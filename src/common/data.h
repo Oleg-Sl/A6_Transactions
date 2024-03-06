@@ -5,11 +5,11 @@
 namespace s21 {
 	struct Student	{
 	public:
-		std::string name = "";
-		std::string surname = "";
-		int year_of_birthday = 0;
-		std::string city = "";
-		int count_of_points = 0;
+		std::string name;
+		std::string surname;
+		int year_of_birthday{ 0 };
+		std::string city;
+		int count_of_points{ 0 };
 	};
 
 	class Data {
@@ -24,9 +24,9 @@ namespace s21 {
 		void SetKey(int validity) { validity_ = validity; }
 
 	private:
-		std::string key_ = "";
+		std::string key_;
 		Student value_;
-		int validity_ = 0;
+		int validity_{ 0 };
 
 	};
 }  // namespace s21
