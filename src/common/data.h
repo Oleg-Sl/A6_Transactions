@@ -20,8 +20,8 @@ namespace s21 {
 		Student GetValue() { return value_; }
 		int GetValidity() { return validity_; }
 		void SetKey(std::string key) { key_ = key; }
-		void SetKey(Student value) { value_ = value; }
-		void SetKey(int validity) { validity_ = validity; }
+		void SetValue(Student value) { value_ = value; }
+		void SetValidity(int validity) { validity_ = validity; }
 
 	private:
 		std::string key_;
