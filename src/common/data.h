@@ -3,19 +3,32 @@
 #include <string>
 
 namespace s21 {
-	struct Student	{
+	struct Student {
 	public:
 		std::string name;
 		std::string surname;
-		int year_of_birthday{ 0 };
+		int birthday{ 0 };
 		std::string city;
-		int count_of_points{ 0 };
+		int coins{ 0 };
+		Student() = default;
+		Student(std::string name, std::string surname, int birthday, std::string city, int coins) {
+			this->name = name;
+			this->surname = surname;
+			this->birthday = birthday;
+			this->city = city;
+			this->coins = coins;
+		}
+		std::string ToString() {
+			return ("%s %s %s %s %s", surname, name, std::to_string(birthday), city, std::to_string(coins));
+		}
 	};
 
 	class Data {
 	public:
 		Data() = default;
 		Data(std::string key, Student value, int validity = 0) : key_(key), value_(value), validity_(validity) {}
+		
+
 		std::string GetKey() { return key_; }
 		Student GetValue() { return value_; }
 		int GetValidity() { return validity_; }
