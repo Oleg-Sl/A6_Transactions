@@ -186,12 +186,7 @@ namespace s21 {
 		return node->parent;
 	}
 
-	SelfBalancingBinarySearchTree::Pointer SelfBalancingBinarySearchTree::GetParentPointer(Pointer node) {
-		Pointer parent = GetParent(node);
-		if (!parent) return nullptr;
-		Pointer child = (parent->left == node) ? parent->left : parent->right;
-		return child;
-	}
+
 
 	SelfBalancingBinarySearchTree::Pointer SelfBalancingBinarySearchTree::Search(std::string key) {
 		Pointer node = root_;
@@ -202,27 +197,33 @@ namespace s21 {
 		return nullptr;
 	}
 
+	void SelfBalancingBinarySearchTree::RemoveNodeWithoutChildren(Pointer node) {
+		Pointer parent = GetParent(node);
+		if (!parent) {
+			root_ = nullptr;
+		}else{
+			if (parent->left == node) parent->left = leaf_;
+			else parent->right = leaf_;
+		}
+		delete node;
+		node = nullptr;
+	}
+
 	bool SelfBalancingBinarySearchTree::RemoveNode(Pointer node) {
 		if (!node || node == leaf_)	return false;
-		if (CountChildren(node) == 0) {
-			if (node == root_) {
-				delete root_;
-				root_ = nullptr;
-			}
-			else {
-
-			}
-			/*Pointer child = GetChild(node);
-			Swap(node, child);
-			delete child;*/
+		bool color = node->color;
+		switch (CountChildren(node))
+		{
+		case 0:
+			RemoveNodeWithoutChildren(node);
+			break;
+		case 1:
+			RemoveNodeWithOneChild(node);
+			break;
+		case 2:
+			break;
 		}
-		else if (CountChildren(node) == 1) {
-
-		}
-		else {
-
-		}
-
+		if (!color) /*RebalanceTree()*/;
 		return true;
 	}
 

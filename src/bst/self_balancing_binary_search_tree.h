@@ -136,7 +136,8 @@ namespace s21 {
 		Pointer GetParent(Pointer node);
 		Pointer Search(std::string key);
 		bool RemoveNode(Pointer node);
-		Pointer GetParentPointer(Pointer node);
+		void RemoveNodeWithoutChildren(Pointer node);
+		void RemoveNodeWithOneChild(Pointer node);
 
 	private:
 		Pointer root_;
