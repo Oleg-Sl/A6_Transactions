@@ -8,7 +8,7 @@ namespace s21 {
 		if (!root_) {
 			root_ = tmp;
 			root_->color = Color::Black;
-			root_->left = root_->right = leaf_;
+			root_->link[0] = root_->link[1] = leaf_;
 		}
 		else {
 			if (Exists(key)) {
@@ -20,17 +20,15 @@ namespace s21 {
 				Pointer parent = root_;
 				while (current_node != leaf_) {
 					parent = current_node;
-					current_node = (current_node->data.GetKey() > key) ? current_node->left : current_node->right;
+					current_node = (current_node->data.GetKey() > key) ? current_node->link[0] : current_node->link[1];
 				}
 				current_node = tmp;
 				current_node->parent = parent;
-				current_node->left = current_node->right = leaf_;
-				if (parent->data.GetKey() > key) {
-					parent->left = current_node;
-				}
-				else {
-					parent->right = current_node;
-				}
+				current_node->link[0] = current_node->link[1] = leaf_;
+
+				bool dir = parent->data.GetKey() > key;
+				parent->link[!dir] = current_node;
+
 				BalanceTree(current_node);
 			}
 		}
@@ -46,8 +44,8 @@ namespace s21 {
 
 		while (current_node != leaf_) {
 			if (current_node->data.GetKey() == key) return current_node->data.GetValue();
-			if (current_node->data.GetKey() > key) current_node = current_node->left;
-			else current_node = current_node->right;
+			if (current_node->data.GetKey() > key) current_node = current_node->link[0];
+			else current_node = current_node->link[1];
 		}
 		return current_node->data.GetValue();
 	}
@@ -102,117 +100,90 @@ namespace s21 {
 	}
 
 	void SelfBalancingBinarySearchTree::LeftRotation(Pointer node) {
-		
-		Pointer tmp = node->right;
-		node->right = tmp->left;
-		if (tmp->left != leaf_) {
-			tmp->left->parent = node;
+
+		Pointer tmp = node->link[1];
+		node->link[1] = tmp->link[0];
+		if (tmp->link[0] != leaf_) {
+			tmp->link[0]->parent = node;
 		}
 		tmp->parent = node->parent;
 		if (node->parent == nullptr) {
 			root_ = tmp;
 		}
-		else if (node == node->parent->left) {
-			node->parent->left = tmp;
+		else if (node == node->parent->link[0]) {
+			node->parent->link[0] = tmp;
 		}
 		else {
-			node->parent->right = tmp;
+			node->parent->link[1] = tmp;
 		}
-		tmp->left = node;
+		tmp->link[0] = node;
 		node->parent = tmp;
-		
-		
+
+
 	}
 
 	void SelfBalancingBinarySearchTree::RightRotation(Pointer node) {
-		Pointer tmp = node->left;
-		node->left = tmp->right;
-		if (tmp->right != leaf_) {
-			tmp->right->parent = node;
+		Pointer tmp = node->link[0];
+		node->link[0] = tmp->link[1];
+		if (tmp->link[1] != leaf_) {
+			tmp->link[1]->parent = node;
 		}
 		tmp->parent = node->parent;
 		if (node->parent == nullptr) {
 			root_ = tmp;
 		}
-		else if (node == node->parent->right) {
-			node->parent->right = tmp;
+		else if (node == node->parent->link[1]) {
+			node->parent->link[1] = tmp;
 		}
 		else {
-			node->parent->left = tmp;
+			node->parent->link[0] = tmp;
 		}
-		tmp->right = node;
+		tmp->link[1] = node;
 		node->parent = tmp;
 
-		
+
 	}
 	void SelfBalancingBinarySearchTree::BalanceTree(Pointer node) {
-		
+		Pointer uncle;
 		while (node->parent != nullptr && node->parent->color == Color::Red) {
-			if (node->parent == node->parent->parent->left) {
-				node = BalanceLeftSubTree(node);
+			bool dir = NodeIsLeftChild(node->parent);
+			uncle = node->parent->parent->link[dir];
+			if (uncle && uncle->color == Color::Red) {
+				uncle->color = Color::Black;
+				node->parent->color = Color::Black;
+				node->parent->parent->color = Color::Red;
+				node = node->parent->parent;
 			}
 			else {
-				node = BalanceRightSubTree(node);
+				if (node == node->parent->link[dir]) {
+					node = node->parent;
+					if (dir)	LeftRotation(node);
+					else RightRotation(node);
+				}
+				node->parent->color = Color::Black;
+				node->parent->parent->color = Color::Red;
+				if (dir) RightRotation(node->parent->parent);
+				else LeftRotation(node->parent->parent);
 			}
 		}
 		root_->color = Color::Black;
 	}
 
-	SelfBalancingBinarySearchTree::Pointer SelfBalancingBinarySearchTree::BalanceLeftSubTree(Pointer node){
-		Pointer uncle;
-		uncle = node->parent->parent->right;
-		if (uncle && uncle->color == Color::Red) {
-			uncle->color = Color::Black;
-			node->parent->color = Color::Black;
-			node->parent->parent->color = Color::Red;
-			node = node->parent->parent;
-		}
-		else {
-			if (node == node->parent->right) {
-				node = node->parent;
-				LeftRotation(node);
-			}
-			node->parent->color = Color::Black;
-			node->parent->parent->color = Color::Red;
-			RightRotation(node->parent->parent);
-		}
-		return node;
-	}
 
-	SelfBalancingBinarySearchTree::Pointer SelfBalancingBinarySearchTree::BalanceRightSubTree(Pointer node){
-		Pointer uncle;
-		uncle = node->parent->parent->left;
-		if (uncle && uncle->color == Color::Red) {
-			uncle->color = Color::Black;
-			node->parent->color = Color::Black;
-			node->parent->parent->color = Color::Red;
-			node = node->parent->parent;
-		}
-		else {
-			if (node == node->parent->left) {
-				node = node->parent;
-				RightRotation(node);
-			}
-			node->parent->color = Color::Black;
-			node->parent->parent->color = Color::Red;
-			LeftRotation(node->parent->parent);
-		}
-		return node;
-	}
 	void SelfBalancingBinarySearchTree::Clear() {
 
 	}
 	int SelfBalancingBinarySearchTree::CountChildren(Pointer node) {
 		int count = 0;
 		if (node) {
-			count += node->left != leaf_;
-			count += node->right != leaf_;
+			count += node->link[0] != leaf_;
+			count += node->link[1] != leaf_;
 		}
 		return count;
 	}
 
 	SelfBalancingBinarySearchTree::Pointer SelfBalancingBinarySearchTree::GetChild(Pointer node) {
-		Pointer child = node->left != leaf_ ? node->left : node->right;
+		Pointer child = node->link[0] != leaf_ ? node->link[0] : node->link[1];
 		return child;
 	}
 
@@ -226,9 +197,69 @@ namespace s21 {
 		Pointer node = root_;
 		while (node && node != leaf_) {
 			if (node->data.GetKey() == key) return node;
-			node = (node->data.GetKey() > key) ? node->left : node->right;
+			node = (node->data.GetKey() > key) ? node->link[0] : node->link[1];
 		}
 		return nullptr;
+	}
+
+	void SelfBalancingBinarySearchTree::RebalanceTree(Pointer node) {
+		while (node != root_ && node->color == Color::Black) {
+			Pointer parent = GetParent(node);
+			Pointer brother;
+			bool dir = NodeIsLeftChild(node);
+
+			brother = parent->link[dir];
+			if (brother->color == Color::Red) {
+				brother->color = Color::Black;
+				parent->color = Color::Red;
+				if (dir)	LeftRotation(parent);
+				else RightRotation(parent);
+				brother = parent->link[dir];
+			}
+			if (brother->link[!dir]->color == Color::Black && brother->link[dir]->color == Color::Black) {
+				brother->color = Color::Red;
+				node = parent;
+			}
+			else {
+				if (brother->link[dir]->color == Color::Black) {
+					brother->link[!dir]->color = Color::Black;
+					brother->color = Color::Red;
+					if (dir)	RightRotation(brother);
+					else LeftRotation(brother);
+
+					brother = parent->link[dir];
+				}
+				brother->color = parent->color;
+				parent->color = Color::Black;
+				brother->link[dir]->color = Color::Black;
+				if (dir)	LeftRotation(parent);
+				else RightRotation(parent);
+				node = root_;
+			}
+		}
+		node->color = Color::Black;
+	}
+
+	bool SelfBalancingBinarySearchTree::NodeIsLeftChild(Pointer node) {
+		return GetParent(node)->link[0] == node;
+	}
+
+	SelfBalancingBinarySearchTree::Pointer SelfBalancingBinarySearchTree::MinValueFromRight(Pointer node) {
+		Pointer tmp = node->link[1];
+		while (tmp->link[0] != leaf_) {
+			tmp = tmp->link[0];
+		}
+		return tmp;
+	}
+
+	void SelfBalancingBinarySearchTree::ExcludeNode(Pointer a, Pointer b) {
+		Pointer parent = GetParent(a);
+		if (!parent) root_ = b;
+		else {
+			bool dir = NodeIsLeftChild(a);
+			parent->link[!dir] = b;
+		}
+		b->parent = parent;
 	}
 
 	void SelfBalancingBinarySearchTree::RemoveNodeWithoutChildren(Pointer node) {
@@ -237,97 +268,11 @@ namespace s21 {
 			root_ = nullptr;
 		}
 		else {
-			if (parent->left == node) parent->left = leaf_;
-			else parent->right = leaf_;
+			if (parent->link[0] == node) parent->link[0] = leaf_;
+			else parent->link[1] = leaf_;
 		}
 		delete node;
 		node = nullptr;
-	}
-
-
-
-	void SelfBalancingBinarySearchTree::RebalanceTree(Pointer node) {
-		while (node != root_ && node->color == Color::Black) {
-			Pointer parent = GetParent(node);
-			Pointer brother;
-			if (NodeIsLeftChild(node)) {
-				brother = parent->right;
-				if (brother->color == Color::Red) {
-					brother->color = Color::Black;
-					parent->color = Color::Red;
-					LeftRotation(parent);
-					brother = parent->right;
-				}
-				if (brother->left->color == Color::Black && brother->right->color == Color::Black) {
-					brother->color = Color::Red;
-					node = parent;
-				}
-				else {
-					if (brother->right->color == Color::Black) {
-						brother->left->color = Color::Black;
-						brother->color = Color::Red;
-						RightRotation(brother);
-						brother = parent->right;
-					}
-					brother->color = parent->color;
-					parent->color = Color::Black;
-					brother->right->color = Color::Black;
-					LeftRotation(parent);
-					node = root_;
-				}
-			}
-			else {
-				brother = parent->left;
-				if (brother->color == Color::Red) {
-					brother->color = Color::Black;
-					parent->color = Color::Red;
-					RightRotation(parent);
-					brother = parent->left;
-				}
-				if (brother->right->color == Color::Black && brother->left->color == Color::Black) {
-					brother->color = Color::Red;
-					node = parent;
-				}
-				else {
-					if (brother->left->color == Color::Black) {
-						brother->right->color = Color::Black;
-						brother->color = Color::Red;
-						LeftRotation(brother);
-						brother = parent->left;
-					}
-					brother->color = parent->color;
-					parent->color = Color::Black;
-					brother->left->color = Color::Black;
-					RightRotation(parent);
-					node = root_;
-				}
-			}
-		}
-		node->color = Color::Black;
-	}
-
-	bool SelfBalancingBinarySearchTree::NodeIsLeftChild(Pointer node) {
-		return GetParent(node)->left == node;
-	}
-
-	SelfBalancingBinarySearchTree::Pointer SelfBalancingBinarySearchTree::MinValueFromRight(Pointer node) {
-		Pointer tmp = node->right;
-		while (tmp->left != leaf_) {
-			tmp = tmp->left;
-		}
-		return tmp;
-	}
-
-	void SelfBalancingBinarySearchTree::ExcludeNode(Pointer a, Pointer b) {
-		Pointer parent = GetParent(a);
-		if (!parent) root_ = b;
-		else if (NodeIsLeftChild(a)) {
-			parent->left = b;
-		}
-		else {
-			parent->right = b;
-		}
-		b->parent = parent;
 	}
 
 	void SelfBalancingBinarySearchTree::RemoveNodeWithOneChild(Pointer node) {
@@ -335,8 +280,8 @@ namespace s21 {
 		bool child_color = child->color;
 		Swap(node, child);
 
-		if (node->left == child) node->left = leaf_;
-		else node->right = leaf_;
+		if (node->link[0] == child) node->link[0] = leaf_;
+		else node->link[1] = leaf_;
 		delete child;
 		child = nullptr;
 
@@ -353,15 +298,15 @@ namespace s21 {
 		if (parent == node) {
 			child->parent = min_node;
 		}
-		else{
+		else {
 			ExcludeNode(min_node, child);
-			min_node->right = node->right;
-			min_node->right->parent = min_node;
+			min_node->link[1] = node->link[1];
+			min_node->link[1]->parent = min_node;
 		}
 
 		ExcludeNode(node, min_node);
-		min_node->left = node->left;
-		min_node->left->parent = min_node;
+		min_node->link[0] = node->link[0];
+		min_node->link[0]->parent = min_node;
 		min_node->color = node->color;
 
 		delete node;
@@ -384,5 +329,5 @@ namespace s21 {
 			break;
 		}
 		return true;
-	}	
+	}
 }

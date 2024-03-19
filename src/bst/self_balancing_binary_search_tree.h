@@ -14,8 +14,9 @@ namespace s21 {
 	class BSTNode {
 	public:
 		BSTNode* parent = nullptr;
-		BSTNode* left = nullptr;
-		BSTNode* right = nullptr;
+		BSTNode* link[2] = {nullptr,nullptr};
+		/*BSTNode* left = nullptr;
+		BSTNode* right = nullptr;*/
 		Data data;
 		bool color = Color::Black;
 
@@ -66,15 +67,15 @@ namespace s21 {
 			}
 
 			BSTIterator& operator--() noexcept {
-				if (current_->left != leaf_) {
-					current_ = current_->left;
-					while (current_->right != leaf_) {
-						current_ = current_->right;
+				if (current_->link[0] != leaf_) {
+					current_ = current_->link[0];
+					while (current_->link[1] != leaf_) {
+						current_ = current_->link[1];
 					}
 				}
 				else {
 					Pointer tmp = current_->parent;
-					current_ = (tmp && tmp->right == current_) ? tmp : nullptr;
+					current_ = (tmp && tmp->link[1] == current_) ? tmp : nullptr;
 					
 					/*while (tmp && tmp->data.GetKey() > current_->data.GetKey()) {
 						current_ = tmp;
@@ -86,15 +87,15 @@ namespace s21 {
 			}
 
 			BSTIterator& operator++() noexcept {
-				if (current_->right != leaf_) {
-					current_ = current_->right;
-					while (current_->left != leaf_) {
-						current_ = current_->left;
+				if (current_->link[1] != leaf_) {
+					current_ = current_->link[1];
+					while (current_->link[0] != leaf_) {
+						current_ = current_->link[0];
 					}
 				}
 				else {
 					Pointer tmp = current_->parent;
-					current_ = (tmp && tmp->left == current_) ? tmp : nullptr;
+					current_ = (tmp && tmp->link[0] == current_) ? tmp : nullptr;
 					/*while (tmp && tmp->data.GetKey() < current_->data.GetKey()) {
 						current_ = tmp;
 						tmp = tmp->parent;
@@ -151,8 +152,6 @@ namespace s21 {
 		void LeftRotation(Pointer node);
 		void RightRotation(Pointer node);
 		void BalanceTree(Pointer node);
-		Pointer BalanceLeftSubTree(Pointer node);
-		Pointer BalanceRightSubTree(Pointer node);
 
 
 	};
@@ -293,8 +292,8 @@ namespace s21 {
 //	}
 //	else {
 //		Iterator begin(root_);
-//		while (begin.current_->left) {
-//			begin = begin.current_->left;
+//		while (begin.current_->link[0]) {
+//			begin = begin.current_->link[0];
 //		}
 //		return begin;
 //	}
@@ -347,10 +346,10 @@ namespace s21 {
 //		else {
 //			tmp->parent = top.first.current_;
 //			if (top.first->first > value.first) {
-//				top.first.current_->left = tmp;
+//				top.first.current_->link[0] = tmp;
 //			}
 //			else {
-//				top.first.current_->right = tmp;
+//				top.first.current_->link[1] = tmp;
 //			}
 //		}
 //	}
@@ -381,16 +380,16 @@ namespace s21 {
 //void Map<Key, T>::Erase(Iterator pos) {
 //	Pointer tmp = pos.current_;
 //	if (tmp) {
-//		if (!tmp->left && !tmp->right) {
+//		if (!tmp->link[0] && !tmp->link[1]) {
 //			EraseList(tmp);
 //		}
-//		else if (tmp->left && !tmp->right) {
+//		else if (tmp->link[0] && !tmp->link[1]) {
 //			EraseLeftBranch(tmp);
 //		}
-//		else if (!tmp->left && tmp->right) {
+//		else if (!tmp->link[0] && tmp->link[1]) {
 //			EraseRightBranch(tmp);
 //		}
-//		else if (tmp->left && tmp->right) {
+//		else if (tmp->link[0] && tmp->link[1]) {
 //			EraseNode(tmp);
 //		}
 //		delete tmp;
@@ -434,8 +433,8 @@ namespace s21 {
 //				Pointer curr = tmp.Front();
 //				tmp.Pop();
 //				Insert(curr->node_pair);
-//				if (curr->left) tmp.Push(curr->left);
-//				if (curr->right) tmp.Push(curr->right);
+//				if (curr->link[0]) tmp.Push(curr->link[0]);
+//				if (curr->link[1]) tmp.Push(curr->link[1]);
 //			}
 //		}
 //	}
@@ -447,39 +446,39 @@ namespace s21 {
 //		root_ = nullptr;
 //	else {
 //		if (tmp->parent->node_pair.first > tmp->node_pair.first)
-//			tmp->parent->left = nullptr;
+//			tmp->parent->link[0] = nullptr;
 //		else
-//			tmp->parent->right = nullptr;
+//			tmp->parent->link[1] = nullptr;
 //	}
 //}
 //
 //template <class Key, class T>
 //void Map<Key, T>::EraseLeftBranch(Pointer tmp) {
 //	if (tmp == root_) {
-//		root_ = tmp->left;
+//		root_ = tmp->link[0];
 //		root_->parent = nullptr;
 //	}
 //	else {
-//		tmp->left->parent = tmp->parent;
+//		tmp->link[0]->parent = tmp->parent;
 //		if (tmp->parent->node_pair.first > tmp->node_pair.first)
-//			tmp->parent->left = tmp->left;
+//			tmp->parent->link[0] = tmp->link[0];
 //		else
-//			tmp->parent->right = tmp->left;
+//			tmp->parent->link[1] = tmp->link[0];
 //	}
 //}
 //
 //template <class Key, class T>
 //void Map<Key, T>::EraseRightBranch(Pointer tmp) {
 //	if (tmp == root_) {
-//		root_ = tmp->right;
+//		root_ = tmp->link[1];
 //		root_->parent = nullptr;
 //	}
 //	else {
-//		tmp->right->parent = tmp->parent;
+//		tmp->link[1]->parent = tmp->parent;
 //		if (tmp->parent->node_pair.first > tmp->node_pair.first)
-//			tmp->parent->left = tmp->right;
+//			tmp->parent->link[0] = tmp->link[1];
 //		else
-//			tmp->parent->right = tmp->right;
+//			tmp->parent->link[1] = tmp->link[1];
 //	}
 //}
 //
@@ -489,36 +488,36 @@ namespace s21 {
 //	--it;
 //	Iterator p(it.current_->parent);
 //
-//	if (it.current_->left) {
+//	if (it.current_->link[0]) {
 //		if (it->first > p->first) {
-//			p.current_->right = it.current_->left;
+//			p.current_->link[1] = it.current_->link[0];
 //		}
 //		else {
-//			p.current_->left = it.current_->left;
+//			p.current_->link[0] = it.current_->link[0];
 //		}
-//		it.current_->left->parent = p.current_;
+//		it.current_->link[0]->parent = p.current_;
 //	}
 //	else {
 //		if (it->first > p->first)
-//			p.current_->right = nullptr;
+//			p.current_->link[1] = nullptr;
 //		else
-//			p.current_->left = nullptr;
+//			p.current_->link[0] = nullptr;
 //	}
 //
-//	it.current_->left = tmp->left;
-//	it.current_->right = tmp->right;
+//	it.current_->link[0] = tmp->link[0];
+//	it.current_->link[1] = tmp->link[1];
 //	it.current_->parent = tmp->parent;
 //
-//	if (tmp->left) tmp->left->parent = it.current_;
-//	if (tmp->right) tmp->right->parent = it.current_;
+//	if (tmp->link[0]) tmp->link[0]->parent = it.current_;
+//	if (tmp->link[1]) tmp->link[1]->parent = it.current_;
 //	if (tmp == root_)
 //		root_ = it.current_;
 //	else {
 //		if (it->first > tmp->parent->node_pair.first) {
-//			tmp->parent->right = it.current_;
+//			tmp->parent->link[1] = it.current_;
 //		}
 //		else {
-//			tmp->parent->left = it.current_;
+//			tmp->parent->link[0] = it.current_;
 //		}
 //	}
 //}
@@ -533,10 +532,10 @@ namespace s21 {
 //			return std::make_pair(Iterator(top), true);
 //		}
 //		else if (it->node_pair.first > key) {
-//			it = it->left;
+//			it = it->link[0];
 //		}
 //		else {
-//			it = it->right;
+//			it = it->link[1];
 //		}
 //	}
 //	return std::make_pair(Iterator(top), false);

@@ -7,7 +7,7 @@ namespace s21 {
 	class BaseClass {
 	public:
 		//<ключ> <Фамилия> <Имя> <Год рождения> <Город> <Число текущих коинов> EX <время в секундах>
-		virtual std::string Set(std::string key, std::string name, std::string surname, int birthday, std::string city, int coins, int validity=0) = 0;
+		virtual std::string Set(std::string key, Student student, int validity=0) = 0;
 		virtual Student Get(std::string key) = 0;
 		virtual bool Exists(std::string key) = 0;
 		virtual bool Del(std::string key) = 0;
