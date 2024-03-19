@@ -127,8 +127,8 @@ namespace s21 {
 		std::string Showall(std::string param);
 		std::string Upload(std::string param);
 		std::string Export(std::string param);
-		Iterator Begin();
-		Iterator End();
+		/*Iterator Begin();
+		Iterator End();*/
 		void Clear();
 		Pointer GetMinForCurrentNode(Pointer node);
 		int CountChildren(Pointer node);
@@ -138,6 +138,12 @@ namespace s21 {
 		bool RemoveNode(Pointer node);
 		void RemoveNodeWithoutChildren(Pointer node);
 		void RemoveNodeWithOneChild(Pointer node);
+		void RemoveNodeWithTwoChild(Pointer node);
+		void RebalanceTree(Pointer node);
+		bool NodeIsLeftChild(Pointer node);
+		Pointer MinValueFromRight(Pointer node);
+		void ExcludeNode(Pointer a, Pointer b);
+
 
 	private:
 		Pointer root_;
@@ -145,6 +151,8 @@ namespace s21 {
 		void LeftRotation(Pointer node);
 		void RightRotation(Pointer node);
 		void BalanceTree(Pointer node);
+		void BalanceLeftSubTree(Pointer node);
+		void BalanceRightSubTree(Pointer node);
 
 
 	};
