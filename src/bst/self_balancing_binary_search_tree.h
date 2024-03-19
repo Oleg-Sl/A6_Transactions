@@ -115,7 +115,7 @@ namespace s21 {
 			Pointer leaf_;
 		};
 
-		std::string Set(std::string key, std::string name, std::string surname, int birthday, std::string city, int coins, int validity = 0);
+		std::string Set(std::string key, Student student, int validity = 0);
 		Student Get(std::string key);
 		bool Exists(std::string key);
 		bool Del(std::string key);
@@ -151,8 +151,8 @@ namespace s21 {
 		void LeftRotation(Pointer node);
 		void RightRotation(Pointer node);
 		void BalanceTree(Pointer node);
-		void BalanceLeftSubTree(Pointer node);
-		void BalanceRightSubTree(Pointer node);
+		Pointer BalanceLeftSubTree(Pointer node);
+		Pointer BalanceRightSubTree(Pointer node);
 
 
 	};

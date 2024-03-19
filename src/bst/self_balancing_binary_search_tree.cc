@@ -2,8 +2,8 @@
 
 namespace s21 {
 
-	std::string SelfBalancingBinarySearchTree::Set(std::string key, std::string name, std::string surname, int birthday, std::string city, int coins, int validity) {
-		Data data(key, Student(name, surname, birthday, city, coins), validity);
+	std::string SelfBalancingBinarySearchTree::Set(std::string key, Student student, int validity) {
+		Data data(key, student, validity);
 		Pointer tmp = new Node(data);
 		if (!root_) {
 			root_ = tmp;
@@ -95,6 +95,7 @@ namespace s21 {
 		return std::string();
 	}
 
+
 	void SelfBalancingBinarySearchTree::Swap(Pointer a, Pointer b) {
 		std::swap(a->data, b->data);
 		std::swap(a->color, b->color);
@@ -148,16 +149,16 @@ namespace s21 {
 		
 		while (node->parent != nullptr && node->parent->color == Color::Red) {
 			if (node->parent == node->parent->parent->left) {
-				BalanceLeftSubTree(node);
+				node = BalanceLeftSubTree(node);
 			}
 			else {
-				BalanceRightSubTree(node);
+				node = BalanceRightSubTree(node);
 			}
 		}
 		root_->color = Color::Black;
 	}
 
-	void SelfBalancingBinarySearchTree::BalanceLeftSubTree(Pointer node){
+	SelfBalancingBinarySearchTree::Pointer SelfBalancingBinarySearchTree::BalanceLeftSubTree(Pointer node){
 		Pointer uncle;
 		uncle = node->parent->parent->right;
 		if (uncle && uncle->color == Color::Red) {
@@ -175,9 +176,10 @@ namespace s21 {
 			node->parent->parent->color = Color::Red;
 			RightRotation(node->parent->parent);
 		}
+		return node;
 	}
 
-	void SelfBalancingBinarySearchTree::BalanceRightSubTree(Pointer node){
+	SelfBalancingBinarySearchTree::Pointer SelfBalancingBinarySearchTree::BalanceRightSubTree(Pointer node){
 		Pointer uncle;
 		uncle = node->parent->parent->left;
 		if (uncle && uncle->color == Color::Red) {
@@ -195,7 +197,7 @@ namespace s21 {
 			node->parent->parent->color = Color::Red;
 			LeftRotation(node->parent->parent);
 		}
-
+		return node;
 	}
 	void SelfBalancingBinarySearchTree::Clear() {
 
