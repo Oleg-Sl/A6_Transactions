@@ -26,8 +26,7 @@ namespace s21 {
 	class Data {
 	public:
 		Data() = default;
-		Data(std::string key, Student value, int validity = 0) : key_(key), value_(value), validity_(validity) {}
-		
+		Data(std::string key, Student value, int validity = 0) : key_(key), value_(value), validity_(validity) {}		
 
 		std::string GetKey() { return key_; }
 		Student GetValue() { return value_; }

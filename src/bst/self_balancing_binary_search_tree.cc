@@ -1,8 +1,9 @@
 #include "self_balancing_binary_search_tree.h"
+#include <iostream>
 
 namespace s21 {
 
-	std::string SelfBalancingBinarySearchTree::Set(std::string key, Student student, int validity) {
+	bool SelfBalancingBinarySearchTree::Set(std::string key, Student student, int validity) {
 		Data data(key, student, validity);
 		Pointer tmp = new Node(data);
 		if (!root_) {
@@ -13,7 +14,7 @@ namespace s21 {
 		else {
 			if (Exists(key)) {
 				delete tmp;
-				return "ERROR: Node with this key already exists";
+				return false;
 			}
 			else {
 				Pointer current_node = root_;
@@ -36,7 +37,7 @@ namespace s21 {
 			//Delete node !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		}
 
-		return "OK";
+		return true;
 	}
 
 	Student SelfBalancingBinarySearchTree::Get(std::string key) {
@@ -50,6 +51,19 @@ namespace s21 {
 		return current_node->data.GetValue();
 	}
 
+	std::vector<std::string> SelfBalancingBinarySearchTree::Keys() {
+		std::vector<std::string> keys;
+		Iterator i = Begin();
+		if (i.IsValid()) {
+			while (i != End()) {
+				keys.push_back(i->GetKey());
+				++i;
+			}
+			keys.push_back(i->GetKey());
+		}
+		return keys;
+	}
+
 
 
 	bool SelfBalancingBinarySearchTree::Exists(std::string key) {
@@ -58,31 +72,80 @@ namespace s21 {
 	}
 
 	bool SelfBalancingBinarySearchTree::Del(std::string key) {
+		Pointer node = Search(key);
+		if (!node) return false;
+		RemoveNode(node);
 		return true;
 	}
 
-	std::string SelfBalancingBinarySearchTree::Update(std::string param) {
-		return std::string();
+
+
+	bool SelfBalancingBinarySearchTree::Update(std::string key, Student student) {
+		Pointer node = Search(key);
+		if (!node) return false;
+		Student value = node->data.GetValue();
+		if (student.name != "-") value.name = student.name;
+		if (student.surname != "-") value.surname = student.surname;
+		if (student.birthday != INT32_MAX) value.birthday = student.birthday;
+		if (student.city != "-") value.city = student.city;
+		if (student.coins != INT32_MAX) value.coins = student.coins;
+		node->data.SetValue(value);
+		return true;
 	}
 
-	std::string SelfBalancingBinarySearchTree::Keys(std::string param) {
-		return std::string();
-	}
 
-	std::string SelfBalancingBinarySearchTree::Rename(std::string param) {
-		return std::string();
+
+	bool SelfBalancingBinarySearchTree::Rename(std::string key, std::string new_key) {
+		Pointer node = Search(key);
+		if (!node) {
+			Set(new_key, Student());
+		}
+		else {
+			Set(new_key, node->data.GetValue(), node->data.GetValidity());
+			RemoveNode(node);
+		}
+		return true;
 	}
 
 	std::string SelfBalancingBinarySearchTree::Ttl(std::string param) {
 		return std::string();
 	}
 
-	std::string SelfBalancingBinarySearchTree::Find(std::string param) {
-		return std::string();
+	std::vector<std::string> SelfBalancingBinarySearchTree::Find(Student student) {
+		std::vector<std::string> keys;
+		Iterator i = Begin();
+		if (i.IsValid()) {
+			while (i != End()) {
+				bool cmp = CompareValue(i->GetValue(), student);
+				if (cmp) keys.push_back(i->GetKey());
+				++i;
+			}
+			bool cmp = CompareValue(i->GetValue(), student);
+			if (cmp) keys.push_back(i->GetKey());
+		}
+		return keys;
 	}
 
-	std::string SelfBalancingBinarySearchTree::Showall(std::string param) {
-		return std::string();
+	bool SelfBalancingBinarySearchTree::CompareValue(Student student, Student search_template) {
+		if (search_template.name != "-" && search_template.name != student.name) return false;
+		if (search_template.surname != "-" && search_template.surname != student.surname) return false;
+		if (search_template.birthday != INT32_MAX && search_template.birthday != student.birthday) return false;
+		if (search_template.city != "-" && search_template.city != student.city) return false;
+		if (search_template.coins != INT32_MAX && search_template.coins != student.coins) return false;
+		return true;
+	}
+
+	std::vector<Student> SelfBalancingBinarySearchTree::Showall() {
+		std::vector<Student> nodes;
+		Iterator i = Begin();
+		if (i.IsValid()) {
+			while (i != End()) {
+				nodes.push_back(i->GetValue());
+				++i;
+			}
+			nodes.push_back(i->GetValue());
+		}
+		return nodes;
 	}
 
 	std::string SelfBalancingBinarySearchTree::Upload(std::string param) {
@@ -110,16 +173,12 @@ namespace s21 {
 		if (node->parent == nullptr) {
 			root_ = tmp;
 		}
-		else if (node == node->parent->link[0]) {
-			node->parent->link[0] = tmp;
-		}
 		else {
-			node->parent->link[1] = tmp;
+			bool dir = NodeIsLeftChild(node);
+			node->parent->link[!dir] = tmp;
 		}
 		tmp->link[0] = node;
 		node->parent = tmp;
-
-
 	}
 
 	void SelfBalancingBinarySearchTree::RightRotation(Pointer node) {
@@ -132,17 +191,14 @@ namespace s21 {
 		if (node->parent == nullptr) {
 			root_ = tmp;
 		}
-		else if (node == node->parent->link[1]) {
-			node->parent->link[1] = tmp;
-		}
 		else {
-			node->parent->link[0] = tmp;
+			bool dir = NodeIsLeftChild(node);
+			node->parent->link[!dir] = tmp;
 		}
 		tmp->link[1] = node;
 		node->parent = tmp;
-
-
 	}
+
 	void SelfBalancingBinarySearchTree::BalanceTree(Pointer node) {
 		Pointer uncle;
 		while (node->parent != nullptr && node->parent->color == Color::Red) {
@@ -171,9 +227,13 @@ namespace s21 {
 
 
 	void SelfBalancingBinarySearchTree::Clear() {
-
+		while (root_) {
+			Pointer node = Begin().current_;
+			RemoveNode(node);
+		}
 	}
-	int SelfBalancingBinarySearchTree::CountChildren(Pointer node) {
+
+	int SelfBalancingBinarySearchTree::CountChildren(Pointer node) const {
 		int count = 0;
 		if (node) {
 			count += node->link[0] != leaf_;
@@ -182,18 +242,16 @@ namespace s21 {
 		return count;
 	}
 
-	SelfBalancingBinarySearchTree::Pointer SelfBalancingBinarySearchTree::GetChild(Pointer node) {
+	SelfBalancingBinarySearchTree::Pointer SelfBalancingBinarySearchTree::GetChild(Pointer node) const {
 		Pointer child = node->link[0] != leaf_ ? node->link[0] : node->link[1];
 		return child;
 	}
 
-	SelfBalancingBinarySearchTree::Pointer SelfBalancingBinarySearchTree::GetParent(Pointer node) {
+	SelfBalancingBinarySearchTree::Pointer SelfBalancingBinarySearchTree::GetParent(Pointer node) const {
 		return node->parent;
 	}
 
-
-
-	SelfBalancingBinarySearchTree::Pointer SelfBalancingBinarySearchTree::Search(std::string key) {
+	SelfBalancingBinarySearchTree::Pointer SelfBalancingBinarySearchTree::Search(std::string key) const {
 		Pointer node = root_;
 		while (node && node != leaf_) {
 			if (node->data.GetKey() == key) return node;
@@ -244,7 +302,7 @@ namespace s21 {
 		return GetParent(node)->link[0] == node;
 	}
 
-	SelfBalancingBinarySearchTree::Pointer SelfBalancingBinarySearchTree::MinValueFromRight(Pointer node) {
+	SelfBalancingBinarySearchTree::Pointer SelfBalancingBinarySearchTree::MinValueFromRight(const Pointer node) const {
 		Pointer tmp = node->link[1];
 		while (tmp->link[0] != leaf_) {
 			tmp = tmp->link[0];
@@ -268,8 +326,8 @@ namespace s21 {
 			root_ = nullptr;
 		}
 		else {
-			if (parent->link[0] == node) parent->link[0] = leaf_;
-			else parent->link[1] = leaf_;
+			bool dir = (parent->link[1] == node);
+			parent->link[dir] = leaf_;
 		}
 		delete node;
 		node = nullptr;
@@ -280,8 +338,9 @@ namespace s21 {
 		bool child_color = child->color;
 		Swap(node, child);
 
-		if (node->link[0] == child) node->link[0] = leaf_;
-		else node->link[1] = leaf_;
+		bool dir = (node->link[1] == child);
+		node->link[dir] = leaf_;
+
 		delete child;
 		child = nullptr;
 
@@ -330,4 +389,21 @@ namespace s21 {
 		}
 		return true;
 	}
+
+	SelfBalancingBinarySearchTree::Iterator SelfBalancingBinarySearchTree::Begin() {
+		Pointer it = root_;
+		while (it && it->link[0] != leaf_) {
+			it = it->link[0];
+		}
+		return Iterator(it, leaf_);
+	}
+
+	SelfBalancingBinarySearchTree::Iterator SelfBalancingBinarySearchTree::End() {
+		Pointer it = root_;
+		while (it && it->link[1] != leaf_) {
+			it = it->link[1];
+		}
+		return Iterator(it, leaf_);
+	}
+
 }
