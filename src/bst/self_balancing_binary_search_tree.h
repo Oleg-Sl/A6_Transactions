@@ -3,6 +3,7 @@
 
 #include "../common/base_class.h"
 #include "../common/data.h"
+#include <fstream>
 
 namespace s21 {
 
@@ -14,7 +15,7 @@ namespace s21 {
 	class BSTNode {
 	public:
 		BSTNode* parent = nullptr;
-		BSTNode* link[2] = {nullptr,nullptr};
+		BSTNode* link[2] = { nullptr,nullptr };
 		Data data;
 		bool color = Color::Black;
 
@@ -32,20 +33,11 @@ namespace s21 {
 		using Pointer = Node*;
 		using Iterator = BSTIterator;
 		using ValueType = Data;
-		Pointer leaf_ ;
+		Pointer leaf_;
 
-		SelfBalancingBinarySearchTree() {
-			root_ = nullptr;
-			leaf_ = new Node();
-		}
+		SelfBalancingBinarySearchTree();
+		~SelfBalancingBinarySearchTree();
 
-		~SelfBalancingBinarySearchTree() {
-			// сделать метод
-			Clear();
-			delete leaf_;
-		}
-
-		
 		// internal class BSTIterator
 		class BSTIterator {
 			friend class SelfBalancingBinarySearchTree;
@@ -53,8 +45,8 @@ namespace s21 {
 		public:
 			BSTIterator(Pointer node, Pointer leaf) : current_(node), leaf_(leaf) {}
 			BSTIterator() : current_(nullptr), leaf_(nullptr) {}
-			BSTIterator(const BSTIterator& obj) { 
-				current_ = obj.current_; 
+			BSTIterator(const BSTIterator& obj) {
+				current_ = obj.current_;
 				leaf_ = obj.leaf_;
 			}
 
@@ -78,7 +70,7 @@ namespace s21 {
 						tmp = tmp->parent;
 					}
 					current_ = tmp;
-					
+
 				}
 				return *this;
 			}
@@ -96,7 +88,7 @@ namespace s21 {
 						current_ = tmp;
 						tmp = tmp->parent;
 					}
-					current_ = tmp;					
+					current_ = tmp;
 				}
 				return *this;
 			}
@@ -126,9 +118,9 @@ namespace s21 {
 		std::string Ttl(std::string param);
 		std::vector<std::string> Find(Student student);
 		std::vector<Student> Showall();
-		std::string Upload(std::string param);
-		std::string Export(std::string param);
-		
+		std::pair<bool, int> Upload(std::string path);
+		std::pair<bool, int> Export(std::string path);
+
 
 	private:
 		Pointer root_;
@@ -138,7 +130,6 @@ namespace s21 {
 		void BalanceTree(Pointer node);
 		Iterator Begin();
 		Iterator End();
-		
 		void Clear();
 		int CountChildren(Pointer node) const;
 		Pointer GetChild(Pointer node) const;
@@ -153,7 +144,7 @@ namespace s21 {
 		Pointer MinValueFromRight(const Pointer node) const;
 		void ExcludeNode(Pointer a, Pointer b);
 		bool CompareValue(Student student, Student search_template);
-
+		bool ParseLine(std::string line);
 	};
 
 }  // namespace s21

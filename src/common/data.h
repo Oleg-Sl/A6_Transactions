@@ -1,6 +1,8 @@
 #ifndef TRANSACTIONS_COMMON_DATA_H_
 #define TRANSACTIONS_COMMON_DATA_H_
 #include <string>
+#include <sstream>
+
 
 namespace s21 {
 	struct Student {
@@ -19,14 +21,16 @@ namespace s21 {
 			this->coins = coins;
 		}
 		std::string ToString() {
-			return ("%s %s %s %s %s", surname, name, std::to_string(birthday), city, std::to_string(coins));
+			std::stringstream ss;
+			ss << name << " " << surname << " " << std::to_string(birthday) << " " << city << " " << std::to_string(coins);
+			return ss.str();
 		}
 	};
 
 	class Data {
 	public:
 		Data() = default;
-		Data(std::string key, Student value, int validity = 0) : key_(key), value_(value), validity_(validity) {}		
+		Data(std::string key, Student value, int validity = 0) : key_(key), value_(value), validity_(validity) {}
 
 		std::string GetKey() { return key_; }
 		Student GetValue() { return value_; }
