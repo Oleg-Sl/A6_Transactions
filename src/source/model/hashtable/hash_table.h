@@ -5,6 +5,7 @@
 #include <model/common/data.h>
 
 #include <array>
+#include <chrono>
 #include <functional>
 #include <vector>
 
@@ -13,16 +14,23 @@ const size_t kDefaultSize = 8;
 
 template <typename T, typename Hasher = std::hash<std::string>>
 class HashTable : BaseClass {
+  struct Node {
+    std::string key;
+    T value;
+    std::chrono::steady_clock::time_point create_time;
+  };
+
  public:
   HashTable() {}
 
   bool Set(std::string key, T value, int validity = 0) {
-    data_.at(GetIndex(key)).push_back(value);
+    data_.at(GetIndex(key))
+        .push_back(Node{key, value, std::chrono::steady_clock::now()});
 
     return 0;
   }
 
-  T Get(std::string key) { return data_.at(GetIndex(key))[0]; }
+  T Get(std::string key) { return data_.at(GetIndex(key))[0].value; }
 
   bool Exists(std::string key) {}
   bool Del(std::string key) {}
@@ -38,7 +46,7 @@ class HashTable : BaseClass {
  private:
   const Hasher hasher_;
   size_t table_size_ = kDefaultSize;
-  std::array<std::vector<T>, kDefaultSize> data_;
+  std::array<std::vector<Node>, kDefaultSize> data_;
 
   size_t GetIndex(std::string value) { return hasher_(value) % table_size_; }
 };
