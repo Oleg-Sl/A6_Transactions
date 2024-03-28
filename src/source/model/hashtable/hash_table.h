@@ -1,21 +1,47 @@
+#ifndef TRANSACTIONS_SOURCE_MODEL_HASHTABLE_HASH_TABLE_H_
+#define TRANSACTIONS_SOURCE_MODEL_HASHTABLE_HASH_TABLE_H_
+
 #include <model/common/base_class.h>
+#include <model/common/data.h>
+
+#include <array>
+#include <functional>
+#include <vector>
 
 namespace s21 {
-class HashTable : BaseClass {
-public:
-  bool Set(std::string key, Student student, int validity = 0);
-  Student Get(std::string key);
-  bool Exists(std::string key);
-  bool Del(std::string key);
-  bool Update(std::string key, Student student);
-  std::vector<std::string> Keys();
-  bool Rename(std::string key, std::string new_key);
-  std::string Ttl(std::string param);
-  std::vector<std::string> Find(Student student);
-  std::vector<Student> Showall();
-  std::pair<bool, int> Upload(std::string path);
-  std::pair<bool, int> Export(std::string path);
+const size_t kDefaultSize = 8;
 
-private:
+template <typename T, typename Hasher = std::hash<std::string>>
+class HashTable : BaseClass {
+ public:
+  HashTable() {}
+
+  bool Set(std::string key, T value, int validity = 0) {
+    data_.at(GetIndex(key)).push_back(value);
+
+    return 0;
+  }
+
+  T Get(std::string key) { return data_.at(GetIndex(key))[0]; }
+
+  bool Exists(std::string key) {}
+  bool Del(std::string key) {}
+  bool Update(std::string key, T value) {}
+  std::vector<std::string> Keys() {}
+  bool Rename(std::string key, std::string new_key) {}
+  std::string Ttl(std::string param) {}
+  std::vector<std::string> Find(T value) {}
+  std::vector<T> Showall() {}
+  std::pair<bool, int> Upload(std::string path) {}
+  std::pair<bool, int> Export(std::string path) {}
+
+ private:
+  const Hasher hasher_;
+  size_t table_size_ = kDefaultSize;
+  std::array<std::vector<T>, kDefaultSize> data_;
+
+  size_t GetIndex(std::string value) { return hasher_(value) % table_size_; }
 };
-} // namespace s21
+}  // namespace s21
+
+#endif  // TRANSACTIONS_SOURCE_MODEL_HASHTABLE_HASH_TABLE_H_
