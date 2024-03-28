@@ -1,0 +1,11 @@
+cmake_minimum_required(VERSION 3.14)
+
+project(TransactionsLibs)
+
+add_library(${TARGET_HASH_TABLE_LIB} STATIC ${LIB_HASH_TABLE_SOURCE})
+
+set_target_properties(${TARGET_HASH_TABLE_LIB} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+set_target_properties(${TARGET_HASH_TABLE_LIB} PROPERTIES PREFIX "")
+
+target_include_directories(${TARGET_HASH_TABLE_LIB} PUBLIC ${RELATIVE_HEADER_DIR})
