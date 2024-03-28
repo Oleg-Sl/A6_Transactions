@@ -8,6 +8,7 @@
 #include <chrono>
 #include <functional>
 #include <vector>
+#include <stdexcept>
 
 namespace s21 {
 const size_t kDefaultSize = 8;
@@ -30,7 +31,15 @@ class HashTable : BaseClass {
     return 0;
   }
 
-  T Get(std::string key) { return data_.at(GetIndex(key))[0].value; }
+  T Get(std::string key) {
+    for (auto const &node : data_.at(GetIndex(key))) {
+      if (node.key == key) {
+        return node.value;
+      }
+    }
+
+    throw std::invalid_argument("Key is not exists");
+  }
 
   bool Exists(std::string key) {}
   bool Del(std::string key) {}
