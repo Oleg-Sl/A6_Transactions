@@ -64,7 +64,19 @@ class HashTable : BaseClass {
 
   bool Rename(std::string key, std::string new_key) {}
 
-  std::string Ttl(std::string key) {}
+  std::string Ttl(std::string key) {
+    auto response_time = std::chrono::steady_clock::now();
+    Node node = GetNode(key);
+
+    if (node.valid) {
+      return std::to_string(node.TTL -
+                            std::chrono::duration_cast<std::chrono::seconds>(
+                                response_time - node.create_time)
+                                .count());
+    }
+
+    return "(null)";
+  }
 
   std::vector<std::string> Find(T value) {}
 
