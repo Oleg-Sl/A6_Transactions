@@ -35,8 +35,8 @@ class HashTable : BaseClass {
   HashTable() {}
 
   bool Set(std::string key, T value, int TTL = 0) {
-    data_.at(GetHash(key))
-        .push_back(Node{key, value, TTL, std::chrono::steady_clock::now()});
+    data_[GetHash(key)].push_back(
+        Node{key, value, TTL, std::chrono::steady_clock::now()});
 
     return 0;
   }
@@ -44,7 +44,7 @@ class HashTable : BaseClass {
   T Get(std::string key) {
     Position pos = GetNodePosition(key);
     if (pos.is_valid) {
-      return (data_.at(pos.hash)[pos.index]).value;
+      return (data_[pos.hash][pos.index]).value;
     }
 
     throw std::invalid_argument("Key is not exists");
@@ -52,7 +52,12 @@ class HashTable : BaseClass {
 
   bool Exists(std::string key) { return GetNodePosition(key).is_valid; }
 
-  bool Del(std::string key) {}
+  bool Del(std::string key) {
+    Position pos = GetNodePosition(key);
+    if (pos.is_valid) {
+      data_[0][0];
+    }
+  }
 
   bool Update(std::string key, T value) {}
 
@@ -65,7 +70,7 @@ class HashTable : BaseClass {
     Position pos = GetNodePosition(key);
 
     if (pos.is_valid) {
-      Node node = data_.at(pos.hash)[pos.index];
+      Node node = data_[pos.hash][pos.index];
       return std::to_string(node.TTL -
                             std::chrono::duration_cast<std::chrono::seconds>(
                                 response_time - node.create_time)
@@ -92,7 +97,7 @@ class HashTable : BaseClass {
 
   bool CheckTTLExpired(const time_type& response_time,
                        const Position& elem_pos) {
-    Node element = data_.at(elem_pos.hash)[elem_pos.index];
+    Node element = data_[elem_pos.hash][elem_pos.index];
 
     return std::chrono::duration_cast<std::chrono::seconds>(response_time -
                                                             element.create_time)
@@ -105,8 +110,8 @@ class HashTable : BaseClass {
     auto response_time = std::chrono::steady_clock::now();
 
     size_t hash = GetHash(key);
-    for (size_t index = 0; index < data_.at(hash).size(); ++index) {
-      Node node = data_.at(hash)[index];
+    for (size_t index = 0; index < data_[hash].size(); ++index) {
+      Node node = data_[hash][index];
       if (node.key == key &&
           !CheckTTLExpired(response_time, Position{hash, index, true})) {
         return Position{hash, index, true};
