@@ -55,8 +55,11 @@ class HashTable : BaseClass {
   bool Del(std::string key) {
     Position pos = GetNodePosition(key);
     if (pos.is_valid) {
-      data_[0][0];
+      data_[pos.hash].erase(data_[pos.hash].begin() + pos.index);
+      return true;
     }
+
+    return false;
   }
 
   bool Update(std::string key, T value) {}
