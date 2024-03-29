@@ -19,42 +19,38 @@ class HashTable : BaseClass {
 
   static const size_t kDefaultSize = 8;
 
+  struct Position {
+    size_t hash;
+    size_t index;
+    bool is_valid = true;
+  };
+
   struct Node {
     std::string key;
     T value;
     int TTL;
     time_type create_time;
-    bool valid = false;
-
-    Node(std::string key, T value, int TTL, time_type create_time)
-        : key(key),
-          value(value),
-          TTL(TTL),
-          create_time(create_time),
-          valid(true) {}
-
-    Node() {}
   };
 
   HashTable() {}
 
   bool Set(std::string key, T value, int TTL = 0) {
-    data_.at(GetIndex(key))
+    data_.at(GetHash(key))
         .push_back(Node{key, value, TTL, std::chrono::steady_clock::now()});
 
     return 0;
   }
 
   T Get(std::string key) {
-    Node node = GetNode(key);
-    if (node.valid) {
-      return node.value;
+    Position pos = GetNodePosition(key);
+    if (pos.is_valid) {
+      return (data_.at(pos.hash)[pos.index]).value;
     }
 
     throw std::invalid_argument("Key is not exists");
   }
 
-  bool Exists(std::string key) { return GetNode(key).valid; }
+  bool Exists(std::string key) { return GetNodePosition(key).is_valid; }
 
   bool Del(std::string key) {}
 
@@ -66,9 +62,10 @@ class HashTable : BaseClass {
 
   std::string Ttl(std::string key) {
     auto response_time = std::chrono::steady_clock::now();
-    Node node = GetNode(key);
+    Position pos = GetNodePosition(key);
 
-    if (node.valid) {
+    if (pos.is_valid) {
+      Node node = data_.at(pos.hash)[pos.index];
       return std::to_string(node.TTL -
                             std::chrono::duration_cast<std::chrono::seconds>(
                                 response_time - node.create_time)
@@ -91,9 +88,12 @@ class HashTable : BaseClass {
   size_t table_size_ = kDefaultSize;
   std::array<std::vector<Node>, kDefaultSize> data_;
 
-  size_t GetIndex(std::string value) { return hasher_(value) % table_size_; }
+  size_t GetHash(std::string value) { return hasher_(value) % table_size_; }
 
-  bool CheckTTLExpired(const time_type& response_time, const Node& element) {
+  bool CheckTTLExpired(const time_type& response_time,
+                       const Position& elem_pos) {
+    Node element = data_.at(elem_pos.hash)[elem_pos.index];
+
     return std::chrono::duration_cast<std::chrono::seconds>(response_time -
                                                             element.create_time)
                        .count() > element.TTL
@@ -101,16 +101,18 @@ class HashTable : BaseClass {
                : false;
   }
 
-  Node GetNode(const std::string& key) {
+  Position GetNodePosition(const std::string& key) {
     auto response_time = std::chrono::steady_clock::now();
 
-    for (auto const& node : data_.at(GetIndex(key))) {
-      if (node.key == key && !CheckTTLExpired(response_time, node)) {
-        return node;
+    size_t hash = GetHash(key);
+    for (size_t index = 0; index < data_.at(hash).size(); ++index) {
+      Node node = data_.at(hash)[index];
+      if (node.key == key &&
+          !CheckTTLExpired(response_time, Position{hash, index, true})) {
+        return Position{hash, index, true};
       }
     }
-
-    return Node();
+    return Position{0, 0, false};
   }
 };
 }  // namespace s21
