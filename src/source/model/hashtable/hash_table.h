@@ -87,7 +87,18 @@ class HashTable : BaseClass {
     return result;
   }
 
-  bool Rename(std::string key, std::string new_key) {}
+  bool Rename(std::string key, std::string new_key) {
+    try {
+      Set(new_key, Get(key));
+    } catch (const std::invalid_argument& ex) {
+      return false;
+    }
+    if (!Del(key)) {
+      return false;
+    }
+
+    return true;
+  }
 
   std::string Ttl(std::string key) {
     auto response_time = std::chrono::steady_clock::now();
