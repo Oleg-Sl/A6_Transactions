@@ -93,7 +93,25 @@ class HashTable : BaseClass {
 
   std::vector<std::string> Find(T value) {}
 
-  std::vector<T> Showall() {}
+  std::vector<T> Showall() {
+    auto response_time = std::chrono::steady_clock::now();
+    std::vector<T> result;
+
+    size_t counter_1 = 0;
+    for (auto& array : data_) {
+      size_t counter_2 = 0;
+      for (auto& elem : array) {
+        if (!CheckTTLExpired(response_time,
+                             Position{counter_1, counter_2, true})) {
+          result.push_back(elem.value);
+        }
+        ++counter_2;
+      }
+      ++counter_1;
+    }
+
+    return result;
+  }
 
   std::pair<bool, int> Upload(std::string path) {}
 
