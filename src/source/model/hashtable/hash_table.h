@@ -62,7 +62,15 @@ class HashTable : BaseClass {
     return false;
   }
 
-  bool Update(std::string key, T value) {}
+  bool Update(std::string key, T value) {
+    Position pos = GetNodePosition(key);
+    if (pos.is_valid) {
+      data_[pos.hash][pos.index].value = value;
+      return true;
+    }
+
+    return false;
+  }
 
   std::vector<std::string> Keys() {}
 
