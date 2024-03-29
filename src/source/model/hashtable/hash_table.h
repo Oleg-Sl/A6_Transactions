@@ -72,7 +72,20 @@ class HashTable : BaseClass {
     return false;
   }
 
-  std::vector<std::string> Keys() {}
+  std::vector<std::string> Keys() {
+    auto response_time = std::chrono::steady_clock::now();
+    std::vector<std::string> result;
+
+    size_t counter_1 = 0;
+    for (auto& array : data_) {
+      if (!CheckTTLExpired(response_time, Position{counter_1, 0, true})) {
+        result.push_back(array[0].key);
+      }
+      ++counter_1;
+    }
+
+    return result;
+  }
 
   bool Rename(std::string key, std::string new_key) {}
 
@@ -126,6 +139,11 @@ class HashTable : BaseClass {
 
   bool CheckTTLExpired(const time_type& response_time,
                        const Position& elem_pos) {
+    if (elem_pos.hash >= table_size_ || elem_pos.hash < 0 ||
+        elem_pos.index >= data_[elem_pos.hash].size() || elem_pos.index < 0) {
+      return true;
+    }
+
     Node element = data_[elem_pos.hash][elem_pos.index];
 
     return std::chrono::duration_cast<std::chrono::seconds>(response_time -
