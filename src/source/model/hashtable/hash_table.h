@@ -7,8 +7,8 @@
 #include <array>
 #include <chrono>
 #include <functional>
-#include <vector>
 #include <stdexcept>
+#include <vector>
 
 namespace s21 {
 const size_t kDefaultSize = 8;
@@ -18,6 +18,7 @@ class HashTable : BaseClass {
   struct Node {
     std::string key;
     T value;
+    int time_to_live;
     std::chrono::steady_clock::time_point create_time;
   };
 
@@ -26,14 +27,17 @@ class HashTable : BaseClass {
 
   bool Set(std::string key, T value, int validity = 0) {
     data_.at(GetIndex(key))
-        .push_back(Node{key, value, std::chrono::steady_clock::now()});
+        .push_back(
+            Node{key, value, validity, std::chrono::steady_clock::now()});
 
     return 0;
   }
 
   T Get(std::string key) {
-    for (auto const &node : data_.at(GetIndex(key))) {
-      if (node.key == key) {
+    auto response_time = std::chrono::steady_clock::now();
+
+    for (auto const& node : data_.at(GetIndex(key))) {
+      if (node.key == key && !CheckTTLExpired(response_time, node.create_time)) {
         return node.value;
       }
     }
@@ -41,8 +45,20 @@ class HashTable : BaseClass {
     throw std::invalid_argument("Key is not exists");
   }
 
-  bool Exists(std::string key) {}
+  bool Exists(std::string key) {
+    auto response_time = std::chrono::steady_clock::now();
+
+    for (auto const& node : data_.at(GetIndex(key))) {
+      if (node.key == key && !CheckTTLExpired(response_time, node.create_time)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   bool Del(std::string key) {}
+
   bool Update(std::string key, T value) {}
   std::vector<std::string> Keys() {}
   bool Rename(std::string key, std::string new_key) {}
@@ -58,6 +74,16 @@ class HashTable : BaseClass {
   std::array<std::vector<Node>, kDefaultSize> data_;
 
   size_t GetIndex(std::string value) { return hasher_(value) % table_size_; }
+
+  bool CheckTTLExpired(
+      const std::chrono::steady_clock::time_point& response_time,
+      const std::chrono::steady_clock::time_point& transaction_create_time) {
+    return std::chrono::duration_cast<std::chrono::seconds>(
+               transaction_create_time - response_time)
+                       .count() < 0
+               ? true
+               : false;
+  }
 };
 }  // namespace s21
 
