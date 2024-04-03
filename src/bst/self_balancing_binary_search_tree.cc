@@ -458,7 +458,7 @@ bool SelfBalancingBinarySearchTree::RemoveNode(Pointer node) {
       RemoveNodeWithoutChildren(node);
       break;
     case 1:
-      RemoveNodeWithOneChild(node);
+      RemoveNodeWithOneChild(node );
       break;
     case 2:
       RemoveNodeWithTwoChild(node);
