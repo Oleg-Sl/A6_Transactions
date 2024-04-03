@@ -12,16 +12,14 @@ SelfBalancingBinarySearchTree::~SelfBalancingBinarySearchTree() {
   delete leaf_;
 }
 
-bool SelfBalancingBinarySearchTree::Set(std::string key, Student student,
-                                        int validity) {
-  Data data(key, student, validity);
+bool SelfBalancingBinarySearchTree::Set(Data data) {
   Pointer tmp = new Node(data);
   if (!root_) {
     root_ = tmp;
     root_->color = Color::Black;
     root_->link[0] = root_->link[1] = leaf_;
   } else {
-    if (Exists(key)) {
+    if (Exists(data.GetKey())) {
       delete tmp;
       return false;
     } else {
@@ -29,7 +27,7 @@ bool SelfBalancingBinarySearchTree::Set(std::string key, Student student,
       Pointer parent = root_;
       while (current_node != leaf_) {
         parent = current_node;
-        current_node = (current_node->data.GetKey() > key)
+        current_node = (current_node->data.GetKey() > data.GetKey())
                            ? current_node->link[0]
                            : current_node->link[1];
       }
@@ -37,13 +35,13 @@ bool SelfBalancingBinarySearchTree::Set(std::string key, Student student,
       current_node->parent = parent;
       current_node->link[0] = current_node->link[1] = leaf_;
 
-      bool dir = parent->data.GetKey() > key;
+      bool dir = parent->data.GetKey() > data.GetKey();
       parent->link[!dir] = current_node;
 
       BalanceTree(current_node);
     }
   }
-  if (validity) {
+  if (data.GetValidity()) {
     // Delete node !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   }
   return true;
@@ -105,9 +103,9 @@ bool SelfBalancingBinarySearchTree::Rename(std::string key,
                                            std::string new_key) {
   Pointer node = Search(key);
   if (!node) {
-    Set(new_key, Student());
+    Set(Data(new_key, Student()));
   } else {
-    Set(new_key, node->data.GetValue(), node->data.GetValidity());
+    Set(Data(new_key, node->data.GetValue(), node->data.GetValidity()));
     RemoveNode(node);
   }
   return true;
@@ -220,7 +218,7 @@ bool SelfBalancingBinarySearchTree::ParseLine(std::string line) {
     int birthday = (param[3] == "-") ? 0 : stoi(param[3]);
     std::string city = param[4];
     int coins = (param[5] == "-") ? 0 : stoi(param[5]);
-    Set(key, Student(name, surname, birthday, city, coins));
+    Set(Data(key, Student(name, surname, birthday, city, coins)));
   } catch (std::exception ex) {
     return false;
   }

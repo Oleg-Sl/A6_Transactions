@@ -8,7 +8,7 @@
 namespace s21 {
 class BaseClass {
  public:
-  virtual bool Set(std::string key, Student student, int validity = 0) = 0;
+  virtual bool Set(Data data) = 0;
   virtual Student Get(std::string key) = 0;
   virtual bool Exists(std::string key) = 0;
   virtual bool Del(std::string key) = 0;

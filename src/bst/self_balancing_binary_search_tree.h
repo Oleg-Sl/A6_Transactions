@@ -101,7 +101,7 @@ class SelfBalancingBinarySearchTree : BaseClass {
     Pointer leaf_;
   };
 
-  bool Set(std::string key, Student student, int validity = 0);
+  bool Set(Data data);
   Student Get(std::string key);
   bool Exists(std::string key);
   bool Del(std::string key);
