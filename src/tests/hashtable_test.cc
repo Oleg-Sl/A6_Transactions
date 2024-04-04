@@ -61,3 +61,41 @@ TEST(HashTableSet, ElementsWithSameKeyAndTTLExpired) {
   ASSERT_EQ(status_2, kOk);
   ASSERT_EQ(table.GetLoadFactor(), 2);
 }
+
+TEST(HashTableExists, Exists) {
+  s21::HashTable<s21::Student> table;
+  table.Set("KEY", s21::Student("NAME", "SURNAME", 12, "CITY", 5555));
+
+  bool status = table.Exists("KEY");
+
+  ASSERT_EQ(status, true);
+}
+
+TEST(HashTableExists, NotExistsKey) {
+  s21::HashTable<s21::Student> table;
+
+  bool status = table.Exists("KEY");
+
+  ASSERT_EQ(status, false);
+}
+
+TEST(HashTableExists, ExistsWithTTL) {
+  s21::HashTable<s21::Student> table;
+  table.Set("KEY", s21::Student("NAME", "SURNAME", 12, "CITY", 5555), 5);
+
+  bool status = table.Exists("KEY");
+
+  ASSERT_EQ(status, true);
+}
+
+
+TEST(HashTableExists, NotExistsTTLExpired) {
+  s21::HashTable<s21::Student> table;
+  table.Set("KEY", s21::Student("NAME", "SURNAME", 12, "CITY", 5555), 1);
+  
+  std::this_thread::sleep_for(std::chrono::seconds(2));
+
+  bool status = table.Exists("KEY");
+
+  ASSERT_EQ(status, false);
+}
