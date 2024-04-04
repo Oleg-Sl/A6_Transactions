@@ -52,10 +52,10 @@ TEST(HashTableSet, ElementsWithSameKeyAndTTLExpired) {
   int status_1 =
       table.Set("KEY", s21::Student("NAME", "SURNAME", 12, "CITY", 5555), 1);
 
-  std::this_thread::sleep_for(std::chrono::seconds(2));
+  std::this_thread::sleep_for(std::chrono::milliseconds(1001));
 
   int status_2 =
-      table.Set("KEY", s21::Student("NAME2", "SURNAME2", 12, "CITY", 5555), 1);
+      table.Set("KEY", s21::Student("NAME2", "SURNAME2", 12, "CITY", 5555));
 
   ASSERT_EQ(status_1, kOk);
   ASSERT_EQ(status_2, kOk);
@@ -88,14 +88,45 @@ TEST(HashTableExists, ExistsWithTTL) {
   ASSERT_EQ(status, true);
 }
 
-
 TEST(HashTableExists, NotExistsTTLExpired) {
   s21::HashTable<s21::Student> table;
   table.Set("KEY", s21::Student("NAME", "SURNAME", 12, "CITY", 5555), 1);
-  
-  std::this_thread::sleep_for(std::chrono::seconds(2));
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(1001));
 
   bool status = table.Exists("KEY");
+
+  ASSERT_EQ(status, false);
+}
+
+TEST(HashTableUpdate, Success) {
+  s21::HashTable<s21::Student> table;
+  table.Set("KEY", s21::Student("NAME", "SURNAME", 12, "CITY", 5555));
+
+  bool status =
+      table.Update("KEY", s21::Student("NAME2", "SURNAME2", 13, "CITY2", 5556));
+
+  // TODO: CHECK Student
+  ASSERT_EQ(status, true);
+}
+
+TEST(HashTableUpdate, FailKeyIsNotExists) {
+  s21::HashTable<s21::Student> table;
+
+  bool status =
+      table.Update("KEY", s21::Student("NAME2", "SURNAME2", 13, "CITY2", 5556));
+
+  ASSERT_EQ(status, false);
+}
+
+TEST(HashTableUpdate, FailTTLExpired) {
+  s21::HashTable<s21::Student> table;
+  table.Set("KEY", s21::Student("NAME", "SURNAME", 12, "CITY", 5555), 1);
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(1001));
+
+  bool status =
+      table.Update("KEY", s21::Student("NAME2", "SURNAME2", 13, "CITY2", 5556));
 
   ASSERT_EQ(status, false);
 }
