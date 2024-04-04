@@ -116,66 +116,51 @@ class HashTable : BaseClass {
     // auto pos = GetNodePosition(key, GetHash(key, table_size_));
     // if (pos != data_.end()) {
     //   (*pos).value = value;
-    //   return static_cast<bool>(StatusUpdate::kOk);
+    //   return true;
     // }
 
-    
+    // return false;
   }
 
   std::string Ttl(std::string key) {
-    // auto response_time = std::chrono::steady_clock::now();
-    // Position pos = GetNodePosition(key);
+    auto response_time = std::chrono::steady_clock::now();
+    auto pos = GetNodePosition(key, GetHash(key, table_size_));
 
-    // if (pos.is_valid) {
-    //   Node node = data_[pos.hash][pos.index];
-    //   return std::to_string(node.TTL -
-    //                         std::chrono::duration_cast<std::chrono::seconds>(
-    //                             response_time - node.create_time)
-    //                             .count());
-    // }
+    if (pos != data_.end()) {
+      return std::to_string((*pos).TTL -
+                            std::chrono::duration_cast<std::chrono::seconds>(
+                                response_time - (*pos).create_time)
+                                .count());
+    }
 
-    // return "(null)";
+    throw std::invalid_argument("Key is not exists");
   }
 
   std::vector<std::string> Find(T value) {
-    // auto response_time = std::chrono::steady_clock::now();
-    // std::vector<std::string> result;
+    auto response_time = std::chrono::steady_clock::now();
+    std::vector<std::string> result;
 
-    // size_t counter_1 = 0;
-    // for (auto& array : data_) {
-    //   size_t counter_2 = 0;
-    //   for (auto& elem : array) {
-    //     // if (!TTLIsExpired(response_time,
-    //     //                      Position{counter_1, counter_2, true}) &&
-    //     //     elem.value == value) { // TODO: Add operator== to Student
-    //     //   result.push_back(elem.value);
-    //     // }
-    //     ++counter_2;
-    //   }
-    //   ++counter_1;
-    // }
+    for (auto it = data_.begin(); it != data_.end(); ++it) {
+      // if (!TTLIsExpired(response_time, it) &&
+      //     elem.value == value) { // TODO: Add operator== to Student
+      // result.push_back(*it);
+      // }
+    }
 
-    // return result;
+    return result;
   }
 
   std::vector<T> Showall() {
-    // auto response_time = std::chrono::steady_clock::now();
-    // std::vector<T> result;
+    auto response_time = std::chrono::steady_clock::now();
+    std::vector<T> result;
 
-    // size_t counter_1 = 0;
-    // for (auto& array : data_) {
-    //   size_t counter_2 = 0;
-    //   for (auto& elem : array) {
-    //     if (!TTLIsExpired(response_time,
-    //                          Position{counter_1, counter_2, true})) {
-    //       result.push_back(elem.value);
-    //     }
-    //     ++counter_2;
-    //   }
-    //   ++counter_1;
-    // }
+    for (auto it = data_.begin(); it != data_.end(); ++it) {
+      if (!TTLIsExpired(response_time, it)) {
+        result.push_back((*it).value);
+      }
+    }
 
-    // return result;
+    return result;
   }
 
   std::pair<bool, int> Upload(std::string path) {}
@@ -194,8 +179,7 @@ class HashTable : BaseClass {
   const Hasher hasher_;
 
   size_t GetHash(std::string value, size_t size) {
-    if (size == 1) return 0;
-    return hasher_(value) % (size - 1);
+    return size == 1 ? 0 : hasher_(value) % (size - 1);
   }
 
   bool TTLIsExpired(const time_type& response_time,
