@@ -130,3 +130,18 @@ TEST(HashTableUpdate, FailTTLExpired) {
 
   ASSERT_EQ(status, false);
 }
+
+TEST(HashTableKeys, Normal) {
+  s21::HashTable<s21::Student> table;
+  std::set<std::string> keys = {"KEY", "KEY2", "KEY3"};
+
+  for (auto key : keys) {
+    table.Set(key, s21::Student("NAME", "SURNAME", 12, "CITY", 5555));
+  }
+
+  std::vector<std::string> result = table.Keys();
+  std::set<std::string> result_set(result.begin(), result.end());
+
+  ASSERT_EQ(keys.size(), result.size());
+  ASSERT_EQ(result_set, keys);
+}
