@@ -1,0 +1,6 @@
+#ifndef TRANSACTIONS_TESTS_COMMON_H_
+#define TRANSACTIONS_TESTS_COMMON_H_
+
+#include <gtest/gtest.h>
+
+#endif  // TRANSACTIONS_TESTS_COMMON_H_
