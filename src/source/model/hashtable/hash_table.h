@@ -30,15 +30,19 @@ class HashTable : BaseClass {
   };
 
   enum class StatusSet { kElementAlreadyExists, kOk };
+  enum class StatusDel { kElementNotExists, kOk };
+  enum class StatusUpdate { kElementNotExists, kOk };
 
   HashTable() {
-    bucket_pointers_ = allocator.allocate(kDefaultSize);
+    bucket_pointers_ = allocator_.allocate(kDefaultSize);
 
     for (std::size_t i = 0; i < table_size_; ++i) {
-      std::allocator_traits<decltype(allocator)>::construct(
-          allocator, &bucket_pointers_[i], data_.end());
+      std::allocator_traits<decltype(allocator_)>::construct(
+          allocator_, &bucket_pointers_[i], data_.end());
     }
   }
+
+  ~HashTable() { allocator_.deallocate(bucket_pointers_, table_size_); }
 
   bool Set(std::string key, T value, int TTL = 0) {
     if (data_.size() / table_size_ >= kResizeCoeff) {
@@ -72,51 +76,50 @@ class HashTable : BaseClass {
   }
 
   bool Del(std::string key) {
-    // Position pos = GetNodePosition(key);
-    // if (pos.is_valid) {
-    //   data_[pos.hash].erase(data_[pos.hash].begin() + pos.index);
-    //   return true;
-    // }
+    auto pos = GetNodePosition(key, GetHash(key, table_size_));
+    if (pos != data_.end()) {
+      bucket_pointers_[(*pos).cached] =
+          (*std::next(pos)).cached == (*std::next(pos)).cached
+              ? (std::next(pos))
+              : data_.end();
+      data_.erase(pos);
+      return static_cast<bool>(StatusDel::kOk);
+    }
 
-    // return false;
+    return static_cast<bool>(StatusDel::kElementNotExists);
   }
 
   bool Update(std::string key, T value) {
-    // Position pos = GetNodePosition(key);
-    // if (pos.is_valid) {
-    //   data_[pos.hash][pos.index].value = value;
-    //   return true;
-    // }
+    auto pos = GetNodePosition(key, GetHash(key, table_size_));
+    if (pos != data_.end()) {
+      (*pos).value = value;
+      return static_cast<bool>(StatusUpdate::kOk);
+    }
 
-    // return false;
+    return static_cast<bool>(StatusUpdate::kElementNotExists);
   }
 
   std::vector<std::string> Keys() {
-    // auto response_time = std::chrono::steady_clock::now();
-    // std::vector<std::string> result;
+    auto response_time = std::chrono::steady_clock::now();
+    std::vector<std::string> result;
 
-    // size_t counter_1 = 0;
-    // for (auto& array : data_) {
-    //   if (!TTLIsExpired(response_time, Position{counter_1, 0, true})) {
-    //     result.push_back(array[0].key);
-    //   }
-    //   ++counter_1;
-    // }
+    for (auto it = data_.begin(); it != data_.end(); ++it) {
+      if (!TTLIsExpired(response_time, it)) {
+        result.push_back((*it).key);
+      }
+    }
 
-    // return result;
+    return result;
   }
 
   bool Rename(std::string key, std::string new_key) {
-    // try {
-    //   Set(new_key, Get(key));
-    // } catch (const std::invalid_argument& ex) {
-    //   return false;
-    // }
-    // if (!Del(key)) {
-    //   return false;
+    // auto pos = GetNodePosition(key, GetHash(key, table_size_));
+    // if (pos != data_.end()) {
+    //   (*pos).value = value;
+    //   return static_cast<bool>(StatusUpdate::kOk);
     // }
 
-    // return true;
+    
   }
 
   std::string Ttl(std::string key) {
@@ -186,7 +189,7 @@ class HashTable : BaseClass {
  private:
   size_t table_size_ = kDefaultSize;
   std::list<Node> data_;
-  std::allocator<typename std::list<Node>::iterator> allocator;
+  std::allocator<typename std::list<Node>::iterator> allocator_;
   typename std::list<Node>::iterator* bucket_pointers_;
   const Hasher hasher_;
 
@@ -198,11 +201,11 @@ class HashTable : BaseClass {
   bool TTLIsExpired(const time_type& response_time,
                     typename std::list<Node>::const_iterator elem_pos) {
     bool is_valid_node = elem_pos != data_.end();
-    bool TTL_id_expired = std::chrono::duration_cast<std::chrono::seconds>(
+    bool TTL_is_expired = std::chrono::duration_cast<std::chrono::milliseconds>(
                               response_time - (*elem_pos).create_time)
-                              .count() > (*elem_pos).TTL;
+                              .count() > 1000 * (*elem_pos).TTL;
 
-    return !is_valid_node || TTL_id_expired;
+    return !is_valid_node || TTL_is_expired;
   }
 
   typename std::list<Node>::iterator GetNodePosition(std::string key,
@@ -222,18 +225,18 @@ class HashTable : BaseClass {
   void Resize() {
     int new_table_size = table_size_ * kScaleCoeff;
     typename std::list<Node>::iterator* new_bucket_pointers =
-        allocator.allocate(new_table_size);
+        allocator_.allocate(new_table_size);
 
     for (std::size_t i = 0; i < new_table_size; ++i) {
-      std::allocator_traits<decltype(allocator)>::construct(
-          allocator, &new_bucket_pointers[i], data_.end());
+      std::allocator_traits<decltype(allocator_)>::construct(
+          allocator_, &new_bucket_pointers[i], data_.end());
     }
 
     for (auto it = data_.begin(); it != data_.end(); ++it) {
       new_bucket_pointers[GetHash((*it).key, new_table_size)] = it;
     }
 
-    allocator.deallocate(bucket_pointers_, table_size_);
+    allocator_.deallocate(bucket_pointers_, table_size_);
     bucket_pointers_ = new_bucket_pointers;
     table_size_ = new_table_size;
   }
