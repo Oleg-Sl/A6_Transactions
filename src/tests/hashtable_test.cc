@@ -222,3 +222,30 @@ TEST(HashTableDel, DelWithTTLExpired) {
   ASSERT_EQ(status, false);
   ASSERT_EQ(table.Exists("KEY"), false);
 }
+
+TEST(HashTableTTL, Normal) {
+  s21::HashTable<std::string, s21::Student> table;
+  table.Set("KEY", s21::Student("NAME", "SURNAME", 12, "CITY", 5555), 1);
+
+  int res = table.Ttl("KEY");
+
+  ASSERT_EQ(res, 1);
+}
+
+TEST(HashTableTTL, KeyWithTTLExpired) {
+  s21::HashTable<std::string, s21::Student> table;
+  table.Set("KEY", s21::Student("NAME", "SURNAME", 12, "CITY", 5555), 1);
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(1001));
+  int res = table.Ttl("KEY");
+
+  ASSERT_EQ(res, 0);
+}
+
+TEST(HashTableTTL, InvalidKey) {
+  s21::HashTable<std::string, s21::Student> table;
+
+  int res = table.Ttl("KEY");
+
+  ASSERT_EQ(res, 0);
+}
