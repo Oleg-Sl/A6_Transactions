@@ -144,6 +144,23 @@ TEST(HashTableKeys, Normal) {
   ASSERT_EQ(result_set, keys);
 }
 
+TEST(HashTableKeys, KeyWithTTLExpired) {
+  s21::HashTable<std::string, s21::Student> table;
+  std::set<std::string> keys = {"KEY", "KEY2", "KEY3"};
+
+  for (auto key : keys) {
+    table.Set(key, s21::Student("NAME", "SURNAME", 12, "CITY", 5555));
+  }
+  table.Set("KEY4", s21::Student("NAME", "SURNAME", 12, "CITY", 5555), 1);
+  std::this_thread::sleep_for(std::chrono::milliseconds(1001));
+
+  std::vector<std::string> result = table.Keys();
+  std::set<std::string> result_set(result.begin(), result.end());
+
+  ASSERT_EQ(keys.size(), result.size());
+  ASSERT_EQ(result_set, keys);
+}
+
 TEST(HashTableRename, Normal) {
   s21::HashTable<std::string, s21::Student> table;
   table.Set("KEY", s21::Student("NAME", "SURNAME", 12, "CITY", 5555));
