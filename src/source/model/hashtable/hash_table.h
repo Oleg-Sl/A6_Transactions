@@ -146,7 +146,7 @@ class HashTable : BaseClass {
                               .count();
     }
 
-    throw std::invalid_argument("Key is not exists");
+    return 0;
   }
 
   std::vector<Key> Find(Value value) {
