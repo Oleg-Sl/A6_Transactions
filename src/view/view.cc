@@ -3,21 +3,34 @@
 #include "../parser/parser.h"
 
 namespace s21 {
-
-void View::Start() {
-  while (true) {
-    std::cout << "Input command and params. For exit input quit" << std::endl;
-    std::string input;
-    getline(std::cin, input);
-
-    auto params = GetParams(input);
-    std::string command = GetCommand(params);
-    if (command == "quit")
-      break;
-    else
-      Execute(command, params);
-  }
-}
+	View::~View() {
+		if (controller_) delete controller_;
+	}
+	void View::Start() {
+		while (true) {
+			ShowMainMenu();
+			std::string aaa;
+			std::cin >> aaa;
+			if (aaa == "1") {
+				if (controller_) delete controller_;
+				controller_ = new Controller("hash");
+				InputCommandAndParams();
+			}
+			else if (aaa == "2") {
+				if (controller_) delete controller_;
+				controller_ = new Controller("bst");
+				InputCommandAndParams();
+			}
+			else if (aaa == "3") {
+				if (controller_) delete controller_;
+				controller_ = new Controller("btree");
+				InputCommandAndParams();
+			}
+			else if (aaa == "4") {
+				break;
+			}
+		}
+	}
 
 View::Vector View::GetParams(std::string str) {
   Parser parser;
@@ -27,17 +40,16 @@ View::Vector View::GetParams(std::string str) {
 
 std::string View::GetCommand(Vector params) { return ToLower(params[0]); }
 
-void View::Execute(std::string command, Vector params) {
-  std::vector<std::string> commands = {"set",    "get",     "exists", "del",
-                                       "update", "keys",    "rename", "ttl",
-                                       "find",   "showall", "upload", "export"};
-  int ind = -1;
-  for (size_t i = 0; i < commands.size(); ++i) {
-    if (command == commands[i]) {
-      ind = i;
-      break;
-    }
-  }
+	void View::Execute(std::string command, Vector params) {
+
+		std::vector<std::string> commands = { "set", "get",	"exists", "del", "update", "keys", "rename", "ttl", "find", "showall", "upload", "export" };
+		int ind = -1;
+		for (int i = 0; i < commands.size(); ++i) {
+			if (command == commands[i]) {
+				ind = i;
+				break;
+			}
+		}
 
   switch (ind) {
     case 0:
@@ -88,32 +100,27 @@ void View::CallSet(Vector params) {
     return;
   }
 
-  if (params.size() == 7) {
-    auto birth = ParseToInt(params[4]);
-    if (!birth.first) return;
-    auto coins = ParseToInt(params[6]);
-    if (!coins.first) return;
-    res = controller_.Set(Data(
-        params[1],
-        Student(params[2], params[3], birth.second, params[5], coins.second)));
-  }
+		if (params.size() == 7) {
+			auto birth = ParseToInt(params[4]);
+			if (!birth.first) return;
+			auto coins = ParseToInt(params[6]);
+			if (!coins.first) return;
+			res = controller_->Set(params[1], Student(params[2], params[3], birth.second, params[5], coins.second));
+		}
 
-  if (params.size() == 9) {
-    auto birth = ParseToInt(params[4]);
-    if (!birth.first) return;
-    auto coins = ParseToInt(params[6]);
-    if (!coins.first) return;
-    if (ToLower(params[7]) != "ex") {
-      IncorrectParamsMessage();
-      return;
-    }
-    auto validity = ParseToInt(params[8]);
-    if (!validity.first) return;
-    res = controller_.Set(Data(
-        params[1],
-        Student(params[2], params[3], birth.second, params[5], coins.second),
-        validity.second));
-  }
+		if (params.size() == 9) {
+			auto birth = ParseToInt(params[4]);
+			if (!birth.first) return;
+			auto coins = ParseToInt(params[6]);
+			if (!coins.first) return;
+			if (ToLower(params[7]) != "ex") {
+				IncorrectParamsMessage();
+				return;
+			}
+			auto validity = ParseToInt(params[8]);
+			if (!validity.first) return;
+			res = controller_->Set(params[1], Student(params[2], params[3], birth.second, params[5], coins.second), validity.second);
+		}
 
   if (res) {
     std::cout << "OK" << std::endl;
@@ -122,12 +129,12 @@ void View::CallSet(Vector params) {
   }
 }
 
-void View::CallGet(Vector params) {
-  if (params.size() != 2) {
-    IncorrectParamsMessage();
-    return;
-  }
-  auto res = controller_.Get(params[1]);
+	void View::CallGet(Vector params) {
+		if (params.size() != 2) {
+			IncorrectParamsMessage();
+			return;
+		}
+		auto res = controller_->Get(params[1]);
 
   if (res.IsEmpty()) {
     std::cout << "(null)" << std::endl;
@@ -136,31 +143,33 @@ void View::CallGet(Vector params) {
   }
 }
 
-void View::CallExists(Vector params) {
-  if (params.size() != 2) {
-    IncorrectParamsMessage();
-    return;
-  }
-  auto res = controller_.Exists(params[1]);
-  if (res) {
-    std::cout << "true" << std::endl;
-  } else {
-    std::cout << "false" << std::endl;
-  }
-}
+	void View::CallExists(Vector params) {
+		if (params.size() != 2) {
+			IncorrectParamsMessage();
+			return;
+		}
+		auto res = controller_->Exists(params[1]);
+		if (res) {
+			std::cout << "true" << std::endl;
+		}
+		else {
+			std::cout << "false" << std::endl;
+		}
+	}
 
-void View::CallDel(Vector params) {
-  if (params.size() != 2) {
-    IncorrectParamsMessage();
-    return;
-  }
-  auto res = controller_.Del(params[1]);
-  if (res) {
-    std::cout << "true" << std::endl;
-  } else {
-    std::cout << "false" << std::endl;
-  }
-}
+	void View::CallDel(Vector params) {
+		if (params.size() != 2) {
+			IncorrectParamsMessage();
+			return;
+		}
+		auto res = controller_->Del(params[1]);
+		if (res) {
+			std::cout << "true" << std::endl;
+		}
+		else {
+			std::cout << "false" << std::endl;
+		}
+	}
 
 void View::CallUpdate(Vector params) {
   if (params.size() != 7) {
@@ -186,8 +195,7 @@ void View::CallUpdate(Vector params) {
     coins = res.second;
   }
 
-  bool result = controller_.Update(
-      params[1], Student(params[2], params[3], birthday, params[5], coins));
+		bool result = controller_->Update(params[1], Student(params[2], params[3], birthday, params[5], coins));
 
   if (result) {
     std::cout << "OK" << std::endl;
@@ -196,25 +204,26 @@ void View::CallUpdate(Vector params) {
   }
 }
 
-void View::CallKeys() {
-  auto keys = controller_.Keys();
-  for (size_t i = 0; i < keys.size(); ++i) {
-    std::cout << i + 1 << ") " << keys[i] << std::endl;
-  }
-}
+	void View::CallKeys() {
+		auto keys = controller_->Keys();
+		for (size_t i = 0; i < keys.size(); ++i) {
+			std::cout << i + 1 << ") " << keys[i] << std::endl;
+		}
+	}
 
-void View::CallRename(Vector params) {
-  if (params.size() != 3) {
-    IncorrectParamsMessage();
-    return;
-  }
-  bool res = controller_.Rename(params[1], params[2]);
-  if (res) {
-    std::cout << "OK" << std::endl;
-  } else {
-    std::cout << "Rename error" << std::endl;
-  }
-}
+	void View::CallRename(Vector params) {
+		if (params.size() != 3) {
+			IncorrectParamsMessage();
+			return;
+		}
+		bool res = controller_->Rename(params[1], params[2]);
+		if (res) {
+			std::cout << "OK" << std::endl;
+		}
+		else {
+			std::cout << "Rename error" << std::endl;
+		}
+	}
 
 void View::CallTtl(Vector params) {}
 
@@ -242,52 +251,74 @@ void View::CallFind(Vector params) {
     coins = res.second;
   }
 
-  auto keys = controller_.Find(
-      Student(params[1], params[2], birthday, params[4], coins));
+		auto keys = controller_->Find(Student(params[1], params[2], birthday, params[4], coins));
 
   for (size_t i = 0; i < keys.size(); ++i) {
     std::cout << i + 1 << ") " << keys[i] << std::endl;
   }
 }
 
-void View::CallShowall() {
-  auto students = controller_.Showall();
-  if (students.size() != 0) {
-    std::cout << std::left << std::setw(3) << "#" << std::left << std::setw(15)
-              << "Name" << std::left << std::setw(15) << "Surname" << std::left
-              << std::setw(10) << "Birthday" << std::left << std::setw(15)
-              << "City" << std::left << std::setw(8) << "Coins" << std::endl;
-    for (size_t i = 0; i < students.size(); ++i) {
-      std::cout << std::setw(3) << i + 1 << students[i].ToString() << std::endl;
-    }
-  }
-}
+	void View::CallShowall() {
+		auto students = controller_->Showall();
+		if (students.size() != 0) {
+			std::cout << std::left << std::setw(3) << "#" << std::left << std::setw(15) << "Name"
+				<< std::left << std::setw(15) << "Surname" << std::left << std::setw(10) << "Birthday"
+				<< std::left << std::setw(15) << "City" << std::left << std::setw(8) << "Coins" << std::endl;
+			for (size_t i = 0; i < students.size(); ++i) {
+				std::cout << std::setw(3) << i + 1 << students[i].ToString() << std::endl;
+			}
+		}
+	}
 
-void View::CallUpload(Vector params) {
-  if (params.size() != 2) {
-    IncorrectParamsMessage();
-    return;
-  }
-  auto res = controller_.Upload(params[1]);
-  if (res.first) {
-    std::cout << "OK " << res.second << std::endl;
-  } else {
-    std::cout << "Upload error" << std::endl;
-  }
-}
+	void View::CallUpload(Vector params) {
+		if (params.size() != 2) {
+			IncorrectParamsMessage();
+			return;
+		}
+		auto res = controller_->Upload(params[1]);
+		if (res.first) {
+			std::cout << "OK " << res.second << std::endl;
+		}
+		else {
+			std::cout << "Upload error" << std::endl;
+		}
+	}
 
-void View::CallExport(Vector params) {
-  if (params.size() != 2) {
-    IncorrectParamsMessage();
-    return;
-  }
-  auto res = controller_.Export(params[1]);
-  if (res.first) {
-    std::cout << "OK " << res.second << std::endl;
-  } else {
-    std::cout << "Export error" << std::endl;
-  }
-}
+	void View::CallExport(Vector params) {
+		if (params.size() != 2) {
+			IncorrectParamsMessage();
+			return;
+		}
+		auto res = controller_->Export(params[1]);
+		if (res.first) {
+			std::cout << "OK " << res.second << std::endl;
+		}
+		else {
+			std::cout << "Export error" << std::endl;
+		}
+	}
+
+	void View::InputCommandAndParams() {
+		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		while (true) {
+			std::cout << "Input command and params. For exit input quit" << std::endl;
+			std::string input;
+			getline(std::cin, input);
+
+			auto params = GetParams(input);
+			std::string command = GetCommand(params);
+			if (command == "quit") break;
+			else Execute(command, params);
+		}
+	}
+
+	void View::ShowMainMenu(){
+		std::cout << "Input model (1 - 3). For exit input 4" << std::endl;
+		std::cout << "1 (HashTable)" << std::endl;
+		std::cout << "2 (SelfBalancingBinarySearchTree)" << std::endl;
+		std::cout << "3 (BPlusTree)" << std::endl;
+		std::cout << "4 (Exit)" << std::endl;
+	}
 
 void View::IncorrectParamsMessage() {
   std::cout << "Incorrect params entered. Try again" << std::endl;

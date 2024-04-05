@@ -9,31 +9,35 @@
 
 namespace s21 {
 class View {
- public:
-  using Vector = std::vector<std::string>;
-  View() = default;
-  void Start();
+public:
+	using Vector = std::vector<std::string>;
+	View() = default;
+	~View();
+	void Start();
 
- private:
-  Controller controller_;
-  Vector GetParams(std::string str);
-  std::string GetCommand(Vector params);
-  void Execute(std::string command, Vector params);
-  void CallSet(Vector params);
-  void CallGet(Vector params);
-  void CallExists(Vector params);
-  void CallDel(Vector params);
-  void CallUpdate(Vector params);
-  void CallKeys();
-  void CallRename(Vector params);
-  void CallTtl(Vector params);
-  void CallFind(Vector params);
-  void CallShowall();
-  void CallUpload(Vector params);
-  void CallExport(Vector params);
-  void IncorrectParamsMessage();
-  std::pair<bool, int> ParseToInt(std::string str);
-  std::string ToLower(std::string str);
+private:
+	Controller* controller_ = nullptr;
+	Vector GetParams(std::string str);
+	std::string GetCommand(Vector params);
+	void Execute(std::string command, Vector params);
+	void CallSet(Vector params);
+	void CallGet(Vector params);
+	void CallExists(Vector params);
+	void CallDel(Vector params);
+	void CallUpdate(Vector params);
+	void CallKeys();
+	void CallRename(Vector params);
+	void CallTtl(Vector params);
+	void CallFind(Vector params);
+	void CallShowall();
+	void CallUpload(Vector params);
+	void CallExport(Vector params);
+	void InputCommandAndParams();
+	void ShowMainMenu();
+	void IncorrectParamsMessage();
+	std::pair<bool, int> ParseToInt(std::string str);
+	std::string ToLower(std::string str);
+
 };
 
 }  // namespace s21

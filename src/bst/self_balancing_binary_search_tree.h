@@ -24,7 +24,7 @@ class BSTNode {
   explicit BSTNode(const Data& value) : data(value) { color = Color::Red; };
 };
 
-class SelfBalancingBinarySearchTree : BaseClass {
+class SelfBalancingBinarySearchTree : public BaseClass {
  public:
   class BSTIterator;
   using Node = BSTNode;
@@ -101,7 +101,7 @@ class SelfBalancingBinarySearchTree : BaseClass {
     Pointer leaf_;
   };
 
-  bool Set(Data data);
+  bool Set(std::string key, Student student, int validity = 0);
   Student Get(std::string key);
   bool Exists(std::string key);
   bool Del(std::string key);
