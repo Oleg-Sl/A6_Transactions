@@ -200,7 +200,8 @@ class HashTable : BaseClass {
     bool is_valid_node = elem_pos != data_.end();
     bool TTL_is_expired = std::chrono::duration_cast<std::chrono::milliseconds>(
                               response_time - (*elem_pos).create_time)
-                              .count() > 1000 * (*elem_pos).TTL;
+                                  .count() > 1000 * (*elem_pos).TTL &&
+                          (*elem_pos).TTL != 0;
 
     return !is_valid_node || TTL_is_expired;
   }
