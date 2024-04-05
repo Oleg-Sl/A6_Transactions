@@ -12,7 +12,7 @@
 
 namespace s21 {
 
-template <typename T, typename Hasher = std::hash<std::string>>
+template <typename Key, typename Value, typename Hasher = std::hash<Key>>
 class HashTable : BaseClass {
  public:
   using time_type = std::chrono::steady_clock::time_point;
@@ -22,8 +22,8 @@ class HashTable : BaseClass {
   static constexpr size_t kScaleCoeff = 2;
 
   struct Node {
-    std::string key;
-    T value;
+    Key key;
+    Value value;
     int TTL;
     time_type create_time;
     int cached;
@@ -40,7 +40,7 @@ class HashTable : BaseClass {
 
   ~HashTable() { allocator_.deallocate(bucket_pointers_, table_size_); }
 
-  bool Set(std::string key, T value, int TTL = 0) {
+  bool Set(Key key, Value value, int TTL = 0) {
     auto response_time = std::chrono::steady_clock::now();
 
     if (data_.size() / table_size_ >= kResizeCoeff) {
@@ -64,7 +64,7 @@ class HashTable : BaseClass {
     return true;
   }
 
-  T Get(std::string key) {
+  Value Get(Key key) {
     auto pos = GetNodePosition(key, GetHash(key, table_size_));
     if (pos != data_.end()) {
       return (*pos).value;
@@ -73,11 +73,11 @@ class HashTable : BaseClass {
     throw std::invalid_argument("Key is not exists");
   }
 
-  bool Exists(std::string key) {
+  bool Exists(Key key) {
     return GetNodePosition(key, GetHash(key, table_size_)) != data_.end();
   }
 
-  bool Del(std::string key) {
+  bool Del(Key key) {
     auto pos = GetNodePosition(key, GetHash(key, table_size_));
     if (pos != data_.end()) {
       bucket_pointers_[(*pos).cached] =
@@ -91,7 +91,7 @@ class HashTable : BaseClass {
     return false;
   }
 
-  bool Update(std::string key, T value) {
+  bool Update(Key key, Value value) {
     auto pos = GetNodePosition(key, GetHash(key, table_size_));
     if (pos != data_.end()) {
       (*pos).value = value;
@@ -101,9 +101,9 @@ class HashTable : BaseClass {
     return false;
   }
 
-  std::vector<std::string> Keys() {
+  std::vector<Key> Keys() {
     auto response_time = std::chrono::steady_clock::now();
-    std::vector<std::string> result;
+    std::vector<Key> result;
 
     for (auto it = data_.begin(); it != data_.end(); ++it) {
       if (!TTLIsExpired(response_time, it)) {
@@ -114,7 +114,7 @@ class HashTable : BaseClass {
     return result;
   }
 
-  bool Rename(std::string key, std::string new_key) {
+  bool Rename(Key key, Key new_key) {
     auto pos = GetNodePosition(key, GetHash(key, table_size_));
     if (pos != data_.end()) {
       int new_key_hash = GetHash(new_key, table_size_);
@@ -136,23 +136,22 @@ class HashTable : BaseClass {
     return false;
   }
 
-  std::string Ttl(std::string key) {
+  int Ttl(Key key) {
     auto response_time = std::chrono::steady_clock::now();
     auto pos = GetNodePosition(key, GetHash(key, table_size_));
 
     if (pos != data_.end()) {
-      return std::to_string((*pos).TTL -
-                            std::chrono::duration_cast<std::chrono::seconds>(
-                                response_time - (*pos).create_time)
-                                .count());
+      return (*pos).TTL - std::chrono::duration_cast<std::chrono::seconds>(
+                              response_time - (*pos).create_time)
+                              .count();
     }
 
     throw std::invalid_argument("Key is not exists");
   }
 
-  std::vector<std::string> Find(T value) {
+  std::vector<Key> Find(Value value) {
     auto response_time = std::chrono::steady_clock::now();
-    std::vector<std::string> result;
+    std::vector<Key> result;
 
     for (auto it = data_.begin(); it != data_.end(); ++it) {
       // if (!TTLIsExpired(response_time, it) &&
@@ -164,9 +163,9 @@ class HashTable : BaseClass {
     return result;
   }
 
-  std::vector<T> Showall() {
+  std::vector<Value> Showall() {
     auto response_time = std::chrono::steady_clock::now();
-    std::vector<T> result;
+    std::vector<Value> result;
 
     for (auto it = data_.begin(); it != data_.end(); ++it) {
       if (!TTLIsExpired(response_time, it)) {
@@ -177,9 +176,9 @@ class HashTable : BaseClass {
     return result;
   }
 
-  std::pair<bool, int> Upload(std::string path) {}
+  std::pair<bool, int> Upload(Key path) {}
 
-  std::pair<bool, int> Export(std::string path) {}
+  std::pair<bool, int> Export(Key path) {}
 
   std::size_t GetSize() { return table_size_; }
 
@@ -192,7 +191,7 @@ class HashTable : BaseClass {
   typename std::list<Node>::iterator* bucket_pointers_;
   const Hasher hasher_;
 
-  size_t GetHash(std::string value, size_t size) {
+  size_t GetHash(Key value, size_t size) {
     return size == 1 ? 0 : hasher_(value) % (size - 1);
   }
 
@@ -206,8 +205,7 @@ class HashTable : BaseClass {
     return !is_valid_node || TTL_is_expired;
   }
 
-  typename std::list<Node>::iterator GetNodePosition(std::string key,
-                                                     int hash) {
+  typename std::list<Node>::iterator GetNodePosition(Key key, int hash) {
     auto response_time = std::chrono::steady_clock::now();
 
     for (auto it = bucket_pointers_[hash];
