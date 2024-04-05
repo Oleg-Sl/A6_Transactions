@@ -13,8 +13,8 @@ SelfBalancingBinarySearchTree::~SelfBalancingBinarySearchTree() {
 }
 
 bool SelfBalancingBinarySearchTree::Set(std::string key, Student student,
-    int validity) {
-    Data data(key, student, validity);
+                                        int validity) {
+  Data data(key, student, validity);
 
   Pointer tmp = new Node(data);
   if (!root_) {
@@ -22,7 +22,7 @@ bool SelfBalancingBinarySearchTree::Set(std::string key, Student student,
     root_->color = Color::Black;
     root_->link[0] = root_->link[1] = leaf_;
   } else {
-      if (Exists(key)) {
+    if (Exists(key)) {
       delete tmp;
       return false;
     } else {
@@ -106,9 +106,9 @@ bool SelfBalancingBinarySearchTree::Rename(std::string key,
                                            std::string new_key) {
   Pointer node = Search(key);
   if (!node) {
-      Set(new_key, Student());
+    Set(new_key, Student());
   } else {
-      Set(new_key, node->data.GetValue(), node->data.GetValidity());
+    Set(new_key, node->data.GetValue(), node->data.GetValidity());
     RemoveNode(node);
   }
   return true;
@@ -461,7 +461,7 @@ bool SelfBalancingBinarySearchTree::RemoveNode(Pointer node) {
       RemoveNodeWithoutChildren(node);
       break;
     case 1:
-      RemoveNodeWithOneChild(node );
+      RemoveNodeWithOneChild(node);
       break;
     case 2:
       RemoveNodeWithTwoChild(node);
