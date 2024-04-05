@@ -29,10 +29,6 @@ class HashTable : BaseClass {
     int cached;
   };
 
-  enum class StatusSet { kElementAlreadyExists, kOk };
-  enum class StatusDel { kElementNotExists, kOk };
-  enum class StatusUpdate { kElementNotExists, kOk };
-
   HashTable() {
     bucket_pointers_ = allocator_.allocate(kDefaultSize);
 
@@ -45,6 +41,8 @@ class HashTable : BaseClass {
   ~HashTable() { allocator_.deallocate(bucket_pointers_, table_size_); }
 
   bool Set(std::string key, T value, int TTL = 0) {
+    auto response_time = std::chrono::steady_clock::now();
+
     if (data_.size() / table_size_ >= kResizeCoeff) {
       Resize();
     }
@@ -52,14 +50,18 @@ class HashTable : BaseClass {
     int hash = GetHash(key, table_size_);
     auto pos = GetNodePosition(key, hash);
     if (pos != data_.end()) {
-      return static_cast<bool>(StatusSet::kElementAlreadyExists);
+      return false;
     }
 
-    bucket_pointers_[hash] = data_.insert(
-        bucket_pointers_[hash],
-        Node{key, value, TTL, std::chrono::steady_clock::now(), hash});
+    if (bucket_pointers_[hash] != data_.end()) {
+      bucket_pointers_[hash] = data_.insert(
+          bucket_pointers_[hash], Node{key, value, TTL, response_time, hash});
+    } else {
+      data_.push_back(Node{key, value, TTL, response_time, hash});
+      bucket_pointers_[hash] = std::prev(data_.end());
+    }
 
-    return static_cast<bool>(StatusSet::kOk);
+    return true;
   }
 
   T Get(std::string key) {
@@ -83,20 +85,20 @@ class HashTable : BaseClass {
               ? (std::next(pos))
               : data_.end();
       data_.erase(pos);
-      return static_cast<bool>(StatusDel::kOk);
+      return true;
     }
 
-    return static_cast<bool>(StatusDel::kElementNotExists);
+    return false;
   }
 
   bool Update(std::string key, T value) {
     auto pos = GetNodePosition(key, GetHash(key, table_size_));
     if (pos != data_.end()) {
       (*pos).value = value;
-      return static_cast<bool>(StatusUpdate::kOk);
+      return true;
     }
 
-    return static_cast<bool>(StatusUpdate::kElementNotExists);
+    return false;
   }
 
   std::vector<std::string> Keys() {
@@ -113,13 +115,25 @@ class HashTable : BaseClass {
   }
 
   bool Rename(std::string key, std::string new_key) {
-    // auto pos = GetNodePosition(key, GetHash(key, table_size_));
-    // if (pos != data_.end()) {
-    //   (*pos).value = value;
-    //   return true;
-    // }
+    auto pos = GetNodePosition(key, GetHash(key, table_size_));
+    if (pos != data_.end()) {
+      int new_key_hash = GetHash(new_key, table_size_);
+      Node new_node = *pos;
+      new_node.cached = new_key_hash;
+      new_node.key = new_key;
+      if (bucket_pointers_[new_key_hash] != data_.end()) {
+        data_.push_back(new_node);
+        bucket_pointers_[new_key_hash] = std::prev(data_.end());
+      } else {
+        bucket_pointers_[new_key_hash] =
+            data_.insert(bucket_pointers_[new_key_hash], new_node);
+      }
+      Del(key);
 
-    // return false;
+      return true;
+    }
+
+    return false;
   }
 
   std::string Ttl(std::string key) {
