@@ -13,13 +13,13 @@ namespace s21 {
 		}
 	}
 
-	bool Controller::Set(Data data) {
-		return bst_.Set(data);
+	Controller::~Controller() {
+		if (model_) delete model_;
 	}
 
 	bool Controller::Set(std::string key, Student student, int validity) {
 		return model_->Set(key, student, validity);
-	}
+	}	
 
 	Student Controller::Get(std::string key) {
 		return model_->Get(key);
