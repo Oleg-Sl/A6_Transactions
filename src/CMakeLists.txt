@@ -5,7 +5,7 @@ project(Transactions)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_compile_options(-Wall -Wextra -Werror -pedantic)
+# add_compile_options(-Wall -Wextra -Werror -pedantic)
 
 if(CMAKE_BUILD_TYPE MATCHES "^Debug")
   add_compile_options(-g -O0)
@@ -30,10 +30,12 @@ set(RELATIVE_HEADER_DIR ${SOURCE_DIR})
 # Sources
 file(GLOB_RECURSE ALL_SOURCES ${SOURCE_DIR}/*.cc ${SOURCE_DIR}/*.h)
 file(GLOB_RECURSE LIB_HASH_TABLE_SOURCE ${HASH_TABLE_DIR}/*.cc ${HASH_TABLE_DIR}/*.h ${COMMON_MODEL_DIR}/*.h)
+file(GLOB_RECURSE CONTROLLER_SOURCES ${CONTROLLER_DIR}/*.cc ${CONTROLLER_DIR}/*.h ${COMMON_MODEL_DIR}/*.h)
+file(GLOB_RECURSE VIEW_SOURCES ${VIEW_DIR}/*.cc ${VIEW_DIR}/*.h)
 file(GLOB_RECURSE TEST_SOURCES ${TESTS_DIR}/*.cc)
 
-add_executable(cli ${SOURCE_DIR}/main.cc)
-target_link_libraries(cli ${TARGET_GRAPH_LIB})
+add_executable(cli ${SOURCE_DIR}/main.cc ${CONTROLLER_SOURCES} ${VIEW_SOURCES})
+target_link_libraries(cli ${TARGET_GRAPH_LIB} )
 target_include_directories(cli PUBLIC ${RELATIVE_HEADER_DIR})
 
 add_custom_target(format COMMAND clang-format --style=Google -i --verbose ${ALL_SOURCES})

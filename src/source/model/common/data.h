@@ -1,6 +1,8 @@
 #ifndef TRANSACTIONS_COMMON_DATA_H_
 #define TRANSACTIONS_COMMON_DATA_H_
+
 #include <istream>
+#include <iomanip>
 #include <sstream>
 #include <string>
 
@@ -23,8 +25,10 @@ struct Student {
   }
   std::string ToString() {
     std::stringstream ss;
-    ss << name << " " << surname << " " << std::to_string(birthday) << " "
-       << city << " " << std::to_string(coins);
+    ss << std::left << std::setw(15) << name << std::left << std::setw(15)
+       << surname << std::left << std::setw(10) << std::to_string(birthday)
+       << std::left << std::setw(15) << city << std::left << std::setw(8)
+       << std::to_string(coins);
     return ss.str();
   }
 
@@ -45,6 +49,13 @@ struct Student {
         student.coins;
 
     return in;
+  }
+
+  bool IsEmpty() const {
+    if (name == "" && surname == "" && birthday == 0 && city == "" &&
+        coins == 0)
+      return true;
+    return false;
   }
 };
 

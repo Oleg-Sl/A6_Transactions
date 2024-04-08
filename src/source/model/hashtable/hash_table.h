@@ -14,7 +14,7 @@ namespace s21 {
 template <typename Key, typename Value,
           typename ValueEqual = std::equal_to<Value>,
           typename Hasher = std::hash<Key>>
-class HashTable : BaseClass {
+class HashTable : public BaseClass {
  public:
   using time_type = std::chrono::steady_clock::time_point;
 

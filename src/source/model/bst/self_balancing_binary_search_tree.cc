@@ -15,6 +15,7 @@ SelfBalancingBinarySearchTree::~SelfBalancingBinarySearchTree() {
 bool SelfBalancingBinarySearchTree::Set(std::string key, Student student,
                                         int validity) {
   Data data(key, student, validity);
+
   Pointer tmp = new Node(data);
   if (!root_) {
     root_ = tmp;

@@ -3,8 +3,8 @@
 
 #include <fstream>
 
-#include "../common/base_class.h"
-#include "../common/data.h"
+#include "model/common/base_class.h"
+#include "model/common/data.h"
 
 namespace s21 {
 
@@ -24,7 +24,7 @@ class BSTNode {
   explicit BSTNode(const Data& value) : data(value) { color = Color::Red; };
 };
 
-class SelfBalancingBinarySearchTree : BaseClass {
+class SelfBalancingBinarySearchTree : public BaseClass {
  public:
   class BSTIterator;
   using Node = BSTNode;
