@@ -224,7 +224,7 @@ class HashTable : BaseClass {
   std::list<Node> data_;
   std::allocator<typename std::list<Node>::iterator> allocator_;
   typename std::list<Node>::iterator* bucket_pointers_;
-  const Hasher hasher_;
+  const Hasher hasher_{};
 
   size_t GetHash(const Key& value, size_t size) const {
     return size == 1 ? 0 : hasher_(value) % (size - 1);
