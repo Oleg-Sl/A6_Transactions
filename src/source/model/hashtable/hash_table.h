@@ -12,7 +12,9 @@
 
 namespace s21 {
 
-template <typename Key, typename Value, typename Hasher = std::hash<Key>>
+template <typename Key, typename Value,
+          typename ValueEqual = std::equal_to<Value>,
+          typename Hasher = std::hash<Key>>
 class HashTable : BaseClass {
  public:
   using time_type = std::chrono::steady_clock::time_point;
@@ -152,12 +154,12 @@ class HashTable : BaseClass {
   std::vector<Key> Find(Value value) {
     auto response_time = std::chrono::steady_clock::now();
     std::vector<Key> result;
+    ValueEqual equal;
 
     for (auto it = data_.begin(); it != data_.end(); ++it) {
-      // if (!TTLIsExpired(response_time, it) &&
-      //     elem.value == value) { // TODO: Add operator== to Student
-      // result.push_back(*it);
-      // }
+      if (!TTLIsExpired(response_time, it) && equal(value, (*it).value)) {
+        result.push_back((*it).key);
+      }
     }
 
     return result;
