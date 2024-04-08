@@ -61,6 +61,20 @@ TEST(HashTableSet, ElementsWithSameKeyAndTTLExpired) {
   ASSERT_EQ(table.GetLoadFactor(), 2);
 }
 
+TEST(HashTableGet, Normal) {
+  HashTable<std::string, Student> table;
+  Student student("NAME", "SURNAME", 12, "CITY", 5555);
+  table.Set("KEY", student);
+
+  ASSERT_EQ(table.Get("KEY"), student);
+}
+
+TEST(HashTableGet, ThrowKeyIsNotExists) {
+  HashTable<std::string, Student> table;
+
+  ASSERT_THROW(table.Get("KEY"), std::invalid_argument);
+}
+
 TEST(HashTableExists, Exists) {
   HashTable<std::string, Student> table;
   table.Set("KEY", Student("NAME", "SURNAME", 12, "CITY", 5555));
@@ -100,12 +114,13 @@ TEST(HashTableExists, NotExistsTTLExpired) {
 
 TEST(HashTableUpdate, Success) {
   HashTable<std::string, Student> table;
-  table.Set("KEY", Student("NAME", "SURNAME", 12, "CITY", 5555));
+  Student student("NAME", "SURNAME", 12, "CITY", 5555);
+  Student new_student("NAME2", "SURNAME2", 13, "CITY2", 5556);
+  table.Set("KEY", student);
 
-  bool status =
-      table.Update("KEY", Student("NAME2", "SURNAME2", 13, "CITY2", 5556));
+  bool status = table.Update("KEY", new_student);
 
-  // TODO: CHECK Student
+  ASSERT_EQ(table.Get("KEY"), new_student);
   ASSERT_EQ(status, true);
 }
 
@@ -286,7 +301,7 @@ TEST(HashTableUpload, FileNotExists) {
   ASSERT_EQ(table.GetLoadFactor(), 0);
 }
 
-TEST(HashTableUpload, FineIncorrectStucture) {
+TEST(HashTableUpload, FileIncorrectStucture) {
   HashTable<std::string, Student> table;
 
   auto result = table.Upload(kSamplesDir + "student_incorrect.dat");
@@ -294,5 +309,67 @@ TEST(HashTableUpload, FineIncorrectStucture) {
   ASSERT_EQ(result.first, true);
   ASSERT_EQ(result.second, 0);
   ASSERT_EQ(table.GetLoadFactor(), 0);
+}
+
+TEST(HashTableFind, OneElements) {
+  HashTable<std::string, Student> table;
+  Student student("NAME", "SURNAME", 12, "CITY", 5555);
+  table.Set("KEY", student);
+
+  auto keys = table.Find(student);
+
+  ASSERT_EQ(keys[0], "KEY");
+}
+
+TEST(HashTableFind, SomeElements) {
+  HashTable<std::string, Student> table;
+  Student student("NAME", "SURNAME", 12, "CITY", 5555);
+  std::set<std::string> keys = {"KEY", "KEY2", "KEY3"};
+
+  for (auto key : keys) {
+    table.Set(key, student);
+  }
+
+  auto keys_result = table.Find(student);
+  std::set<std::string> result_set(keys_result.begin(), keys_result.end());
+
+  ASSERT_EQ(keys, result_set);
+}
+
+TEST(HashTableFind, NotExistsElement) {
+  HashTable<std::string, Student> table;
+
+  auto keys = table.Find(Student("NAME", "SURNAME", 12, "CITY", 5555));
+
+  ASSERT_EQ(keys.empty(), true);
+}
+
+TEST(HashTableShowAll, EmptyTable) {
+  HashTable<std::string, Student> table;
+
+  auto values = table.Showall();
+
+  ASSERT_EQ(values.empty(), true);
+}
+
+TEST(HashTableShowAll, OneElement) {
+  HashTable<std::string, Student> table;
+
+  auto values = table.Showall();
+
+  ASSERT_EQ(values.empty(), true);
+}
+
+TEST(HashTableShowAll, SomeElements) {
+  HashTable<std::string, Student> table;
+  Student student("NAME", "SURNAME", 12, "CITY", 5555);
+  table.Set("KEY", student);
+  table.Set("KEY2", student);
+  table.Set("KEY3", student);
+
+  auto values = table.Showall();
+
+  ASSERT_EQ(values.size(), 3);
+  ASSERT_EQ(table.GetLoadFactor(), 3);
 }
 }  // namespace s21
