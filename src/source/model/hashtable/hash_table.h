@@ -4,9 +4,8 @@
 #include <model/common/base_class.h>
 #include <model/common/data.h>
 
-#include <array>
 #include <chrono>
-#include <functional>
+#include <fstream>
 #include <list>
 #include <stdexcept>
 
@@ -178,9 +177,43 @@ class HashTable : BaseClass {
     return result;
   }
 
-  std::pair<bool, int> Upload(Key path) {}
+  std::pair<bool, int> Upload(std::string path) {
+    std::ifstream file(path);
+    Key key;
+    Value value;
 
-  std::pair<bool, int> Export(Key path) {}
+    if (!file.is_open()) {
+      return std::pair<bool, int>(false, 0);
+    }
+
+    int counter = 0;
+    while (file >> key && file >> value) {
+      if (Set(key, value)) {
+        ++counter;
+      }
+    }
+
+    return std::pair<bool, int>(true, counter);
+  }
+
+  std::pair<bool, int> Export(std::string path) {
+    auto response_time = std::chrono::steady_clock::now();
+    std::ofstream file(path);
+
+    if (!file.is_open()) {
+      return std::pair<bool, int>(false, 0);
+    }
+
+    int counter = 0;
+    for (auto it = data_.begin(); it != data_.end(); ++it) {
+      if (!TTLIsExpired(response_time, it)) {
+        file << (*it).key << " " << (*it).value << std::endl;
+        ++counter;
+      }
+    }
+
+    return std::pair<bool, int>(true, counter);
+  }
 
   std::size_t GetSize() { return table_size_; }
 
@@ -222,7 +255,7 @@ class HashTable : BaseClass {
   }
 
   void Resize() {
-    int new_table_size = table_size_ * kScaleCoeff;
+    size_t new_table_size = table_size_ * kScaleCoeff;
     typename std::list<Node>::iterator* new_bucket_pointers =
         allocator_.allocate(new_table_size);
 
