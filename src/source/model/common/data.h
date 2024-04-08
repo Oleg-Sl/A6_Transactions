@@ -1,5 +1,6 @@
 #ifndef TRANSACTIONS_COMMON_DATA_H_
 #define TRANSACTIONS_COMMON_DATA_H_
+#include <istream>
 #include <sstream>
 #include <string>
 
@@ -25,6 +26,25 @@ struct Student {
     ss << name << " " << surname << " " << std::to_string(birthday) << " "
        << city << " " << std::to_string(coins);
     return ss.str();
+  }
+
+  bool operator==(const Student& other) const {
+    return name == other.name && surname == other.surname &&
+           birthday == other.birthday && city == other.city &&
+           coins == other.coins;
+  }
+
+  friend std::ostream& operator<<(std::ostream& os, const Student& student) {
+    return os << student.name << " " << student.surname << " "
+              << student.birthday << " " << student.city << " "
+              << student.coins;
+  }
+
+  friend std::istream& operator>>(std::istream& in, Student& student) {
+    in >> student.name >> student.surname >> student.birthday >> student.city >>
+        student.coins;
+
+    return in;
   }
 };
 
