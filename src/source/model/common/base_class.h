@@ -15,7 +15,7 @@ class BaseClass {
   virtual bool Update(std::string key, Student student) = 0;
   virtual std::vector<std::string> Keys() = 0;
   virtual bool Rename(std::string key, std::string new_key) = 0;
-  virtual std::string Ttl(std::string param) = 0;  //???
+  virtual int Ttl(std::string param) = 0;
   virtual std::vector<std::string> Find(Student student) = 0;
   virtual std::vector<Student> Showall() = 0;
   virtual std::pair<bool, int> Upload(std::string path) = 0;
