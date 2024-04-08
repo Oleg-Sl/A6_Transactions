@@ -17,6 +17,7 @@ enable_testing()
 add_executable(${PROJECT_NAME} ${TEST_SOURCES})
 target_link_libraries(${PROJECT_NAME} GTest::gtest_main ${TARGET_GRAPH_LIB})
 target_include_directories(${PROJECT_NAME} PUBLIC ${RELATIVE_HEADER_DIR})
+add_definitions(-DSAMPLES_DIR="${SAMPLES_DIR}")
 
 include(GoogleTest)
 gtest_discover_tests(${PROJECT_NAME})

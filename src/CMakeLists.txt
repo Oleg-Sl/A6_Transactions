@@ -5,7 +5,7 @@ project(Transactions)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# add_compile_options(-Wall -Wextra -Werror -pedantic)
+add_compile_options(-Wall -Wextra -Werror -pedantic)
 
 if(CMAKE_BUILD_TYPE MATCHES "^Debug")
   add_compile_options(-g -O0)
@@ -23,6 +23,7 @@ set(VIEW_DIR ${SOURCE_DIR}/view)
 set(TESTS_DIR ${BASE_DIR}/tests)
 set(HASH_TABLE_DIR ${MODEL_DIR}/hashtable)
 set(COMMON_MODEL_DIR ${MODEL_DIR}/common)
+set(SAMPLES_DIR ${BASE_DIR}/samples)
 
 set(RELATIVE_HEADER_DIR ${SOURCE_DIR})
 
