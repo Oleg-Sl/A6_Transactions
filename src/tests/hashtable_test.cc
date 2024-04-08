@@ -1,29 +1,31 @@
 #include <chrono>
+#include <filesystem>
 #include <thread>
 
 #include "common.h"
 #include "model/hashtable/hash_table.h"
 
+namespace s21 {
+
 static constexpr bool kOk = true;
 static constexpr bool kError = false;
 
 TEST(HashTableSet, OneElement) {
-  s21::HashTable<std::string, s21::Student> table;
+  HashTable<std::string, Student> table;
 
-  int status =
-      table.Set("KEY", s21::Student("NAME", "SURNAME", 12, "CITY", 5555));
+  int status = table.Set("KEY", Student("NAME", "SURNAME", 12, "CITY", 5555));
 
   ASSERT_EQ(status, kOk);
   ASSERT_EQ(table.GetLoadFactor(), 1);
 }
 
 TEST(HashTableSet, ManyElement) {
-  s21::HashTable<std::string, s21::Student> table;
+  HashTable<std::string, Student> table;
   size_t count_elements = 100;
 
   for (size_t i = 0; i < count_elements; ++i) {
     int status = table.Set("KEY" + std::to_string(i),
-                           s21::Student("NAME", "SURNAME", 12, "CITY", 5555));
+                           Student("NAME", "SURNAME", 12, "CITY", 5555));
     ASSERT_EQ(status, kOk);
   }
 
@@ -31,13 +33,12 @@ TEST(HashTableSet, ManyElement) {
 }
 
 TEST(HashTableSet, ElementsWithSameKey) {
-  s21::HashTable<std::string, s21::Student> table;
+  HashTable<std::string, Student> table;
 
-  int status_1 =
-      table.Set("KEY", s21::Student("NAME", "SURNAME", 12, "CITY", 5555));
+  int status_1 = table.Set("KEY", Student("NAME", "SURNAME", 12, "CITY", 5555));
 
   int status_2 =
-      table.Set("KEY", s21::Student("NAME2", "SURNAME2", 12, "CITY", 5555));
+      table.Set("KEY", Student("NAME2", "SURNAME2", 12, "CITY", 5555));
 
   ASSERT_EQ(status_1, kOk);
   ASSERT_EQ(status_2, kError);
@@ -45,15 +46,15 @@ TEST(HashTableSet, ElementsWithSameKey) {
 }
 
 TEST(HashTableSet, ElementsWithSameKeyAndTTLExpired) {
-  s21::HashTable<std::string, s21::Student> table;
+  HashTable<std::string, Student> table;
 
   int status_1 =
-      table.Set("KEY", s21::Student("NAME", "SURNAME", 12, "CITY", 5555), 1);
+      table.Set("KEY", Student("NAME", "SURNAME", 12, "CITY", 5555), 1);
 
   std::this_thread::sleep_for(std::chrono::milliseconds(1001));
 
   int status_2 =
-      table.Set("KEY", s21::Student("NAME2", "SURNAME2", 12, "CITY", 5555));
+      table.Set("KEY", Student("NAME2", "SURNAME2", 12, "CITY", 5555));
 
   ASSERT_EQ(status_1, kOk);
   ASSERT_EQ(status_2, kOk);
@@ -61,8 +62,8 @@ TEST(HashTableSet, ElementsWithSameKeyAndTTLExpired) {
 }
 
 TEST(HashTableExists, Exists) {
-  s21::HashTable<std::string, s21::Student> table;
-  table.Set("KEY", s21::Student("NAME", "SURNAME", 12, "CITY", 5555));
+  HashTable<std::string, Student> table;
+  table.Set("KEY", Student("NAME", "SURNAME", 12, "CITY", 5555));
 
   bool status = table.Exists("KEY");
 
@@ -70,7 +71,7 @@ TEST(HashTableExists, Exists) {
 }
 
 TEST(HashTableExists, NotExistsKey) {
-  s21::HashTable<std::string, s21::Student> table;
+  HashTable<std::string, Student> table;
 
   bool status = table.Exists("KEY");
 
@@ -78,8 +79,8 @@ TEST(HashTableExists, NotExistsKey) {
 }
 
 TEST(HashTableExists, ExistsWithTTL) {
-  s21::HashTable<std::string, s21::Student> table;
-  table.Set("KEY", s21::Student("NAME", "SURNAME", 12, "CITY", 5555), 5);
+  HashTable<std::string, Student> table;
+  table.Set("KEY", Student("NAME", "SURNAME", 12, "CITY", 5555), 5);
 
   bool status = table.Exists("KEY");
 
@@ -87,8 +88,8 @@ TEST(HashTableExists, ExistsWithTTL) {
 }
 
 TEST(HashTableExists, NotExistsTTLExpired) {
-  s21::HashTable<std::string, s21::Student> table;
-  table.Set("KEY", s21::Student("NAME", "SURNAME", 12, "CITY", 5555), 1);
+  HashTable<std::string, Student> table;
+  table.Set("KEY", Student("NAME", "SURNAME", 12, "CITY", 5555), 1);
 
   std::this_thread::sleep_for(std::chrono::milliseconds(1001));
 
@@ -98,43 +99,43 @@ TEST(HashTableExists, NotExistsTTLExpired) {
 }
 
 TEST(HashTableUpdate, Success) {
-  s21::HashTable<std::string, s21::Student> table;
-  table.Set("KEY", s21::Student("NAME", "SURNAME", 12, "CITY", 5555));
+  HashTable<std::string, Student> table;
+  table.Set("KEY", Student("NAME", "SURNAME", 12, "CITY", 5555));
 
   bool status =
-      table.Update("KEY", s21::Student("NAME2", "SURNAME2", 13, "CITY2", 5556));
+      table.Update("KEY", Student("NAME2", "SURNAME2", 13, "CITY2", 5556));
 
   // TODO: CHECK Student
   ASSERT_EQ(status, true);
 }
 
 TEST(HashTableUpdate, FailKeyIsNotExists) {
-  s21::HashTable<std::string, s21::Student> table;
+  HashTable<std::string, Student> table;
 
   bool status =
-      table.Update("KEY", s21::Student("NAME2", "SURNAME2", 13, "CITY2", 5556));
+      table.Update("KEY", Student("NAME2", "SURNAME2", 13, "CITY2", 5556));
 
   ASSERT_EQ(status, false);
 }
 
 TEST(HashTableUpdate, FailTTLExpired) {
-  s21::HashTable<std::string, s21::Student> table;
-  table.Set("KEY", s21::Student("NAME", "SURNAME", 12, "CITY", 5555), 1);
+  HashTable<std::string, Student> table;
+  table.Set("KEY", Student("NAME", "SURNAME", 12, "CITY", 5555), 1);
 
   std::this_thread::sleep_for(std::chrono::milliseconds(1001));
 
   bool status =
-      table.Update("KEY", s21::Student("NAME2", "SURNAME2", 13, "CITY2", 5556));
+      table.Update("KEY", Student("NAME2", "SURNAME2", 13, "CITY2", 5556));
 
   ASSERT_EQ(status, false);
 }
 
 TEST(HashTableKeys, Normal) {
-  s21::HashTable<std::string, s21::Student> table;
+  HashTable<std::string, Student> table;
   std::set<std::string> keys = {"KEY", "KEY2", "KEY3"};
 
   for (auto key : keys) {
-    table.Set(key, s21::Student("NAME", "SURNAME", 12, "CITY", 5555));
+    table.Set(key, Student("NAME", "SURNAME", 12, "CITY", 5555));
   }
 
   std::vector<std::string> result = table.Keys();
@@ -145,13 +146,13 @@ TEST(HashTableKeys, Normal) {
 }
 
 TEST(HashTableKeys, KeyWithTTLExpired) {
-  s21::HashTable<std::string, s21::Student> table;
+  HashTable<std::string, Student> table;
   std::set<std::string> keys = {"KEY", "KEY2", "KEY3"};
 
   for (auto key : keys) {
-    table.Set(key, s21::Student("NAME", "SURNAME", 12, "CITY", 5555));
+    table.Set(key, Student("NAME", "SURNAME", 12, "CITY", 5555));
   }
-  table.Set("KEY4", s21::Student("NAME", "SURNAME", 12, "CITY", 5555), 1);
+  table.Set("KEY4", Student("NAME", "SURNAME", 12, "CITY", 5555), 1);
   std::this_thread::sleep_for(std::chrono::milliseconds(1001));
 
   std::vector<std::string> result = table.Keys();
@@ -162,8 +163,8 @@ TEST(HashTableKeys, KeyWithTTLExpired) {
 }
 
 TEST(HashTableRename, Normal) {
-  s21::HashTable<std::string, s21::Student> table;
-  table.Set("KEY", s21::Student("NAME", "SURNAME", 12, "CITY", 5555));
+  HashTable<std::string, Student> table;
+  table.Set("KEY", Student("NAME", "SURNAME", 12, "CITY", 5555));
 
   bool status = table.Rename("KEY", "KEY2");
 
@@ -173,7 +174,7 @@ TEST(HashTableRename, Normal) {
 }
 
 TEST(HashTableRename, InvalidKey) {
-  s21::HashTable<std::string, s21::Student> table;
+  HashTable<std::string, Student> table;
 
   bool status = table.Rename("KEY", "KEY2");
 
@@ -183,8 +184,8 @@ TEST(HashTableRename, InvalidKey) {
 }
 
 TEST(HashTableRename, KeyWithTTLExpired) {
-  s21::HashTable<std::string, s21::Student> table;
-  table.Set("KEY", s21::Student("NAME", "SURNAME", 12, "CITY", 5555), 1);
+  HashTable<std::string, Student> table;
+  table.Set("KEY", Student("NAME", "SURNAME", 12, "CITY", 5555), 1);
   std::this_thread::sleep_for(std::chrono::milliseconds(1001));
 
   bool status = table.Rename("KEY", "KEY2");
@@ -195,8 +196,8 @@ TEST(HashTableRename, KeyWithTTLExpired) {
 }
 
 TEST(HashTableDel, Normal) {
-  s21::HashTable<std::string, s21::Student> table;
-  table.Set("KEY", s21::Student("NAME", "SURNAME", 12, "CITY", 5555));
+  HashTable<std::string, Student> table;
+  table.Set("KEY", Student("NAME", "SURNAME", 12, "CITY", 5555));
 
   bool status = table.Del("KEY");
 
@@ -205,7 +206,7 @@ TEST(HashTableDel, Normal) {
 }
 
 TEST(HashTableDel, InvalidKey) {
-  s21::HashTable<std::string, s21::Student> table;
+  HashTable<std::string, Student> table;
 
   bool status = table.Del("KEY");
 
@@ -213,8 +214,8 @@ TEST(HashTableDel, InvalidKey) {
 }
 
 TEST(HashTableDel, DelWithTTLExpired) {
-  s21::HashTable<std::string, s21::Student> table;
-  table.Set("KEY", s21::Student("NAME", "SURNAME", 12, "CITY", 5555), 1);
+  HashTable<std::string, Student> table;
+  table.Set("KEY", Student("NAME", "SURNAME", 12, "CITY", 5555), 1);
 
   std::this_thread::sleep_for(std::chrono::milliseconds(1001));
   bool status = table.Del("KEY");
@@ -224,8 +225,8 @@ TEST(HashTableDel, DelWithTTLExpired) {
 }
 
 TEST(HashTableTTL, Normal) {
-  s21::HashTable<std::string, s21::Student> table;
-  table.Set("KEY", s21::Student("NAME", "SURNAME", 12, "CITY", 5555), 1);
+  HashTable<std::string, Student> table;
+  table.Set("KEY", Student("NAME", "SURNAME", 12, "CITY", 5555), 1);
 
   int res = table.Ttl("KEY");
 
@@ -233,8 +234,8 @@ TEST(HashTableTTL, Normal) {
 }
 
 TEST(HashTableTTL, KeyWithTTLExpired) {
-  s21::HashTable<std::string, s21::Student> table;
-  table.Set("KEY", s21::Student("NAME", "SURNAME", 12, "CITY", 5555), 1);
+  HashTable<std::string, Student> table;
+  table.Set("KEY", Student("NAME", "SURNAME", 12, "CITY", 5555), 1);
 
   std::this_thread::sleep_for(std::chrono::milliseconds(1001));
   int res = table.Ttl("KEY");
@@ -243,9 +244,55 @@ TEST(HashTableTTL, KeyWithTTLExpired) {
 }
 
 TEST(HashTableTTL, InvalidKey) {
-  s21::HashTable<std::string, s21::Student> table;
+  HashTable<std::string, Student> table;
 
   int res = table.Ttl("KEY");
 
   ASSERT_EQ(res, 0);
 }
+
+TEST(HashTableExport, Normal) {
+  HashTable<std::string, Student> table;
+  table.Set("KEY", Student("NAME", "SURNAME", 12, "CITY", 5555));
+  table.Set("KEY2", Student("NAME", "SURNAME", 12, "CITY", 5555));
+  table.Set("KEY3", Student("NAME", "SURNAME", 12, "CITY", 5555));
+  std::string temp_file =
+      (std::filesystem::temp_directory_path() / "temp.dat").string();
+
+  table.Export(temp_file);
+
+  ASSERT_EQ(std::fstream(temp_file).is_open(), true);
+  std::remove(temp_file.c_str());
+  ASSERT_EQ(std::fstream(temp_file).is_open(), false);
+}
+
+TEST(HashTableUpload, Normal) {
+  HashTable<std::string, Student> table;
+
+  auto result = table.Upload(kSamplesDir + "student.dat");
+
+  ASSERT_EQ(result.first, true);
+  ASSERT_EQ(result.second, 2);
+  ASSERT_EQ(table.GetLoadFactor(), 2);
+}
+
+TEST(HashTableUpload, FileNotExists) {
+  HashTable<std::string, Student> table;
+
+  auto result = table.Upload(kSamplesDir + "notexists.dat");
+
+  ASSERT_EQ(result.first, false);
+  ASSERT_EQ(result.second, 0);
+  ASSERT_EQ(table.GetLoadFactor(), 0);
+}
+
+TEST(HashTableUpload, FineIncorrectStucture) {
+  HashTable<std::string, Student> table;
+
+  auto result = table.Upload(kSamplesDir + "student_incorrect.dat");
+
+  ASSERT_EQ(result.first, true);
+  ASSERT_EQ(result.second, 0);
+  ASSERT_EQ(table.GetLoadFactor(), 0);
+}
+}  // namespace s21
