@@ -12,12 +12,10 @@ namespace s21 {
 class View {
  public:
   using Vector = std::vector<std::string>;
-  View() = default;
-  ~View();
   void Start();
 
  private:
-  Controller* controller_ = nullptr;
+  std::unique_ptr<Controller> controller_;
   Vector GetParams(std::string str);
   std::string GetCommand(Vector params);
   void Execute(std::string command, Vector params);

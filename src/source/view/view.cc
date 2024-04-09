@@ -1,31 +1,22 @@
+#include "model/common/data.h"
+#include "model/hashtable/hash_table.h"
+#include "model/parser/parser.h"
 #include "view/view.h"
 
-#include "model/parser/parser.h"
-
 namespace s21 {
-View::~View() {
-  if (controller_) delete controller_;
-}
 void View::Start() {
   while (true) {
     ShowMainMenu();
-    std::string aaa;
-    std::cin >> aaa;
-    if (aaa == "1") {
-      if (controller_) delete controller_;
-      controller_ = new Controller("hash");
-      InputCommandAndParams();
-    } else if (aaa == "2") {
-      if (controller_) delete controller_;
-      controller_ = new Controller("bst");
-      InputCommandAndParams();
-    } else if (aaa == "3") {
-      if (controller_) delete controller_;
-      controller_ = new Controller("btree");
-      InputCommandAndParams();
-    } else if (aaa == "4") {
+    std::string choice;
+    std::cin >> choice;
+    if (choice == "1") {
+      controller_ = std::make_unique<Controller>(
+          std::make_unique<HashTable<std::string, Student>>());
+    } else if (choice == "2") {
+    } else {
       break;
     }
+    InputCommandAndParams();
   }
 }
 
@@ -337,6 +328,7 @@ std::pair<bool, int> View::ParseToInt(std::string str) {
     return std::make_pair(false, 0);
   }
 }
+
 std::string View::ToLower(std::string str) {
   for (auto& c : str) {
     c = tolower(c);

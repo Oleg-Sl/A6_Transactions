@@ -2,13 +2,15 @@
 #define TRANSACTIONS_CONTROLLER_CONTROLLER_H_
 
 // #include "model/bst/self_balancing_binary_search_tree.h"
+#include <memory>
+
 #include "model/common/base_class.h"
 #include "model/common/data.h"
 
 namespace s21 {
 class Controller {
  public:
-  Controller(std::string obj);
+  explicit Controller(std::unique_ptr<BaseClass> model);
   bool Set(std::string key, Student student, int validity = 0);
   Student Get(std::string key);
   bool Exists(std::string key);
@@ -23,7 +25,7 @@ class Controller {
   std::pair<bool, int> Export(std::string path);
 
  private:
-  BaseClass *model_;
+  std::unique_ptr<BaseClass> model_;
 };
 
 }  // namespace s21

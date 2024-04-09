@@ -2,15 +2,7 @@
 #include "model/hashtable/hash_table.h"
 
 namespace s21 {
-Controller::Controller(std::string obj) {
-  if (obj == "hash") {
-    model_ =  new HashTable<std::string, Student>();
-  } else if (obj == "bst") {
-    // model_ = new SelfBalancingBinarySearchTree();
-  } else {
-    // model_ = new Three();
-  }
-}
+Controller::Controller(std::unique_ptr<BaseClass> model) : model_(std::move(model)) {}
 
 bool Controller::Set(std::string key, Student student, int validity) {
   return model_->Set(key, student, validity);
