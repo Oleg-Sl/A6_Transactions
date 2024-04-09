@@ -53,8 +53,9 @@ report: build
 stylecheck: build
 	cmake --build $(BUILD_DIR) --target stylecheck
 
-cppcheck: build
-	cmake --build $(BUILD_DIR) --target cppcheck
+btree:
+	g++ -Wall -Wextra -Werror -o bthree bplusthree/*.cc
+	./bthree
 
 format: build
 	cmake --build $(BUILD_DIR) --target format
