@@ -8,6 +8,7 @@
 namespace s21 {
 class BaseClass {
  public:
+  virtual ~BaseClass() = default;
   virtual bool Set(const std::string& key, const Student& student,
                    int validity = 0) = 0;
   virtual Student Get(const std::string& key) const = 0;

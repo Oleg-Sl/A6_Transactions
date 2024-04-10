@@ -39,9 +39,9 @@ class HashTable : public BaseClass {
     }
   }
 
-  ~HashTable() { allocator_.deallocate(bucket_pointers_, table_size_); }
+  ~HashTable() override { allocator_.deallocate(bucket_pointers_, table_size_); }
 
-  bool Set(const Key& key, const Value& value, int TTL = 0) {
+  bool Set(const Key& key, const Value& value, int TTL = 0) override {
     auto response_time = std::chrono::steady_clock::now();
 
     if (data_.size() / table_size_ >= kResizeCoeff) {
@@ -65,7 +65,7 @@ class HashTable : public BaseClass {
     return true;
   }
 
-  Value Get(const Key& key) const {
+  Value Get(const Key& key) const override {
     auto pos = GetNodePosition(key, GetHash(key, table_size_));
     if (pos != data_.end()) {
       return (*pos).value;
@@ -74,11 +74,11 @@ class HashTable : public BaseClass {
     throw std::invalid_argument("Key is not exists");
   }
 
-  bool Exists(const Key& key) const {
+  bool Exists(const Key& key) const override {
     return GetNodePosition(key, GetHash(key, table_size_)) != data_.end();
   }
 
-  bool Del(const Key& key) {
+  bool Del(const Key& key) override {
     auto pos = GetNodePosition(key, GetHash(key, table_size_));
     if (pos != data_.end()) {
       bucket_pointers_[(*pos).cached] =
@@ -92,7 +92,7 @@ class HashTable : public BaseClass {
     return false;
   }
 
-  bool Update(const Key& key, const Value& value) {
+  bool Update(const Key& key, const Value& value) override {
     auto pos = GetNodePosition(key, GetHash(key, table_size_));
     if (pos != data_.end()) {
       (*pos).value = value;
@@ -102,7 +102,7 @@ class HashTable : public BaseClass {
     return false;
   }
 
-  std::vector<Key> Keys() const {
+  std::vector<Key> Keys() const override {
     auto response_time = std::chrono::steady_clock::now();
     std::vector<Key> result;
 
@@ -115,7 +115,7 @@ class HashTable : public BaseClass {
     return result;
   }
 
-  bool Rename(const Key& key, const Key& new_key) {
+  bool Rename(const Key& key, const Key& new_key) override {
     auto pos = GetNodePosition(key, GetHash(key, table_size_));
     if (pos != data_.end()) {
       int new_key_hash = GetHash(new_key, table_size_);
@@ -137,7 +137,7 @@ class HashTable : public BaseClass {
     return false;
   }
 
-  int Ttl(const Key& key) const {
+  int Ttl(const Key& key) const override {
     auto response_time = std::chrono::steady_clock::now();
     auto pos = GetNodePosition(key, GetHash(key, table_size_));
 
@@ -150,7 +150,7 @@ class HashTable : public BaseClass {
     return 0;
   }
 
-  std::vector<Key> Find(const Value& value) const {
+  std::vector<Key> Find(const Value& value) const override {
     auto response_time = std::chrono::steady_clock::now();
     std::vector<Key> result;
     ValueEqual equal;
@@ -164,7 +164,7 @@ class HashTable : public BaseClass {
     return result;
   }
 
-  std::vector<Value> Showall() const {
+  std::vector<Value> Showall() const override {
     auto response_time = std::chrono::steady_clock::now();
     std::vector<Value> result;
 
@@ -177,7 +177,7 @@ class HashTable : public BaseClass {
     return result;
   }
 
-  std::pair<bool, int> Upload(const std::string& path) {
+  std::pair<bool, int> Upload(const std::string& path) override {
     std::ifstream file(path);
     Key key;
     Value value;
@@ -196,7 +196,7 @@ class HashTable : public BaseClass {
     return std::pair<bool, int>(true, counter);
   }
 
-  std::pair<bool, int> Export(const std::string& path) const {
+  std::pair<bool, int> Export(const std::string& path) const override {
     auto response_time = std::chrono::steady_clock::now();
     std::ofstream file(path);
 
