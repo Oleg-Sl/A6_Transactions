@@ -39,7 +39,9 @@ class HashTable : public BaseClass {
     }
   }
 
-  ~HashTable() override { allocator_.deallocate(bucket_pointers_, table_size_); }
+  ~HashTable() override {
+    allocator_.deallocate(bucket_pointers_, table_size_);
+  }
 
   bool Set(const Key& key, const Value& value, int TTL = 0) override {
     auto response_time = std::chrono::steady_clock::now();
@@ -147,7 +149,7 @@ class HashTable : public BaseClass {
                               .count();
     }
 
-    return 0;
+    throw std::invalid_argument("Key is not exists");
   }
 
   std::vector<Key> Find(const Value& value) const override {
