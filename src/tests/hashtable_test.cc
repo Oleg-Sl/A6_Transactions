@@ -248,22 +248,19 @@ TEST(HashTableTTL, Normal) {
   ASSERT_EQ(res, 1);
 }
 
-TEST(HashTableTTL, KeyWithTTLExpired) {
+TEST(HashTableTTL, ThrowKeyWithTTLExpired) {
   HashTable<std::string, Student> table;
   table.Set("KEY", Student("NAME", "SURNAME", 12, "CITY", 5555), 1);
 
   std::this_thread::sleep_for(std::chrono::milliseconds(1001));
-  int res = table.Ttl("KEY");
 
-  ASSERT_EQ(res, 0);
+  ASSERT_THROW(table.Ttl("KEY"), std::invalid_argument);
 }
 
-TEST(HashTableTTL, InvalidKey) {
+TEST(HashTableTTL, ThrowInvalidKey) {
   HashTable<std::string, Student> table;
 
-  int res = table.Ttl("KEY");
-
-  ASSERT_EQ(res, 0);
+  ASSERT_THROW(table.Ttl("KEY"), std::invalid_argument);
 }
 
 TEST(HashTableExport, Normal) {
