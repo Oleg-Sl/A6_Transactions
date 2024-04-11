@@ -7,10 +7,15 @@
 
 namespace s21 {
 void View::Start() {
-  AddMenuOnStack(kMainMenuCommands);
+  PushMenu(kMainMenuCommands);
 
   while (stack_menu_.size() > 0) {
-    CallMenuAction(stack_menu_.top());
+    std::cout << "> ";
+    std::string input;
+    getline(std::cin, input);
+    user_input_ = std::stringstream(input);
+
+    ExecuteMenu(stack_menu_.top());
   }
 }
 
@@ -107,20 +112,16 @@ void View::Export() {
   std::cout << res.first << " " << res.second << std::endl;
 }
 
-void View::ShowMenu(const std::map<std::string, MenuAction>& menu) {
+void View::DisplayMenu(const std::map<std::string, MenuAction>& menu) {
   for (auto elem : menu) {
     std::cout << elem.first << " " << elem.second.description << std::endl;
   }
 }
 
-void View::CallMenuAction(const std::map<std::string, MenuAction>& menu) {
-  std::cout << "> ";
-  std::string input;
-  getline(std::cin, input);
-  user_input_ = std::stringstream(input);
-  std::string command = parser_.ParseValue<std::string>(user_input_, "command");
-
+void View::ExecuteMenu(const std::map<std::string, MenuAction>& menu) {
   try {
+    std::string command =
+        parser_.ParseValue<std::string>(user_input_, "command");
     auto callable = menu.find(command);
     if (callable != menu.end()) {
       callable->second.function();
@@ -132,15 +133,15 @@ void View::CallMenuAction(const std::map<std::string, MenuAction>& menu) {
   }
 }
 
-void View::AddMenuOnStack(const std::map<std::string, MenuAction>& menu) {
-  ShowMenu(menu);
+void View::PushMenu(const std::map<std::string, MenuAction>& menu) {
+  DisplayMenu(menu);
   stack_menu_.push(menu);
 }
 
-void View::PopMenuFromStack() {
+void View::PopMenu() {
   stack_menu_.pop();
   if (!stack_menu_.empty()) {
-    ShowMenu(stack_menu_.top());
+    DisplayMenu(stack_menu_.top());
   }
 }
 
@@ -151,7 +152,7 @@ void View::SetController(std::unique_ptr<Controller> controller) {
 void View::UseHashTable() {
   SetController(std::make_unique<Controller>(
       std::make_unique<HashTable<std::string, Student>>()));
-  AddMenuOnStack(kStorageCommands);
+  PushMenu(kStorageCommands);
 }
 
 void View::UseSBBST() {}

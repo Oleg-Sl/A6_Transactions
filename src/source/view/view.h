@@ -19,7 +19,7 @@ class View {
 
  public:
   const std::map<std::string, MenuAction> kStorageCommands = {
-      {"set", {[this] { Set(); }, "<key> <struct> ex <time>"}},
+      {"set", {[this] { Set(); }, "<key> <struct> [ex <time>]"}},
       {"get", {[this] { Get(); }, "<key>"}},
       {"exists", {[this] { Exists(); }, "<key>"}},
       {"del", {[this] { Del(); }, "<key>"}},
@@ -31,14 +31,14 @@ class View {
       {"showall", {[this] { Showall(); }, ""}},
       {"upload", {[this] { Upload(); }, "<path>"}},
       {"export", {[this] { Export(); }, "<path>"}},
-      {"help", {[this] { ShowMenu(kStorageCommands); }}},
-      {"exit", {[this] { PopMenuFromStack(); }}}};
+      {"help", {[this] { DisplayMenu(kStorageCommands); }}},
+      {"exit", {[this] { PopMenu(); }}}};
 
   const std::map<std::string, MenuAction> kMainMenuCommands = {
       {"1", {[this] { UseHashTable(); }, "use HashTable"}},
       {"2", {[this] { UseSBBST(); }, "use SBBST"}},
       {"3", {[this] { UseBPlusTree(); }, "use BPlusTree"}},
-      {"4", {[this] { PopMenuFromStack(); }, "exit"}}};
+      {"4", {[this] { PopMenu(); }, "exit"}}};
 
   void Start();
 
@@ -67,10 +67,10 @@ class View {
 
   void SetController(std::unique_ptr<Controller> controller);
 
-  void ShowMenu(const std::map<std::string, MenuAction>& menu);
-  void AddMenuOnStack(const std::map<std::string, MenuAction>& menu);
-  void PopMenuFromStack();
-  void CallMenuAction(const std::map<std::string, MenuAction>& menu);
+  void DisplayMenu(const std::map<std::string, MenuAction>& menu);
+  void PushMenu(const std::map<std::string, MenuAction>& menu);
+  void PopMenu();
+  void ExecuteMenu(const std::map<std::string, MenuAction>& menu);
 };
 
 }  // namespace s21
