@@ -83,9 +83,12 @@ class HashTable : public BaseClass {
   bool Del(const Key& key) override {
     auto pos = GetNodePosition(key, GetHash(key, table_size_));
     if (pos != data_.end()) {
-      bucket_pointers_[pos->cached] =
-          std::next(pos)->cached == std::next(pos)->cached ? (std::next(pos))
-                                                           : data_.end();
+      if (bucket_pointers_[pos->cached]->key == key) {
+        bucket_pointers_[pos->cached] =
+            std::next(pos)->cached == std::next(pos)->cached ? (std::next(pos))
+                                                             : data_.end();
+      }
+
       data_.erase(pos);
       return true;
     }
@@ -276,18 +279,28 @@ class HashTable : public BaseClass {
     size_t new_table_size = table_size_ * kScaleCoeff;
     typename std::list<Node>::iterator* new_bucket_pointers =
         allocator_.allocate(new_table_size);
+    std::list<Node> new_data;
 
     for (std::size_t i = 0; i < new_table_size; ++i) {
       std::allocator_traits<decltype(allocator_)>::construct(
-          allocator_, &new_bucket_pointers[i], data_.end());
+          allocator_, &new_bucket_pointers[i], new_data.end());
     }
 
     for (auto it = data_.begin(); it != data_.end(); ++it) {
-      new_bucket_pointers[GetHash(it->key, new_table_size)] = it;
+      int new_hash = GetHash(it->key, new_table_size);
+      it->cached = new_hash;
+      if (new_bucket_pointers[new_hash] != new_data.end()) {
+        new_bucket_pointers[new_hash] =
+            new_data.insert(new_bucket_pointers[new_hash], *it);
+      } else {
+        new_data.push_back(*it);
+        new_bucket_pointers[new_hash] = std::prev(new_data.end());
+      }
     }
 
     allocator_.deallocate(bucket_pointers_, table_size_);
-    bucket_pointers_ = new_bucket_pointers;
+    data_ = std::move(new_data);
+    bucket_pointers_ = std::move(new_bucket_pointers);
     table_size_ = new_table_size;
   }
 };
