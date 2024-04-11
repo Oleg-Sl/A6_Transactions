@@ -15,7 +15,7 @@ void View::Start() {
     getline(std::cin, input);
     user_input_ = std::stringstream(input);
 
-    ExecuteMenu(stack_menu_.top());
+    ExecuteCommand();
   }
 }
 
@@ -118,12 +118,12 @@ void View::DisplayMenu(const std::map<std::string, MenuAction>& menu) {
   }
 }
 
-void View::ExecuteMenu(const std::map<std::string, MenuAction>& menu) {
+void View::ExecuteCommand() {
   try {
     std::string command =
         parser_.ParseValue<std::string>(user_input_, "command");
-    auto callable = menu.find(command);
-    if (callable != menu.end()) {
+    auto callable = stack_menu_.top().find(command);
+    if (callable != stack_menu_.top().end()) {
       callable->second.function();
     } else {
       std::cout << "incorrect command " << command << std::endl;

@@ -70,7 +70,7 @@ class View {
   void DisplayMenu(const std::map<std::string, MenuAction>& menu);
   void PushMenu(const std::map<std::string, MenuAction>& menu);
   void PopMenu();
-  void ExecuteMenu(const std::map<std::string, MenuAction>& menu);
+  void ExecuteCommand();
 };
 
 }  // namespace s21
