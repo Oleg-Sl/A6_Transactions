@@ -92,9 +92,13 @@ private:
 
         // если узел является конем
         if (node == root_) {
+            // std::cout 
             // TODO ("Remove root node if it is empty");
+            std::cout << "Remove root node if it is empty: " << key << std::endl;
+            updateRoot(node);
             return;
         }
+        // printTree();
         // если узел заполнен не оптимально
         if (node->keys.size() < degree) {
             std::cout << "remove key and rebalance = " << key << std::endl;
@@ -108,6 +112,7 @@ private:
         // std::cout << "============== REBALANCE ==============" << std::endl;
         node_type* left_neighbor = node->left;
         node_type* right_neighbor = node->right;
+        // printTree();
         if (left_neighbor != nullptr && left_neighbor->keys.size() > degree) {
             // Заимствование из левого узла
             std::cout << "Заимствование из левого узла" << std::endl;
@@ -125,10 +130,16 @@ private:
             right_neighbor->values.erase(right_neighbor->values.begin());
             recursiveUpdateKeys(right_neighbor->parent);
         } else if (left_neighbor) {
+            // std::cout << "============== REBALANCE ==============" << std::endl;
+            // printTree();
             // Объединение с левым узлом
-            std::cout << "Объединение с левым узлом" << std::endl;
+            // node->keys[0] = 1000;
+            std::cout << "Объединение с левым узлом: " << node->keys.size() << " + " << left_neighbor->keys.size() << std::endl;
             std::move(node->keys.begin(), node->keys.end(), std::back_inserter(left_neighbor->keys));
+            // printTree();
+            // std::cout << "Объединение с левым узлом: " << node->keys.size() << " + " << left_neighbor->keys.size() << std::endl;
             std::move(node->childs.begin(), node->childs.end(), std::back_inserter(left_neighbor->childs));
+            std::move(node->values.begin(), node->values.end(), std::back_inserter(left_neighbor->values));
             // node->keys.erase(node->keys.begin(), node->keys.end());
             // node->childs.erase(node->childs.begin(), node->childs.end());
             if (node->right != nullptr) {
@@ -136,23 +147,41 @@ private:
             }
             left_neighbor->right = node->right;
             // left_neighbor.end()
-            auto it = lower_bound(node->parent->keys.begin(), node->parent->keys.end(), *left_neighbor->keys.begin());
+            // printTree();
+            auto it = upper_bound(node->parent->keys.begin(), node->parent->keys.end(), *left_neighbor->keys.begin());
             std::cout << "Remove from parent key = " << *it << std::endl;
-
-            removeKey(node->parent, *it);
+            // removeKey(node->parent, *it);
             // std::cout << "Remove node = " << node << std::endl;
             delete node;
         } else if (right_neighbor) {
             // Объединение с правым узлом
             std::cout << "Объединение с правым узлом" << std::endl;
-            std::move(right_neighbor->childs.begin(), right_neighbor->childs.end(), std::back_inserter(node->childs));
             std::move(right_neighbor->keys.begin(), right_neighbor->keys.end(), std::back_inserter(node->keys));
+            std::move(right_neighbor->childs.begin(), right_neighbor->childs.end(), std::back_inserter(node->childs));
+            std::move(right_neighbor->values.begin(), right_neighbor->values.end(), std::back_inserter(node->values));
             if (node->right != nullptr) {
                 node->right->left = right_neighbor;
             }
             right_neighbor->right = node->right;
-            delete node;
+            // printTree();
+            auto it = upper_bound(right_neighbor->parent->keys.begin(), right_neighbor->parent->keys.end(), *node->keys.begin());
+            removeKey(right_neighbor->parent, *it);
+            delete right_neighbor;
         }
+    }
+
+    void updateRoot(node_type *node) {
+        if (node->keys.size() > 0) {
+            return;
+        }
+        if (!node->is_leaf) {
+            std::cout << "node->childs[0] = " << node->childs[0]->keys.size() << " = " << node->childs[0]->values.size() << std::endl;
+            root_ = node->childs[0];
+            root_->parent = nullptr;
+        } else {
+            root_ = nullptr;
+        }
+        delete node;
     }
 
     void recursiveUpdateKeys(node_type* node) {
@@ -241,7 +270,7 @@ private:
             src->values.erase(src->values.begin() + border, src->values.end());
         } else {
             std::move(src->childs.begin() + border, src->childs.end(), std::back_inserter(dst->childs));
-            std::transform(src->childs.begin(), src->childs.end(), src->childs.begin(), [dst](auto item) { return item->parent = dst; });
+            // std::transform(src->childs.begin(), src->childs.end(), src->childs.begin(), [dst](auto item) { return item->parent = dst; });
             src->childs.erase(src->childs.begin() + border, src->childs.end());
         }
     }
@@ -249,18 +278,20 @@ private:
     void removeKeyFromNode(node_type* node, Key& key) {
         auto it = lower_bound(node->keys.begin(), node->keys.end(), key);
         size_t index = it - node->keys.begin();
-        std::cout << "removeKeyFromNode = " << key << ", index = " << index << std::endl;
+        // std::cout << "removeKeyFro mNode = " << key << ", index = " << index << std::endl;
 
         if (it == node->keys.end()) {
             return;
         }
         node->keys.erase(it);
         if (node->is_leaf) {
+            // std::cout << "11111111111111111 = " << std::endl;
             node->values.erase(node->values.begin() + index);
+            // std::cout << "22222222222222222 = " << std::endl;
         } else {
             node->childs.erase(node->childs.begin() + index + 1);
         }
-        std::cout << "" << node->values << std::endl;
+        // std::cout << "+++" <<  std::endl;
     }
 
     void updateKeys(node_type *left, node_type *right) {
@@ -283,6 +314,30 @@ private:
         std::cout << "Parent: " << node->parent << std::endl;
         for (size_t i = 0; i < node->keys.size(); ++i) {
             std::cout << "key = " << node->keys[i] << std::endl;
+        }
+    }
+
+
+    void printTree() {
+        _printTree(root_);
+    }
+
+    void _printTree(node_type* node, int depth = 0) {
+        for (int i = 0; i < depth; ++i) {
+            std::cout << "|  ";
+            // std::cout << "  ";
+        }
+        std::cout << "|__";
+
+        for (const auto& key : node->keys) {
+            std::cout << key << " ";
+        }
+        std::cout << std::endl;
+
+        if (!node->is_leaf) {
+            for (const auto& child : node->childs) {
+                _printTree(child, depth + 1);
+            }
         }
     }
 };
