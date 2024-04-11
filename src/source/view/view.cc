@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "model/common/data.h"
 #include "model/hashtable/hash_table.h"
 #include "model/parser/parser.h"
@@ -5,26 +7,19 @@
 
 namespace s21 {
 void View::Start() {
-  while (true) {
-    ShowMainMenu();
-    std::string choice;
-    std::cin >> choice;
-    if (choice == "1") {
-      controller_ = std::make_unique<Controller>(
-          std::make_unique<HashTable<std::string, Student>>());
-    } else if (choice == "2") {
-    } else {
-      break;
-    }
-    InputCommandAndParams();
+  stack_menu_.push(kMainMenuCommands);
+  ShowMenu(stack_menu_.top());
+
+  while (stack_menu_.size() > 0) {
+    CallMenuAction(stack_menu_.top());
   }
 }
 
-void View::Set(std::stringstream& stream) {
-  std::string key = parser_.ParseValue<std::string>(stream, "KEY");
-  Student student = parser_.ParseValue<Student>(stream, "STUDENT");
+void View::Set() {
+  std::string key = parser_.ParseValue<std::string>(user_input_, "key");
+  Student student = parser_.ParseValue<Student>(user_input_, "student");
 
-  auto optional_arg = parser_.ParseOptionalArgument<int>(stream, "EX");
+  auto optional_arg = parser_.ParseOptionalArgument<int>(user_input_, "ex");
   if (optional_arg.first.empty()) {
     controller_->Set(key, student);
   } else {
@@ -32,8 +27,8 @@ void View::Set(std::stringstream& stream) {
   }
 }
 
-void View::Get(std::stringstream& stream) {
-  std::string key = parser_.ParseValue<std::string>(stream, "KEY");
+void View::Get() {
+  std::string key = parser_.ParseValue<std::string>(user_input_, "key");
   try {
     Student student = controller_->Get(key);
     std::cout << student << std::endl;
@@ -42,23 +37,23 @@ void View::Get(std::stringstream& stream) {
   }
 }
 
-void View::Exists(std::stringstream& stream) {
-  std::string key = parser_.ParseValue<std::string>(stream, "KEY");
+void View::Exists() {
+  std::string key = parser_.ParseValue<std::string>(user_input_, "key");
   std::cout << controller_->Exists(key) << std::endl;
 }
 
-void View::Del(std::stringstream& stream) {
-  std::string key = parser_.ParseValue<std::string>(stream, "KEY");
+void View::Del() {
+  std::string key = parser_.ParseValue<std::string>(user_input_, "key");
   std::cout << controller_->Del(key) << std::endl;
 }
 
-void View::Update(std::stringstream& stream) {
-  std::string key = parser_.ParseValue<std::string>(stream, "KEY");
-  Student student = parser_.ParseValue<Student>(stream, "Student");
+void View::Update() {
+  std::string key = parser_.ParseValue<std::string>(user_input_, "key");
+  Student student = parser_.ParseValue<Student>(user_input_, "student");
   std::cout << controller_->Update(key, student) << std::endl;
 }
 
-void View::Keys(std::stringstream& stream) {
+void View::Keys() {
   size_t counter = 1;
   for (auto& key : controller_->Keys()) {
     std::cout << counter << ") " << key << std::endl;
@@ -66,23 +61,23 @@ void View::Keys(std::stringstream& stream) {
   }
 }
 
-void View::Rename(std::stringstream& stream) {
-  std::string key_1 = parser_.ParseValue<std::string>(stream, "KEY1");
-  std::string key_2 = parser_.ParseValue<std::string>(stream, "KEY2");
+void View::Rename() {
+  std::string key_1 = parser_.ParseValue<std::string>(user_input_, "key1");
+  std::string key_2 = parser_.ParseValue<std::string>(user_input_, "key2");
   std::cout << controller_->Rename(key_1, key_2) << std::endl;
 }
 
-void View::Ttl(std::stringstream& stream) {
+void View::Ttl() {
   try {
-    std::string key = parser_.ParseValue<std::string>(stream, "KEY");
+    std::string key = parser_.ParseValue<std::string>(user_input_, "key");
     std::cout << controller_->Ttl(key) << std::endl;
   } catch (std::invalid_argument& ex) {
     std::cout << "(null)" << std::endl;
   }
 }
 
-void View::Find(std::stringstream& stream) {
-  Student student = parser_.ParseValue<Student>(stream, "STUDENT");
+void View::Find() {
+  Student student = parser_.ParseValue<Student>(user_input_, "student");
   size_t counter = 1;
   for (auto& key : controller_->Find(student)) {
     std::cout << counter << ") " << key << std::endl;
@@ -90,7 +85,7 @@ void View::Find(std::stringstream& stream) {
   }
 }
 
-void View::Showall(std::stringstream& stream) {
+void View::Showall() {
   size_t counter = 1;
   for (auto& student : controller_->Showall()) {
     std::cout << counter << ") " << student << std::endl;
@@ -98,45 +93,59 @@ void View::Showall(std::stringstream& stream) {
   }
 }
 
-void View::Upload(std::stringstream& stream) {
-  std::string path = parser_.ParseValue<std::string>(stream, "path");
+void View::Upload() {
+  std::string path = parser_.ParseValue<std::string>(user_input_, "path");
   controller_->Upload(path);
 }
 
-void View::Export(std::stringstream& stream) {
-  std::string path = parser_.ParseValue<std::string>(stream, "path");
+void View::Export() {
+  std::string path = parser_.ParseValue<std::string>(user_input_, "path");
   controller_->Export(path);
 }
 
-void View::InputCommandAndParams() {
-  std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-  while (true) {
-    std::cout << "Input command and params. For exit input quit" << std::endl;
-    std::string input;
-    getline(std::cin, input);
-
-    std::stringstream stream(input);
-    std::string command = parser_.ParseValue<std::string>(stream, "COMMAND");
-
-    try {
-      auto callable = kCommands.find(command);
-      if (callable != kCommands.end()) {
-        callable->second(stream);
-      } else {
-        std::cout << "INCORRECT COMMAND " << command << std::endl;
-      }
-    } catch (std::exception& ex) {
-      std::cout << ex.what() << std::endl;
-    }
+void View::ShowMenu(const std::map<std::string, MenuAction>& menu) {
+  for (auto elem : menu) {
+    std::cout << elem.first << " " << elem.second.description << std::endl;
   }
 }
 
-void View::ShowMainMenu() {
-  std::cout << "Input model (1 - 3). For exit input 4" << std::endl;
-  std::cout << "1 (HashTable)" << std::endl;
-  std::cout << "2 (SelfBalancingBinarySearchTree)" << std::endl;
-  std::cout << "3 (BPlusTree)" << std::endl;
-  std::cout << "4 (Exit)" << std::endl;
+void View::CallMenuAction(const std::map<std::string, MenuAction>& menu) {
+  std::cout << "> ";
+  std::string input;
+  getline(std::cin, input);
+  user_input_ = std::stringstream(input);
+  std::string command = parser_.ParseValue<std::string>(user_input_, "command");
+
+  try {
+    auto callable = menu.find(command);
+    if (callable != menu.end()) {
+      callable->second.function();
+    } else {
+      std::cout << "incorrect command " << command << std::endl;
+    }
+  } catch (std::exception& ex) {
+    std::cout << ex.what() << std::endl;
+  }
+}
+
+void View::ChangeCurrentMenu(const std::map<std::string, MenuAction>& menu) {
+  ShowMenu(menu);
+  stack_menu_.push(menu);
+}
+
+void View::SetHashTableModel() {
+  controller_ = std::make_unique<Controller>(
+      std::make_unique<HashTable<std::string, Student>>());
+}
+
+void View::SetSBBSTModel() {
+  // controller_ = std::make_unique<Controller>(
+  //   std::make_unique<HashTable<std::string, Student>>());
+}
+
+void View::SetBPlusTreeModel() {
+  // controller_ = std::make_unique<Controller>(
+  //     std::make_unique<HashTable<std::string, Student>>());
 }
 
 }  // namespace s21

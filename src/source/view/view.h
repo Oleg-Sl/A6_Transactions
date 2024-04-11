@@ -1,60 +1,76 @@
 #ifndef TRANSACTIONS_VIEW_VIEW_H_
 #define TRANSACTIONS_VIEW_VIEW_H_
 #include <functional>
-#include <iomanip>
-#include <iostream>
-#include <limits>
-#include <set>
+#include <map>
 #include <sstream>
-#include <vector>
+#include <stack>
+#include <string>
 
 #include "controller/controller.h"
 #include "model/parser/parser.h"
 
 namespace s21 {
 class View {
- public:
-  using Vector = std::vector<std::string>;
+  struct MenuAction {
+    std::function<void()> function;
+    std::string description;
+  };
 
-  const std::unordered_map<std::string, std::function<void(std::stringstream&)>>
-      kCommands = {
-          {"set", [this](std::stringstream& stream) { Set(stream); }},
-          {"get", [this](std::stringstream& stream) { Get(stream); }},
-          {"exists", [this](std::stringstream& stream) { Exists(stream); }},
-          {"del", [this](std::stringstream& stream) { Del(stream); }},
-          {"update", [this](std::stringstream& stream) { Update(stream); }},
-          {"keys", [this](std::stringstream& stream) { Keys(stream); }},
-          {"rename", [this](std::stringstream& stream) { Rename(stream); }},
-          {"ttl", [this](std::stringstream& stream) { Ttl(stream); }},
-          {"find", [this](std::stringstream& stream) { Find(stream); }},
-          {"showall", [this](std::stringstream& stream) { Showall(stream); }},
-          {"upload", [this](std::stringstream& stream) { Upload(stream); }},
-          {"export", [this](std::stringstream& stream) { Export(stream); }}};
+ public:
+  const std::map<std::string, MenuAction> kStorageCommands = {
+      {"set", {[this] { Set(); }, "<key> <struct> ex <time>"}},
+      {"get", {[this] { Get(); }, "<key>"}},
+      {"exists", {[this] { Exists(); }, "<key>"}},
+      {"del", {[this] { Del(); }, "<key>"}},
+      {"update", {[this] { Update(); }, "<key> <struct>"}},
+      {"keys", {[this] { Keys(); }, ""}},
+      {"rename", {[this] { Rename(); }, "<key1> <key2>"}},
+      {"ttl", {[this] { Ttl(); }, "<key>"}},
+      {"find", {[this] { Find(); }, "<struct>"}},
+      {"showall", {[this] { Showall(); }, ""}},
+      {"upload", {[this] { Upload(); }, "<path>"}},
+      {"export", {[this] { Export(); }, "<path>"}},
+      {"help", {[this] { ShowMenu(kStorageCommands); }}}};
+
+  const std::map<std::string, MenuAction> kMainMenuCommands = {
+      {"1",
+       {[this] {
+          SetHashTableModel();
+          ChangeCurrentMenu(kStorageCommands);
+        },
+        "use HashTable"}},
+      {"2", {[this] {}, "use SBBST"}},
+      {"3", {[this] {}, "use BPlusTree"}},
+      {"4", {[this] {}, "exit"}}};
 
   void Start();
 
  private:
-  std::unique_ptr<Controller> controller_;
   Parser parser_;
+  std::unique_ptr<Controller> controller_;
+  std::stack<std::map<std::string, MenuAction>> stack_menu_;
+  std::stringstream user_input_;
 
-  void Set(std::stringstream& stream);
-  void Get(std::stringstream& stream);
-  void Exists(std::stringstream& stream);
-  void Del(std::stringstream& stream);
-  void Update(std::stringstream& stream);
-  void Keys(std::stringstream& stream);
-  void Rename(std::stringstream& stream);
-  void Ttl(std::stringstream& stream);
-  void Find(std::stringstream& stream);
-  void Showall(std::stringstream& stream);
-  void Upload(std::stringstream& stream);
-  void Export(std::stringstream& stream);
+  void Set();
+  void Get();
+  void Exists();
+  void Del();
+  void Update();
+  void Keys();
+  void Rename();
+  void Ttl();
+  void Find();
+  void Showall();
+  void Upload();
+  void Export();
 
-  void InputCommandAndParams();
-  void ShowMainMenu();
-  void IncorrectParamsMessage();
-  std::pair<bool, int> ParseToInt(std::string str);
-  std::string ToLower(std::string str);
+  void SetHashTableModel();
+  void SetSBBSTModel();
+  void SetBPlusTreeModel();
+
+  void ShowMenu(const std::map<std::string, MenuAction>& menu);
+  void ChangeCurrentMenu(const std::map<std::string, MenuAction>& menu);
+  void CallMenuAction(const std::map<std::string, MenuAction>& menu);
 };
 
 }  // namespace s21
