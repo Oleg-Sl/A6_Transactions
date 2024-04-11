@@ -97,12 +97,14 @@ void View::Showall() {
 
 void View::Upload() {
   std::string path = parser_.ParseValue<std::string>(user_input_, "path");
-  controller_->Upload(path);
+  auto res = controller_->Upload(path);
+  std::cout << res.first << " " << res.second << std::endl;
 }
 
 void View::Export() {
   std::string path = parser_.ParseValue<std::string>(user_input_, "path");
-  controller_->Export(path);
+  auto res = controller_->Export(path);
+  std::cout << res.first << " " << res.second << std::endl;
 }
 
 void View::ShowMenu(const std::map<std::string, MenuAction>& menu) {

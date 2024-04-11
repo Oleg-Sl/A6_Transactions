@@ -70,7 +70,7 @@ class HashTable : public BaseClass {
   Value Get(const Key& key) const override {
     auto pos = GetNodePosition(key, GetHash(key, table_size_));
     if (pos != data_.end()) {
-      return (*pos).value;
+      return pos->value;
     }
 
     throw std::invalid_argument("Key is not exists");
@@ -83,10 +83,9 @@ class HashTable : public BaseClass {
   bool Del(const Key& key) override {
     auto pos = GetNodePosition(key, GetHash(key, table_size_));
     if (pos != data_.end()) {
-      bucket_pointers_[(*pos).cached] =
-          (*std::next(pos)).cached == (*std::next(pos)).cached
-              ? (std::next(pos))
-              : data_.end();
+      bucket_pointers_[pos->cached] =
+          std::next(pos)->cached == std::next(pos)->cached ? (std::next(pos))
+                                                           : data_.end();
       data_.erase(pos);
       return true;
     }
@@ -97,7 +96,7 @@ class HashTable : public BaseClass {
   bool Update(const Key& key, const Value& value) override {
     auto pos = GetNodePosition(key, GetHash(key, table_size_));
     if (pos != data_.end()) {
-      (*pos).value = value;
+      pos->value = value;
       return true;
     }
 
@@ -110,7 +109,7 @@ class HashTable : public BaseClass {
 
     for (auto it = data_.begin(); it != data_.end(); ++it) {
       if (!TTLIsExpired(response_time, it)) {
-        result.push_back((*it).key);
+        result.push_back(it->key);
       }
     }
 
@@ -119,12 +118,13 @@ class HashTable : public BaseClass {
 
   bool Rename(const Key& key, const Key& new_key) override {
     auto pos = GetNodePosition(key, GetHash(key, table_size_));
-    if (pos != data_.end()) {
+    auto pos2 = GetNodePosition(new_key, GetHash(new_key, table_size_));
+    if (pos != data_.end() && pos2 == data_.end()) {
       int new_key_hash = GetHash(new_key, table_size_);
       Node new_node = *pos;
       new_node.cached = new_key_hash;
       new_node.key = new_key;
-      if (bucket_pointers_[new_key_hash] != data_.end()) {
+      if (bucket_pointers_[new_key_hash] == data_.end()) {
         data_.push_back(new_node);
         bucket_pointers_[new_key_hash] = std::prev(data_.end());
       } else {
@@ -144,9 +144,9 @@ class HashTable : public BaseClass {
     auto pos = GetNodePosition(key, GetHash(key, table_size_));
 
     if (pos != data_.end()) {
-      return (*pos).TTL - std::chrono::duration_cast<std::chrono::seconds>(
-                              response_time - (*pos).create_time)
-                              .count();
+      return pos->TTL - std::chrono::duration_cast<std::chrono::seconds>(
+                            response_time - pos->create_time)
+                            .count();
     }
 
     throw std::invalid_argument("Key is not exists");
@@ -158,8 +158,8 @@ class HashTable : public BaseClass {
     ValueEqual equal;
 
     for (auto it = data_.begin(); it != data_.end(); ++it) {
-      if (!TTLIsExpired(response_time, it) && equal(value, (*it).value)) {
-        result.push_back((*it).key);
+      if (!TTLIsExpired(response_time, it) && equal(value, it->value)) {
+        result.push_back(it->key);
       }
     }
 
@@ -172,7 +172,7 @@ class HashTable : public BaseClass {
 
     for (auto it = data_.begin(); it != data_.end(); ++it) {
       if (!TTLIsExpired(response_time, it)) {
-        result.push_back((*it).value);
+        result.push_back(it->value);
       }
     }
 
@@ -209,7 +209,7 @@ class HashTable : public BaseClass {
     int counter = 0;
     for (auto it = data_.begin(); it != data_.end(); ++it) {
       if (!TTLIsExpired(response_time, it)) {
-        file << (*it).key << " " << (*it).value << std::endl;
+        file << it->key << " " << it->value << std::endl;
         ++counter;
       }
     }
@@ -236,9 +236,9 @@ class HashTable : public BaseClass {
                     typename std::list<Node>::const_iterator elem_pos) const {
     bool is_valid_node = elem_pos != data_.end();
     bool TTL_is_expired = std::chrono::duration_cast<std::chrono::milliseconds>(
-                              response_time - (*elem_pos).create_time)
-                                  .count() > 1000 * (*elem_pos).TTL &&
-                          (*elem_pos).TTL != 0;
+                              response_time - elem_pos->create_time)
+                                  .count() > 1000 * elem_pos->TTL &&
+                          elem_pos->TTL != 0;
 
     return !is_valid_node || TTL_is_expired;
   }
@@ -248,7 +248,7 @@ class HashTable : public BaseClass {
     auto response_time = std::chrono::steady_clock::now();
 
     for (auto it = bucket_pointers_[hash];
-         it != data_.end() && (*it).cached == hash; ++it) {
+         it != data_.end() && it->cached == hash; ++it) {
       Node node = *it;
       if (node.key == key && !TTLIsExpired(response_time, it)) {
         return it;
@@ -262,7 +262,7 @@ class HashTable : public BaseClass {
     auto response_time = std::chrono::steady_clock::now();
 
     for (auto it = bucket_pointers_[hash];
-         it != data_.end() && (*it).cached == hash; ++it) {
+         it != data_.end() && it->cached == hash; ++it) {
       Node node = *it;
       if (node.key == key && !TTLIsExpired(response_time, it)) {
         return it;
@@ -283,7 +283,7 @@ class HashTable : public BaseClass {
     }
 
     for (auto it = data_.begin(); it != data_.end(); ++it) {
-      new_bucket_pointers[GetHash((*it).key, new_table_size)] = it;
+      new_bucket_pointers[GetHash(it->key, new_table_size)] = it;
     }
 
     allocator_.deallocate(bucket_pointers_, table_size_);
