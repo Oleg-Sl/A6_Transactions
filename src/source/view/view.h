@@ -7,6 +7,7 @@
 #include <string>
 
 #include "controller/controller.h"
+#include "model/hashtable/hash_table.h"
 #include "model/parser/parser.h"
 
 namespace s21 {
@@ -30,18 +31,14 @@ class View {
       {"showall", {[this] { Showall(); }, ""}},
       {"upload", {[this] { Upload(); }, "<path>"}},
       {"export", {[this] { Export(); }, "<path>"}},
-      {"help", {[this] { ShowMenu(kStorageCommands); }}}};
+      {"help", {[this] { ShowMenu(kStorageCommands); }}},
+      {"exit", {[this] { PopMenuFromStack(); }}}};
 
   const std::map<std::string, MenuAction> kMainMenuCommands = {
-      {"1",
-       {[this] {
-          SetHashTableModel();
-          ChangeCurrentMenu(kStorageCommands);
-        },
-        "use HashTable"}},
-      {"2", {[this] {}, "use SBBST"}},
-      {"3", {[this] {}, "use BPlusTree"}},
-      {"4", {[this] {}, "exit"}}};
+      {"1", {[this] { UseHashTable(); }, "use HashTable"}},
+      {"2", {[this] { UseSBBST(); }, "use SBBST"}},
+      {"3", {[this] { UseBPlusTree(); }, "use BPlusTree"}},
+      {"4", {[this] { PopMenuFromStack(); }, "exit"}}};
 
   void Start();
 
@@ -64,12 +61,15 @@ class View {
   void Upload();
   void Export();
 
-  void SetHashTableModel();
-  void SetSBBSTModel();
-  void SetBPlusTreeModel();
+  void UseHashTable();
+  void UseSBBST();
+  void UseBPlusTree();
+
+  void SetController(std::unique_ptr<Controller> controller);
 
   void ShowMenu(const std::map<std::string, MenuAction>& menu);
-  void ChangeCurrentMenu(const std::map<std::string, MenuAction>& menu);
+  void AddMenuOnStack(const std::map<std::string, MenuAction>& menu);
+  void PopMenuFromStack();
   void CallMenuAction(const std::map<std::string, MenuAction>& menu);
 };
 

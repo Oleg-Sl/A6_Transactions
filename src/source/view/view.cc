@@ -7,8 +7,7 @@
 
 namespace s21 {
 void View::Start() {
-  stack_menu_.push(kMainMenuCommands);
-  ShowMenu(stack_menu_.top());
+  AddMenuOnStack(kMainMenuCommands);
 
   while (stack_menu_.size() > 0) {
     CallMenuAction(stack_menu_.top());
@@ -19,12 +18,15 @@ void View::Set() {
   std::string key = parser_.ParseValue<std::string>(user_input_, "key");
   Student student = parser_.ParseValue<Student>(user_input_, "student");
 
+  bool status = false;
   auto optional_arg = parser_.ParseOptionalArgument<int>(user_input_, "ex");
   if (optional_arg.first.empty()) {
-    controller_->Set(key, student);
+    status = controller_->Set(key, student);
   } else {
-    controller_->Set(key, student, optional_arg.second);
+    status = controller_->Set(key, student, optional_arg.second);
   }
+
+  std::cout << status << std::endl;
 }
 
 void View::Get() {
@@ -68,8 +70,8 @@ void View::Rename() {
 }
 
 void View::Ttl() {
+  std::string key = parser_.ParseValue<std::string>(user_input_, "key");
   try {
-    std::string key = parser_.ParseValue<std::string>(user_input_, "key");
     std::cout << controller_->Ttl(key) << std::endl;
   } catch (std::invalid_argument& ex) {
     std::cout << "(null)" << std::endl;
@@ -128,24 +130,30 @@ void View::CallMenuAction(const std::map<std::string, MenuAction>& menu) {
   }
 }
 
-void View::ChangeCurrentMenu(const std::map<std::string, MenuAction>& menu) {
+void View::AddMenuOnStack(const std::map<std::string, MenuAction>& menu) {
   ShowMenu(menu);
   stack_menu_.push(menu);
 }
 
-void View::SetHashTableModel() {
-  controller_ = std::make_unique<Controller>(
-      std::make_unique<HashTable<std::string, Student>>());
+void View::PopMenuFromStack() {
+  stack_menu_.pop();
+  if (!stack_menu_.empty()) {
+    ShowMenu(stack_menu_.top());
+  }
 }
 
-void View::SetSBBSTModel() {
-  // controller_ = std::make_unique<Controller>(
-  //   std::make_unique<HashTable<std::string, Student>>());
+void View::SetController(std::unique_ptr<Controller> controller) {
+  controller_ = std::move(controller);
 }
 
-void View::SetBPlusTreeModel() {
-  // controller_ = std::make_unique<Controller>(
-  //     std::make_unique<HashTable<std::string, Student>>());
+void View::UseHashTable() {
+  SetController(std::make_unique<Controller>(
+      std::make_unique<HashTable<std::string, Student>>()));
+  AddMenuOnStack(kStorageCommands);
 }
+
+void View::UseSBBST() {}
+
+void View::UseBPlusTree() {}
 
 }  // namespace s21
