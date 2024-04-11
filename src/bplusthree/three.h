@@ -87,15 +87,16 @@ public:
     node_type *begin_leaf{};
 private:
     void removeKey(node_type *node, Key& key) {
-        printNode(node);
+        std::cout << "remove key = " << key << std::endl;
+        // printNode(node);
         // удаление ключа из узла
         removeKeyFromNode(node, key);
-        printNode(node);
+        // printNode(node);
         // если узел является конем
         if (node == root_) {
             // std::cout 
             // TODO ("Remove root node if it is empty");
-            std::cout << "Remove root node if it is empty: " << key << std::endl;
+            // std::cout << "Remove root node if it is empty: " << key << std::endl;
             updateRoot(node);
             return;
         }
@@ -175,9 +176,7 @@ private:
         if (node->keys.size() > 0) {
             return;
         }
-        std::cout << "+++" << std::endl;
         if (!node->is_leaf) {
-            // std::cout << "node->childs[0] = " << node->childs[0]->keys.size() << " = " << node->childs[0]->values.size() << std::endl;
             root_ = node->childs[0];
             root_->parent = nullptr;
         } else {
@@ -278,13 +277,9 @@ private:
     }
 
     void removeKeyFromNode(node_type* node, Key& key) {
-        // printNode(node);
-
         auto it = lower_bound(node->keys.begin(), node->keys.end(), key);
         size_t index = it - node->keys.begin();
-        // std::cout << "removeKeyFro mNode = " << key << ", index = " << index << std::endl;
-
-        if (it == node->keys.end()) {
+        if (it == node->keys.end() || node->keys.size() == 0) {
             return;
         }
 
@@ -294,8 +289,6 @@ private:
         } else {
             node->childs.erase(node->childs.begin() + index + 1);
         }
-                printNode(node);
-        // std::cout << "+++" <<  std::endl;
     }
 
     void updateKeys(node_type *left, node_type *right) {

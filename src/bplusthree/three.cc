@@ -14,19 +14,19 @@ int main() {
     three.insert(10, "dasf");
     three.insert(0, "dasf");
     // // three.printTree();
-    // three.insert(9, "dasf");
+    three.insert(9, "dasf");
     // three.printTree();
 
     three.printTree();
-    three.remove(3);
-    three.remove(2);
-    three.remove(1);
-    three.remove(6);
-    three.remove(5);
-    three.remove(4);
-    three.remove(7);
-    three.remove(8);
-    three.remove(0);
+    // three.remove(3);
+    // three.remove(2);
+    // three.remove(1);
+    // three.remove(6);
+    // three.remove(5);
+    // three.remove(4);
+    // three.remove(7);
+    // three.remove(8);
+    // three.remove(0);
     std::cout << "======================================================" << std::endl;
     three.remove(10);
 
@@ -58,9 +58,9 @@ int main() {
     // three.remove(22);
     // three.remove(11);
     
-    Node<int, std::string>* root = three.root_;
-    std::cout << ">>> Root, is leaf = " << root->is_leaf << std::endl;
-    three.printNode(root);
+    // Node<int, std::string>* root = three.root_;
+    // std::cout << ">>> Root, is leaf = " << root->is_leaf << std::endl;
+    // three.printNode(root);
     // std::cout << "Keys = " << root->keys.size() << std::endl;
     // std::cout << "Values = " << root->values.size() << std::endl;
     // std::cout << "Childs = " << root->childs.size() << std::endl;
