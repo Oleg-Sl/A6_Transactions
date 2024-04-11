@@ -9,41 +9,42 @@ int main() {
     three.insert(6, "dasf");
     three.insert(5, "dasf");
     three.insert(4, "dasf");
-    // three.insert(7, "dasf");
-    // three.insert(8, "dasf");
-    // three.insert(10, "dasf");
-    // three.insert(0, "dasf");
+    three.insert(7, "dasf");
+    three.insert(8, "dasf");
+    three.insert(10, "dasf");
+    three.insert(0, "dasf");
     // // three.printTree();
     // three.insert(9, "dasf");
     // three.printTree();
 
     three.printTree();
-
+    three.remove(3);
     three.remove(2);
-    three.printTree();
-    std::cout << "======================================================" << std::endl;
+    three.remove(1);
     three.remove(6);
-    three.printTree();
+    three.remove(5);
+    three.remove(4);
+    three.remove(7);
+    three.remove(8);
+    three.remove(0);
+    std::cout << "======================================================" << std::endl;
+    three.remove(10);
 
-    // three.remove(5);
-    // three.remove(3);
+    // // three.remove(5);
+    // three.remove(6);
+    three.printTree();
     // three.remove(4);
-    // three.remove(1);
 
     // three.printTree();
-    // // std::cout << "======================================================" << std::endl;
-    // three.insert(4, "B");
-    // three.insert(9, "GDG");
-    // three.insert(8, "dasf alkjdsf ajsdf j;asd;fj a;sfdlj alksjdhgaspdhug wpe38290 hjep 9 ");
-    // three.insert(7, "C");
-    // three.insert(10, "GDG");
-    // std::cout << "======================================================" << std::endl;
-    // three.insert(11, "GDG");
 
-    // three.remove(3);
     // three.remove(2);
+    // three.printTree();
     // three.remove(5);
-    // three.remove(6);
+    // three.remove(3);
+    // // three.remove(4);
+    // // three.remove(1);
+    // three.printTree();
+
     // std::cout << "==> " << three.searchLeaf(5) << std::endl;
     // three.remove(5);
     // for (int i = -110; i < 1500; ++i) {
@@ -57,19 +58,17 @@ int main() {
     // three.remove(22);
     // three.remove(11);
     
-    // Node<int, std::string>* root = three.root_;
-    // std::cout << "Root" << std::endl;
-    // // three.printNode(root);
+    Node<int, std::string>* root = three.root_;
+    std::cout << ">>> Root, is leaf = " << root->is_leaf << std::endl;
+    three.printNode(root);
     // std::cout << "Keys = " << root->keys.size() << std::endl;
     // std::cout << "Values = " << root->values.size() << std::endl;
-    // for (const auto& val : root->values) {
-    //     std::cout << val << std::endl;
-    // }
-    // std::cout << "Child 0" << std::endl;
+    // std::cout << "Childs = " << root->childs.size() << std::endl;
+    // std::cout << ">>> Child 0, is leaf = " << root->childs[0]->is_leaf << std::endl;
     // three.printNode(root->childs[0]);
-    // std::cout << "Child 1" << std::endl;
+    // std::cout << ">>> Child 1, is leaf = " << root->childs[1]->is_leaf << std::endl;
     // three.printNode(root->childs[1]);
-    // std::cout << "Child 2" << std::endl;
+    // std::cout << ">>> Child 2, is leaf = " << root->childs[2]->is_leaf << std::endl;
     // three.printNode(root->childs[2]);
     // std::cout << "Child 3" << std::endl;
     // three.printNode(root->childs[3]);
