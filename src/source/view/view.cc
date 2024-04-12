@@ -1,4 +1,5 @@
 #include <iostream>
+#include <limits>
 
 #include "model/common/data.h"
 #include "model/hashtable/hash_table.h"
@@ -6,6 +7,27 @@
 #include "view/view.h"
 
 namespace s21 {
+struct StudentComparator {
+  std::string str_ignored = "-";
+  int int_ignored = std::numeric_limits<int>::min();
+
+  bool operator()(Student student_1, Student student_2) {
+    bool name_equal =
+        (student_1.name == student_2.name || student_2.name == str_ignored);
+    bool surname_equal = (student_1.surname == student_2.surname ||
+                          student_2.surname == str_ignored);
+    bool birhday_equal = (student_1.birthday == student_2.birthday ||
+                          student_2.birthday == int_ignored);
+    bool city_equal =
+        (student_1.city == student_2.city || student_2.city == str_ignored);
+    bool coins_equal =
+        (student_1.coins == student_2.coins || student_2.coins == int_ignored);
+
+    return name_equal && surname_equal && birhday_equal && city_equal &&
+           coins_equal;
+  }
+};
+
 void View::Start() {
   PushMenu(kMainMenuCommands);
 
@@ -56,8 +78,22 @@ void View::Del() {
 
 void View::Update() {
   std::string key = parser_.ParseValue<std::string>(user_input_, "key");
-  Student student = parser_.ParseValue<Student>(user_input_, "student");
-  std::cout << controller_->Update(key, student) << std::endl;
+  std::string name = parser_.ParseValue<std::string>(user_input_, "name");
+  std::string surname = parser_.ParseValue<std::string>(user_input_, "surname");
+  std::string birthday =
+      parser_.ParseValue<std::string>(user_input_, "birthday");
+  std::string city = parser_.ParseValue<std::string>(user_input_, "city");
+  std::string coins = parser_.ParseValue<std::string>(user_input_, "coins");
+
+  Student new_student;
+  Student old_student = controller_->Get(key);
+  new_student.name = name == "-" ? old_student.name : name;
+  new_student.surname = surname == "-" ? old_student.surname : name;
+  new_student.birthday =
+      birthday == "-" ? old_student.birthday : std::stoi(birthday);
+  new_student.city = city == "-" ? old_student.city : city;
+  new_student.coins = coins == "-" ? old_student.coins : std::stoi(coins);
+  std::cout << controller_->Update(key, new_student) << std::endl;
 }
 
 void View::Keys() {
@@ -84,7 +120,19 @@ void View::Ttl() {
 }
 
 void View::Find() {
-  Student student = parser_.ParseValue<Student>(user_input_, "student");
+  Student student;
+  student.name = parser_.ParseValue<std::string>(user_input_, "name");
+  student.surname = parser_.ParseValue<std::string>(user_input_, "surname");
+  std::string birthday =
+      parser_.ParseValue<std::string>(user_input_, "birthday");
+  student.city = parser_.ParseValue<std::string>(user_input_, "city");
+  std::string coins = parser_.ParseValue<std::string>(user_input_, "coins");
+
+  birthday == "-" ? student.birthday = std::numeric_limits<int>::min()
+                  : student.birthday = std::stoi(birthday);
+  coins == "-" ? student.coins = std::numeric_limits<int>::min()
+               : student.coins = std::stoi(coins);
+
   size_t counter = 1;
   for (auto& key : controller_->Find(student)) {
     std::cout << counter << ") " << key << std::endl;
@@ -151,7 +199,7 @@ void View::SetController(std::unique_ptr<Controller> controller) {
 
 void View::UseHashTable() {
   SetController(std::make_unique<Controller>(
-      std::make_unique<HashTable<std::string, Student>>()));
+      std::make_unique<HashTable<std::string, Student, StudentComparator>>()));
   PushMenu(kStorageCommands);
 }
 

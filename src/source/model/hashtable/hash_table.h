@@ -161,7 +161,7 @@ class HashTable : public BaseClass {
     ValueEqual equal;
 
     for (auto it = data_.begin(); it != data_.end(); ++it) {
-      if (!TTLIsExpired(response_time, it) && equal(value, it->value)) {
+      if (!TTLIsExpired(response_time, it) && equal(it->value, value)) {
         result.push_back(it->key);
       }
     }
