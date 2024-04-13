@@ -1,5 +1,7 @@
-#ifndef TRANSACTIONS_SOURCE_VIEW_VIEW_H_
-#define TRANSACTIONS_SOURCE_VIEW_VIEW_H_
+#ifndef TRANSACTIONS_SOURCE_VIEW_STORAGE_H_
+#define TRANSACTIONS_SOURCE_VIEW_STORAGE_H_
+
+#include <view/baseview.h>
 
 #include <functional>
 #include <map>
@@ -8,16 +10,10 @@
 #include <string>
 
 #include "controller/controller.h"
-#include "model/hashtable/hash_table.h"
 #include "model/parser/parser.h"
 
 namespace s21 {
-class View {
-  struct MenuAction {
-    std::function<void()> function;
-    std::string description;
-  };
-
+class Storage : BaseView {
  public:
   const std::map<std::string, MenuAction> kStorageCommands = {
       {"set", {[this] { Set(); }, "<key> <struct> [ex <time>]"}},
@@ -35,18 +31,12 @@ class View {
       {"help", {[this] { DisplayMenu(kStorageCommands); }}},
       {"exit", {[this] { PopMenu(); }}}};
 
-  const std::map<std::string, MenuAction> kMainMenuCommands = {
-      {"1", {[this] { UseHashTable(); }, "use HashTable"}},
-      {"2", {[this] { UseSBBST(); }, "use SBBST"}},
-      {"3", {[this] { UseBPlusTree(); }, "use BPlusTree"}},
-      {"4", {[this] { PopMenu(); }, "exit"}}};
+  Storage(const Controller& controller) : controller_(controller) {}
 
   void Start();
 
  private:
-  Parser parser_;
-  std::unique_ptr<Controller> controller_;
-  std::stack<std::map<std::string, MenuAction>> stack_menu_;
+  Controller controller_;
   std::stringstream user_input_;
 
   void Set();
@@ -61,19 +51,8 @@ class View {
   void Showall();
   void Upload();
   void Export();
-
-  void UseHashTable();
-  void UseSBBST();
-  void UseBPlusTree();
-
-  void SetController(std::unique_ptr<Controller> controller);
-
-  void DisplayMenu(const std::map<std::string, MenuAction>& menu);
-  void PushMenu(const std::map<std::string, MenuAction>& menu);
-  void PopMenu();
-  void ExecuteCommand();
 };
 
 }  // namespace s21
 
-#endif  // TRANSACTIONS_SOURCE_VIEW_VIEW_H_
+#endif  // TRANSACTIONS_SOURCE_VIEW_STORAGE_H_
