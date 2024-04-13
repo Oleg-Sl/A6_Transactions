@@ -279,27 +279,27 @@ class HashTable : public BaseClass {
     size_t new_table_size = table_size_ * kScaleCoeff;
     typename std::list<Node>::iterator* new_bucket_pointers =
         allocator_.allocate(new_table_size);
-    std::list<Node> new_data;
+    std::list<Node> temp;
+    std::swap(temp, data_);
 
     for (std::size_t i = 0; i < new_table_size; ++i) {
       std::allocator_traits<decltype(allocator_)>::construct(
-          allocator_, &new_bucket_pointers[i], new_data.end());
+          allocator_, &new_bucket_pointers[i], data_.end());
     }
 
-    for (auto it = data_.begin(); it != data_.end(); ++it) {
+    for (auto it = temp.begin(); it != temp.end(); ++it) {
       int new_hash = GetHash(it->key, new_table_size);
       it->cached = new_hash;
-      if (new_bucket_pointers[new_hash] != new_data.end()) {
+      if (new_bucket_pointers[new_hash] != data_.end()) {
         new_bucket_pointers[new_hash] =
-            new_data.insert(new_bucket_pointers[new_hash], *it);
+            data_.insert(new_bucket_pointers[new_hash], *it);
       } else {
-        new_data.push_back(*it);
-        new_bucket_pointers[new_hash] = std::prev(new_data.end());
+        data_.push_back(*it);
+        new_bucket_pointers[new_hash] = std::prev(data_.end());
       }
     }
 
     allocator_.deallocate(bucket_pointers_, table_size_);
-    data_ = std::move(new_data);
     bucket_pointers_ = std::move(new_bucket_pointers);
     table_size_ = new_table_size;
   }
