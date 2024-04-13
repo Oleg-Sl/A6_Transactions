@@ -40,7 +40,7 @@ target_include_directories(cli PUBLIC ${RELATIVE_HEADER_DIR})
 
 add_custom_target(format COMMAND clang-format --style=Google -i --verbose ${ALL_SOURCES})
 add_custom_target(stylecheck COMMAND clang-format --style=Google -n --verbose ${ALL_SOURCES})
-add_custom_target(cppcheck COMMAND cppcheck --language=c++ --enable=all --suppress=unusedFunction --suppress=missingInclude --inconclusive --suppress=functionStatic ${CLI_SOURCE} ${LIB_GRAPH_SOURCE} ${LIB_GRAPH_ALGORITHM_SOURCE})
+add_custom_target(cppcheck COMMAND cppcheck --language=c++ --enable=all --suppress=unusedFunction --suppress=missingInclude --inconclusive --suppress=functionStatic ${ALL_SOURCES})
 
 enable_testing()
 add_subdirectory(${MODEL_DIR})
