@@ -1,9 +1,10 @@
-#ifndef TRANSACTIONS_PARSER_PARSER_H_
-#define TRANSACTIONS_PARSER_PARSER_H_
+#ifndef TRANSACTIONS_SOURCE_MODEL_PARSER_PARSER_H_
+#define TRANSACTIONS_SOURCE_MODEL_PARSER_PARSER_H_
+
+#include <limits>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <limits>
 
 namespace s21 {
 
@@ -45,4 +46,5 @@ class Parser {
 };
 
 }  // namespace s21
-#endif  // TRANSACTIONS_PARSER_PARSER_H_
+
+#endif  // TRANSACTIONS_SOURCE_MODEL_PARSER_PARSER_H_

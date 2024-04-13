@@ -1,5 +1,5 @@
-#ifndef TRANSACTIONS_CONTROLLER_CONTROLLER_H_
-#define TRANSACTIONS_CONTROLLER_CONTROLLER_H_
+#ifndef TRANSACTIONS_SOURCE_CONTROLLER_CONTROLLER_H_
+#define TRANSACTIONS_SOURCE_CONTROLLER_CONTROLLER_H_
 
 // #include "model/bst/self_balancing_binary_search_tree.h"
 #include <memory>
@@ -29,4 +29,5 @@ class Controller {
 };
 
 }  // namespace s21
-#endif  // TRANSACTIONS_CONTROLLER_CONTROLLER_H_
+
+#endif  // TRANSACTIONS_SOURCE_CONTROLLER_CONTROLLER_H_

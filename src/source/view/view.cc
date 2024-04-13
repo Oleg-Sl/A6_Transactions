@@ -1,17 +1,18 @@
+#include "view/view.h"
+
 #include <iostream>
 #include <limits>
 
 #include "model/common/data.h"
 #include "model/hashtable/hash_table.h"
 #include "model/parser/parser.h"
-#include "view/view.h"
 
 namespace s21 {
 struct StudentComparator {
   std::string str_ignored = "-";
   int int_ignored = std::numeric_limits<int>::min();
 
-  bool operator()(Student student_1, Student student_2) {
+  bool operator()(Student student_1, Student student_2) const {
     bool name_equal =
         (student_1.name == student_2.name || student_2.name == str_ignored);
     bool surname_equal = (student_1.surname == student_2.surname ||

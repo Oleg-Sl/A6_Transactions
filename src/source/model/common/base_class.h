@@ -1,5 +1,6 @@
-#ifndef TRANSACTIONS_COMMON_BASE_CLASS_H_
-#define TRANSACTIONS_COMMON_BASE_CLASS_H_
+#ifndef TRANSACTIONS_SOURCE_MODEL_COMMON_BASE_CLASS_H_
+#define TRANSACTIONS_SOURCE_MODEL_COMMON_BASE_CLASS_H_
+
 #include <string>
 #include <vector>
 
@@ -24,4 +25,5 @@ class BaseClass {
   virtual std::pair<bool, int> Export(const std::string& path) const = 0;
 };
 }  // namespace s21
-#endif  // TRANSACTIONS_COMMON_BASE_CLASS_H_
+
+#endif  // TRANSACTIONS_SOURCE_MODEL_COMMON_BASE_CLASS_H_

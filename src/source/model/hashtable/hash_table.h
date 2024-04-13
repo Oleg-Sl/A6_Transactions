@@ -305,4 +305,5 @@ class HashTable : public BaseClass {
   }
 };
 }  // namespace s21
+
 #endif  // TRANSACTIONS_SOURCE_MODEL_HASHTABLE_HASH_TABLE_H_

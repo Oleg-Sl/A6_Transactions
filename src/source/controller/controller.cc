@@ -1,8 +1,10 @@
 #include "controller/controller.h"
+
 #include "model/hashtable/hash_table.h"
 
 namespace s21 {
-Controller::Controller(std::unique_ptr<BaseClass> model) : model_(std::move(model)) {}
+Controller::Controller(std::unique_ptr<BaseClass> model)
+    : model_(std::move(model)) {}
 
 bool Controller::Set(std::string key, Student student, int validity) {
   return model_->Set(key, student, validity);

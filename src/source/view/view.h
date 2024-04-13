@@ -1,5 +1,6 @@
-#ifndef TRANSACTIONS_VIEW_VIEW_H_
-#define TRANSACTIONS_VIEW_VIEW_H_
+#ifndef TRANSACTIONS_SOURCE_VIEW_VIEW_H_
+#define TRANSACTIONS_SOURCE_VIEW_VIEW_H_
+
 #include <functional>
 #include <map>
 #include <sstream>
@@ -74,4 +75,5 @@ class View {
 };
 
 }  // namespace s21
-#endif  // TRANSACTIONS_VIEW_VIEW_H_
+
+#endif  // TRANSACTIONS_SOURCE_VIEW_VIEW_H_

@@ -1,8 +1,8 @@
-#ifndef TRANSACTIONS_COMMON_DATA_H_
-#define TRANSACTIONS_COMMON_DATA_H_
+#ifndef TRANSACTIONS_SOURCE_MODEL_COMMON_DATA_H_
+#define TRANSACTIONS_SOURCE_MODEL_COMMON_DATA_H_
 
-#include <istream>
 #include <iomanip>
+#include <istream>
 #include <sstream>
 #include <string>
 
@@ -78,4 +78,5 @@ class Data {
   int validity_{0};
 };
 }  // namespace s21
-#endif  // TRANSACTIONS_COMMON_DATA_H_
+
+#endif  // TRANSACTIONS_SOURCE_MODEL_COMMON_DATA_H_
