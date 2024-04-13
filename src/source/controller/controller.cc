@@ -1,44 +1,43 @@
 #include "controller/controller.h"
-
 #include "model/hashtable/hash_table.h"
 
 namespace s21 {
-Controller::Controller(std::unique_ptr<BaseClass> model)
-    : model_(std::move(model)) {}
+Controller::Controller(BaseClass&& model) : model_(model) {}
 
 bool Controller::Set(std::string key, Student student, int validity) {
-  return model_->Set(key, student, validity);
+  return model_.Set(key, student, validity);
 }
 
-Student Controller::Get(std::string key) { return model_->Get(key); }
+Student Controller::Get(std::string key) { return model_.Get(key); }
 
-bool Controller::Exists(std::string key) { return model_->Exists(key); }
+bool Controller::Exists(std::string key) { return model_.Exists(key); }
 
-bool Controller::Del(std::string key) { return model_->Del(key); }
+bool Controller::Del(std::string key) { return model_.Del(key); }
 
 bool Controller::Update(std::string key, Student student) {
-  return model_->Update(key, student);
+  return model_.Update(key, student);
 }
 
-std::vector<std::string> Controller::Keys() { return model_->Keys(); }
+std::vector<std::string> Controller::Keys() { return model_.Keys(); }
 
 bool Controller::Rename(std::string key, std::string new_key) {
-  return model_->Rename(key, new_key);
+  return model_.Rename(key, new_key);
 }
 
-int Controller::Ttl(std::string param) { return model_->Ttl(param); }
+int Controller::Ttl(std::string param) { return model_.Ttl(param); }
 
 std::vector<std::string> Controller::Find(Student student) {
-  return model_->Find(student);
+  return model_.Find(student);
 }
 
-std::vector<Student> Controller::Showall() { return model_->Showall(); }
+std::vector<Student> Controller::Showall() { return model_.Showall(); }
 
 std::pair<bool, int> Controller::Upload(std::string path) {
-  return model_->Upload(path);
+  return model_.Upload(path);
 }
 
 std::pair<bool, int> Controller::Export(std::string path) {
-  return model_->Export(path);
+  return model_.Export(path);
 }
+
 }  // namespace s21

@@ -10,7 +10,7 @@
 namespace s21 {
 class Controller {
  public:
-  explicit Controller(std::unique_ptr<BaseClass> model);
+  explicit Controller(BaseClass&& model);
   bool Set(std::string key, Student student, int validity = 0);
   Student Get(std::string key);
   bool Exists(std::string key);
@@ -25,7 +25,7 @@ class Controller {
   std::pair<bool, int> Export(std::string path);
 
  private:
-  std::unique_ptr<BaseClass> model_;
+  BaseClass& model_;
 };
 
 }  // namespace s21
