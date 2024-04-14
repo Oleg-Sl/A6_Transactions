@@ -284,8 +284,8 @@ TEST(HashTableUpload, Normal) {
   auto result = table.Upload(kSamplesDir + "student.dat");
 
   ASSERT_EQ(result.first, true);
-  ASSERT_EQ(result.second, 2);
-  ASSERT_EQ(table.GetLoadFactor(), 2);
+  ASSERT_EQ(result.second, 20);
+  ASSERT_EQ(table.GetLoadFactor(), 20);
 }
 
 TEST(HashTableUpload, FileNotExists) {
