@@ -1,5 +1,5 @@
 BUILD_DIR = build
-TEST_EXE = SimpleNavigatorTests
+TEST_EXE = TransactionsTests
 REPORT_FLAG =
 
 OS = $(shell uname -s)
