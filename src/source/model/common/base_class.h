@@ -7,20 +7,20 @@
 #include "data.h"
 
 namespace s21 {
+template <typename Key, typename Value>
 class BaseClass {
  public:
   virtual ~BaseClass() = default;
-  virtual bool Set(const std::string& key, const Student& student,
-                   int validity = 0) = 0;
-  virtual Student Get(const std::string& key) const = 0;
-  virtual bool Exists(const std::string& key) const = 0;
-  virtual bool Del(const std::string& key) = 0;
-  virtual bool Update(const std::string& key, const Student& student) = 0;
-  virtual std::vector<std::string> Keys() const = 0;
-  virtual bool Rename(const std::string& key, const std::string& new_key) = 0;
-  virtual int Ttl(const std::string& param) const = 0;
-  virtual std::vector<std::string> Find(const Student& student) const = 0;
-  virtual std::vector<Student> Showall() const = 0;
+  virtual bool Set(const Key& key, const Value& value, int validity = 0) = 0;
+  virtual Value Get(const Key& key) const = 0;
+  virtual bool Exists(const Key& key) const = 0;
+  virtual bool Del(const Key& key) = 0;
+  virtual bool Update(const Key& key, const Value& value) = 0;
+  virtual std::vector<Key> Keys() const = 0;
+  virtual bool Rename(const Key& key, const Key& new_key) = 0;
+  virtual int Ttl(const Key& param) const = 0;
+  virtual std::vector<Key> Find(const Value& value) const = 0;
+  virtual std::vector<Value> Showall() const = 0;
   virtual std::pair<bool, int> Upload(const std::string& path) = 0;
   virtual std::pair<bool, int> Export(const std::string& path) const = 0;
 };

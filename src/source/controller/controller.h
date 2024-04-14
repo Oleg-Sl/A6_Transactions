@@ -8,24 +8,40 @@
 #include "model/common/data.h"
 
 namespace s21 {
+
+template <typename Key, typename Value>
 class Controller {
  public:
-  explicit Controller(BaseClass&& model);
-  bool Set(std::string key, Student student, int validity = 0);
-  Student Get(std::string key);
-  bool Exists(std::string key);
-  bool Del(std::string key);
-  bool Update(std::string key, Student student);
-  std::vector<std::string> Keys();
-  bool Rename(std::string key, std::string new_key);
-  int Ttl(std::string param);
-  std::vector<std::string> Find(Student student);
-  std::vector<Student> Showall();
-  std::pair<bool, int> Upload(std::string path);
-  std::pair<bool, int> Export(std::string path);
+  explicit Controller(BaseClass<Key, Value>&& model) : model_(model) {}
+
+  bool Set(Key key, Value value, int validity = 0) {
+    return model_.Set(key, value, validity);
+  }
+
+  Value Get(Key key) { return model_.Get(key); }
+
+  bool Exists(Key key) { return model_.Exists(key); }
+
+  bool Del(Key key) { return model_.Del(key); }
+
+  bool Update(Key key, Value value) { return model_.Update(key, value); }
+
+  std::vector<Key> Keys() { return model_.Keys(); }
+
+  bool Rename(Key key, Key new_key) { return model_.Rename(key, new_key); }
+
+  int Ttl(Key param) { return model_.Ttl(param); }
+
+  std::vector<Key> Find(Value value) { return model_.Find(value); }
+
+  std::vector<Value> Showall() { return model_.Showall(); }
+
+  std::pair<bool, int> Upload(std::string path) { return model_.Upload(path); }
+
+  std::pair<bool, int> Export(std::string path) { return model_.Export(path); }
 
  private:
-  BaseClass& model_;
+  BaseClass<Key, Value>& model_;
 };
 
 }  // namespace s21

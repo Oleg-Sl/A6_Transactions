@@ -5,8 +5,10 @@
 
 #include "controller/controller.h"
 #include "model/parser/parser.h"
+#include "view/storage.h"
 
 namespace s21 {
+template <typename Key, typename Value>
 class MainMenu : public BaseView {
  public:
   const std::map<std::string, MenuAction> kMainMenuCommands = {
@@ -15,20 +17,37 @@ class MainMenu : public BaseView {
       {"3", {[this] { UseBPlusTree(); }, "use BPlusTree"}},
       {"4", {[this] { PopMenu(); }, "exit"}}};
 
-  MainMenu(const Controller& hashtable, const Controller& sbbst,
-           const Controller& bplustree)
+  MainMenu(const Controller<Key, Value>& hashtable,
+           const Controller<Key, Value>& sbbst,
+           const Controller<Key, Value>& bplustree)
       : hashtable_(hashtable), sbbst_(sbbst), bplustree_(bplustree) {}
 
-  void Start();
+  void Start() override {
+    PushMenu(kMainMenuCommands);
+
+    while (stack_menu_.size() > 0) {
+      DisplayMenu(kMainMenuCommands);
+      std::cout << "> ";
+      std::string input;
+      getline(std::cin, input);
+      std::stringstream stream(input);
+      std::string command;
+      stream >> command;
+
+      ExecuteCommand(command);
+    }
+  }
 
  private:
-  Controller hashtable_;
-  Controller sbbst_;
-  Controller bplustree_;
+  Controller<Key, Value> hashtable_;
+  Controller<Key, Value> sbbst_;
+  Controller<Key, Value> bplustree_;
 
-  void UseHashTable();
-  void UseSBBST();
-  void UseBPlusTree();
+  void UseHashTable() { Storage<Key, Value>(hashtable_).Start(); }
+
+  void UseSBBST() { Storage<Key, Value>(sbbst_).Start(); }
+
+  void UseBPlusTree() { Storage<Key, Value>(bplustree_).Start(); }
 };
 
 }  // namespace s21
