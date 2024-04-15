@@ -12,10 +12,8 @@ class Parser {
  public:
   inline static const std::string kErrorParse = "Failed to read";
 
-  Parser() = default;
-
   template <typename T>
-  T ParseValue(std::stringstream &stream, const std::string &arg_name) {
+  T ParseValue(std::istream &stream, const std::string &arg_name) {
     T value;
     stream >> value;
     if (stream.fail()) {
@@ -28,7 +26,7 @@ class Parser {
   }
 
   template <typename T>
-  std::pair<std::string, T> ParseOptionalArgument(std::stringstream &stream,
+  std::pair<std::string, T> ParseOptionalArgument(std::istream &stream,
                                                   const std::string &arg_name) {
     if (stream.eof()) {
       return std::make_pair("", T());
