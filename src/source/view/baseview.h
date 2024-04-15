@@ -41,7 +41,7 @@ class BaseView {
     }
   }
 
-  void ExecuteCommand(std::string command) {
+  void ExecuteCommand(const std::string& command) {
     try {
       auto callable = stack_menu_.top().find(command);
       if (callable != stack_menu_.top().end()) {
@@ -49,7 +49,7 @@ class BaseView {
       } else {
         std::cout << "incorrect command " << command << std::endl;
       }
-    } catch (std::exception& ex) {
+    } catch (const std::exception& ex) {
       std::cout << ex.what() << std::endl;
     }
   }

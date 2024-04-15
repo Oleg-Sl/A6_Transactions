@@ -14,31 +14,35 @@ class Controller {
  public:
   explicit Controller(BaseClass<Key, Value>&& model) : model_(model) {}
 
-  bool Set(Key key, Value value, int validity = 0) {
+  bool Set(Key key, Value value, int validity = 0) const {
     return model_.Set(key, value, validity);
   }
 
-  Value Get(Key key) { return model_.Get(key); }
+  Value Get(Key key) const { return model_.Get(key); }
 
-  bool Exists(Key key) { return model_.Exists(key); }
+  bool Exists(Key key) const { return model_.Exists(key); }
 
-  bool Del(Key key) { return model_.Del(key); }
+  bool Del(Key key) const { return model_.Del(key); }
 
-  bool Update(Key key, Value value) { return model_.Update(key, value); }
+  bool Update(Key key, Value value) const { return model_.Update(key, value); }
 
-  std::vector<Key> Keys() { return model_.Keys(); }
+  std::vector<Key> Keys() const { return model_.Keys(); }
 
-  bool Rename(Key key, Key new_key) { return model_.Rename(key, new_key); }
+  bool Rename(Key key, Key new_key) const {
+    return model_.Rename(key, new_key);
+  }
 
-  int Ttl(Key param) { return model_.Ttl(param); }
+  int Ttl(Key param) const { return model_.Ttl(param); }
 
-  std::vector<Key> Find(Value value) { return model_.Find(value); }
+  std::vector<Key> Find(Value value) const { return model_.Find(value); }
 
-  std::vector<Value> Showall() { return model_.Showall(); }
+  std::vector<Value> Showall() const { return model_.Showall(); }
 
   std::pair<bool, int> Upload(std::string path) { return model_.Upload(path); }
 
-  std::pair<bool, int> Export(std::string path) { return model_.Export(path); }
+  std::pair<bool, int> Export(std::string path) const {
+    return model_.Export(path);
+  }
 
  private:
   BaseClass<Key, Value>& model_;

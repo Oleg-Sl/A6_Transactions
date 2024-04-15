@@ -76,11 +76,13 @@ void StorageMenu<std::string, Student>::Find() {
 }  // namespace s21
 
 int main() {
-  s21::HashTable<std::string, s21::Student> hashtable;
-  s21::Controller<std::string, s21::Student> controller_1(std::move(hashtable));
+  using key = std::string;
+  using value = s21::Student;
 
-  s21::MainMenu<std::string, s21::Student> mainmenu(controller_1, controller_1,
-                                                    controller_1);
+  s21::HashTable<key, value> hashtable;
+  s21::Controller<key, value> controller_1(std::move(hashtable));
+
+  s21::MainMenu<key, value> mainmenu(controller_1, controller_1, controller_1);
 
   mainmenu.Start();
 

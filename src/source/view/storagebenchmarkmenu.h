@@ -29,10 +29,9 @@ class StorageBenchmarkMenu : BaseView {
   }
 
  private:
-  StorageBenchmark benchmark_;
-
   void MeasureTimeStorage(Controller<Key, Value> controller,
                           size_t count_elements, size_t repeats) {
+    StorageBenchmark benchmark_;
     benchmark_.FillStorage(controller, count_elements);
 
     std::cout << "Get: ";

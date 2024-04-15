@@ -51,21 +51,20 @@ std::string GenerateKey(size_t length) {
   return key;
 }
 
-void StorageBenchmark::FillStorage(Controller<std::string, Student> controller,
-                                   size_t count) {
+void StorageBenchmark::FillStorage(
+    const Controller<std::string, Student>& controller, size_t count) {
   for (size_t i = 0; i < count; ++i) {
     controller.Set(GenerateKey(kKeyLength), GenerateStudent());
   }
 }
 
-double StorageBenchmark::MeasureGet(Controller<std::string, Student> storage,
-                                    size_t repeats) {
+double StorageBenchmark::MeasureGet(
+    const Controller<std::string, Student>& storage, size_t repeats) {
   std::vector<std::string> keys = storage.Keys();
-  std::uniform_int_distribution<int> temp(0, storage.Keys().size() - 1);
   double time = 0;
 
   for (size_t i = 0; i < repeats; ++i) {
-    std::string key = keys[temp(gen_)];
+    std::string key = keys[i % (keys.size() - 1)];
     time += MeasureTime(
         [&storage](const std::string& k) { return storage.Get(k); }, key);
   }
@@ -74,7 +73,7 @@ double StorageBenchmark::MeasureGet(Controller<std::string, Student> storage,
 }
 
 double StorageBenchmark::MeasureShowAll(
-    Controller<std::string, Student> storage, size_t repeats) {
+    const Controller<std::string, Student>& storage, size_t repeats) {
   double time = 0;
 
   for (size_t i = 0; i < repeats; ++i) {
@@ -84,14 +83,13 @@ double StorageBenchmark::MeasureShowAll(
   return time;
 }
 
-double StorageBenchmark::MeasureFind(Controller<std::string, Student> storage,
-                                     size_t repeats) {
+double StorageBenchmark::MeasureFind(
+    const Controller<std::string, Student>& storage, size_t repeats) {
   double time = 0;
   std::vector<Student> students = storage.Showall();
-  std::uniform_int_distribution<int> temp(0, students.size() - 1);
 
   for (size_t i = 0; i < repeats; ++i) {
-    Student student = students[temp(gen_)];
+    Student student = students[i % (students.size() - 1)];
     time += MeasureTime(
         [&storage](const Student& s) { return storage.Find(s); }, student);
   }
@@ -99,8 +97,8 @@ double StorageBenchmark::MeasureFind(Controller<std::string, Student> storage,
   return time;
 }
 
-double StorageBenchmark::MeasureSet(Controller<std::string, Student> storage,
-                                    size_t repeats) {
+double StorageBenchmark::MeasureSet(
+    const Controller<std::string, Student>& storage, size_t repeats) {
   double time = 0;
 
   for (size_t i = 0; i < repeats; ++i) {
@@ -116,14 +114,13 @@ double StorageBenchmark::MeasureSet(Controller<std::string, Student> storage,
   return time;
 }
 
-double StorageBenchmark::MeasureDel(Controller<std::string, Student> storage,
-                                    size_t repeats) {
+double StorageBenchmark::MeasureDel(
+    const Controller<std::string, Student>& storage, size_t repeats) {
   double time = 0;
   std::vector<std::string> keys = storage.Keys();
-  std::uniform_int_distribution<int> temp(0, storage.Keys().size() - 1);
 
   for (size_t i = 0; i < repeats; ++i) {
-    std::string key = keys[temp(gen_)];
+    std::string key = keys[i % (keys.size() - 1)];
     time += MeasureTime(
         [&storage](const std::string& k) { return storage.Del(k); }, key);
     storage.Set(key, GenerateStudent());
