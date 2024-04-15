@@ -1,5 +1,5 @@
-#ifndef TRANSACTIONS_SOURCE_VIEW_STORAGE_H_
-#define TRANSACTIONS_SOURCE_VIEW_STORAGE_H_
+#ifndef TRANSACTIONS_SOURCE_VIEW_STORAGEMENU_H_
+#define TRANSACTIONS_SOURCE_VIEW_STORAGEMENU_H_
 
 #include <view/baseview.h>
 
@@ -14,7 +14,7 @@
 
 namespace s21 {
 template <typename Key, typename Value>
-class Storage : BaseView {
+class StorageMenu : BaseView {
  public:
   const std::map<std::string, MenuAction> kStorageCommands = {
       {"set", {[this] { Set(); }, "<key> <struct> [ex <time>]"}},
@@ -32,7 +32,7 @@ class Storage : BaseView {
       {"help", {[this] { DisplayMenu(kStorageCommands); }}},
       {"exit", {[this] { PopMenu(); }}}};
 
-  explicit Storage(const Controller<Key, Value>& controller)
+  explicit StorageMenu(const Controller<Key, Value>& controller)
       : controller_(controller) {}
 
   void Start() override {
@@ -40,13 +40,9 @@ class Storage : BaseView {
     DisplayMenu(kStorageCommands);
 
     while (stack_menu_.size() > 0) {
-      std::cout << "> ";
-      std::string input;
-      getline(std::cin, input);
-      std::stringstream stream(input);
       std::string command;
-      stream >> command;
-      user_input_ = std::move(stream);
+      std::cout << "> ";
+      std::cin >> command;
 
       ExecuteCommand(command);
     }
@@ -54,25 +50,26 @@ class Storage : BaseView {
 
  private:
   Controller<Key, Value> controller_;
-  std::stringstream user_input_;
 
   void Set() {
-    Key key = parser_.ParseValue<Key>(user_input_, "key");
-    Value value = parser_.ParseValue<Value>(user_input_, "value");
+    std::stringstream user_input = ReadInputAsStringStream();
+    Key key = parser_.ParseValue<Key>(user_input, "key");
+    Value value = parser_.ParseValue<Value>(user_input, "value");
 
     bool status = false;
-    auto optional_arg = parser_.ParseOptionalArgument<int>(user_input_, "ex");
+    auto optional_arg = parser_.ParseOptionalArgument<int>(user_input, "ex");
     if (optional_arg.first.empty()) {
       status = controller_.Set(key, value);
     } else {
       status = controller_.Set(key, value, optional_arg.second);
     }
 
-    std::cout << status << std::endl;
+    std::cout << StatusToStr(status) << std::endl;
   }
 
   void Get() {
-    Key key = parser_.ParseValue<Key>(user_input_, "key");
+    std::stringstream user_input = ReadInputAsStringStream();
+    Key key = parser_.ParseValue<Key>(user_input, "key");
     try {
       Value value = controller_.Get(key);
       std::cout << value << std::endl;
@@ -82,20 +79,24 @@ class Storage : BaseView {
   }
 
   void Exists() {
-    Key key = parser_.ParseValue<Key>(user_input_, "key");
-    std::cout << controller_.Exists(key) << std::endl;
+    std::stringstream user_input = ReadInputAsStringStream();
+    Key key = parser_.ParseValue<Key>(user_input, "key");
+    std::cout << std::boolalpha << controller_.Exists(key) << std::endl;
   }
 
   void Del() {
-    Key key = parser_.ParseValue<Key>(user_input_, "key");
-    std::cout << controller_.Del(key) << std::endl;
+    std::stringstream user_input = ReadInputAsStringStream();
+    Key key = parser_.ParseValue<Key>(user_input, "key");
+    std::cout << std::boolalpha << StatusToStr(controller_.Del(key))
+              << std::endl;
   }
 
   void Update() {
-    Key key = parser_.ParseValue<Key>(user_input_, "key");
-    Value value = parser_.ParseValue<Value>(user_input_, "value");
+    std::stringstream user_input = ReadInputAsStringStream();
+    Key key = parser_.ParseValue<Key>(user_input, "key");
+    Value value = parser_.ParseValue<Value>(user_input, "value");
 
-    std::cout << controller_.Update(key, value) << std::endl;
+    std::cout << StatusToStr(controller_.Update(key, value)) << std::endl;
   }
 
   void Keys() {
@@ -107,13 +108,15 @@ class Storage : BaseView {
   }
 
   void Rename() {
-    Key key_1 = parser_.ParseValue<Key>(user_input_, "key1");
-    Key key_2 = parser_.ParseValue<Key>(user_input_, "key2");
+    std::stringstream user_input = ReadInputAsStringStream();
+    Key key_1 = parser_.ParseValue<Key>(user_input, "key1");
+    Key key_2 = parser_.ParseValue<Key>(user_input, "key2");
     std::cout << controller_.Rename(key_1, key_2) << std::endl;
   }
 
   void Ttl() {
-    Key key = parser_.ParseValue<Key>(user_input_, "key");
+    std::stringstream user_input = ReadInputAsStringStream();
+    Key key = parser_.ParseValue<Key>(user_input, "key");
     try {
       std::cout << controller_.Ttl(key) << std::endl;
     } catch (std::invalid_argument& ex) {
@@ -122,7 +125,8 @@ class Storage : BaseView {
   }
 
   void Find() {
-    Value value = parser_.ParseValue<Value>(user_input_, "value");
+    std::stringstream user_input = ReadInputAsStringStream();
+    Value value = parser_.ParseValue<Value>(user_input, "value");
 
     size_t counter = 1;
     for (auto& key : controller_.Find(value)) {
@@ -140,18 +144,24 @@ class Storage : BaseView {
   }
 
   void Upload() {
-    std::string path = parser_.ParseValue<std::string>(user_input_, "path");
+    std::stringstream user_input = ReadInputAsStringStream();
+    std::string path = parser_.ParseValue<std::string>(user_input, "path");
     auto res = controller_.Upload(path);
-    std::cout << res.first << " " << res.second << std::endl;
+    std::cout << StatusToStr(res.first) << " " << res.second << std::endl;
   }
 
   void Export() {
-    std::string path = parser_.ParseValue<std::string>(user_input_, "path");
+    std::stringstream user_input = ReadInputAsStringStream();
+    std::string path = parser_.ParseValue<std::string>(user_input, "path");
     auto res = controller_.Export(path);
-    std::cout << res.first << " " << res.second << std::endl;
+    std::cout << StatusToStr(res.first) << " " << res.second << std::endl;
+  }
+
+  static std::string StatusToStr(bool status) {
+    return status ? "OK" : "(null)";
   }
 };
 
 }  // namespace s21
 
-#endif  // TRANSACTIONS_SOURCE_VIEW_STORAGE_H_
+#endif  // TRANSACTIONS_SOURCE_VIEW_STORAGEMENU_H_

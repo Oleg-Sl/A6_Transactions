@@ -53,6 +53,13 @@ class BaseView {
       std::cout << ex.what() << std::endl;
     }
   }
+
+  std::stringstream ReadInputAsStringStream() {
+    std::string input;
+    std::cin >> std::ws;
+    std::getline(std::cin, input);
+    return std::stringstream(input);
+  }
 };
 }  // namespace s21
 

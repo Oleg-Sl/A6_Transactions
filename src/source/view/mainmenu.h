@@ -5,7 +5,7 @@
 
 #include "controller/controller.h"
 #include "model/parser/parser.h"
-#include "view/storage.h"
+#include "view/storagemenu.h"
 
 namespace s21 {
 template <typename Key, typename Value>
@@ -43,11 +43,11 @@ class MainMenu : public BaseView {
   Controller<Key, Value> sbbst_;
   Controller<Key, Value> bplustree_;
 
-  void UseHashTable() { Storage<Key, Value>(hashtable_).Start(); }
+  void UseHashTable() const { StorageMenu<Key, Value>(hashtable_).Start(); }
 
-  void UseSBBST() { Storage<Key, Value>(sbbst_).Start(); }
+  void UseSBBST() const { StorageMenu<Key, Value>(sbbst_).Start(); }
 
-  void UseBPlusTree() { Storage<Key, Value>(bplustree_).Start(); }
+  void UseBPlusTree() const { StorageMenu<Key, Value>(bplustree_).Start(); }
 };
 
 }  // namespace s21

@@ -2,7 +2,7 @@
 #include <model/common/data.h>
 #include <model/hashtable/hash_table.h>
 #include <view/mainmenu.h>
-#include <view/storage.h>
+#include <view/storagemenu.h>
 
 #include <iostream>
 #include <string>
@@ -30,14 +30,15 @@ struct StudentComparator {
 };
 
 template <>
-void Storage<std::string, Student>::Update() {
-  std::string key = parser_.ParseValue<std::string>(user_input_, "key");
-  std::string name = parser_.ParseValue<std::string>(user_input_, "name");
-  std::string surname = parser_.ParseValue<std::string>(user_input_, "surname");
+void StorageMenu<std::string, Student>::Update() {
+  std::stringstream user_input = ReadInputAsStringStream();
+  std::string key = parser_.ParseValue<std::string>(user_input, "key");
+  std::string name = parser_.ParseValue<std::string>(user_input, "name");
+  std::string surname = parser_.ParseValue<std::string>(user_input, "surname");
   std::string birthday =
-      parser_.ParseValue<std::string>(user_input_, "birthday");
-  std::string city = parser_.ParseValue<std::string>(user_input_, "city");
-  std::string coins = parser_.ParseValue<std::string>(user_input_, "coins");
+      parser_.ParseValue<std::string>(user_input, "birthday");
+  std::string city = parser_.ParseValue<std::string>(user_input, "city");
+  std::string coins = parser_.ParseValue<std::string>(user_input, "coins");
 
   Student new_student;
   Student old_student = controller_.Get(key);
@@ -51,14 +52,15 @@ void Storage<std::string, Student>::Update() {
 }
 
 template <>
-void Storage<std::string, Student>::Find() {
+void StorageMenu<std::string, Student>::Find() {
+  std::stringstream user_input = ReadInputAsStringStream();
   Student student;
-  student.name = parser_.ParseValue<std::string>(user_input_, "name");
-  student.surname = parser_.ParseValue<std::string>(user_input_, "surname");
+  student.name = parser_.ParseValue<std::string>(user_input, "name");
+  student.surname = parser_.ParseValue<std::string>(user_input, "surname");
   std::string birthday =
-      parser_.ParseValue<std::string>(user_input_, "birthday");
-  student.city = parser_.ParseValue<std::string>(user_input_, "city");
-  std::string coins = parser_.ParseValue<std::string>(user_input_, "coins");
+      parser_.ParseValue<std::string>(user_input, "birthday");
+  student.city = parser_.ParseValue<std::string>(user_input, "city");
+  std::string coins = parser_.ParseValue<std::string>(user_input, "coins");
 
   birthday == "-" ? student.birthday = std::numeric_limits<int>::min()
                   : student.birthday = std::stoi(birthday);
