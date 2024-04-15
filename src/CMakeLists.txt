@@ -38,6 +38,9 @@ add_executable(cli ${SOURCE_DIR}/main.cc ${CONTROLLER_SOURCES} ${VIEW_SOURCES})
 target_link_libraries(cli ${TARGET_GRAPH_LIB} )
 target_include_directories(cli PUBLIC ${RELATIVE_HEADER_DIR})
 
+add_executable(benchmark ${SOURCE_DIR}/benchmark.cc ${MODEL_DIR}/common/storagebenchmark.cc)
+target_include_directories(benchmark PUBLIC ${RELATIVE_HEADER_DIR})
+
 add_custom_target(format COMMAND clang-format --style=Google -i --verbose ${ALL_SOURCES})
 add_custom_target(stylecheck COMMAND clang-format --style=Google -n --verbose ${ALL_SOURCES})
 add_custom_target(cppcheck COMMAND cppcheck --language=c++ --enable=all --suppress=unusedFunction --suppress=missingInclude --inconclusive --suppress=functionStatic ${ALL_SOURCES})
