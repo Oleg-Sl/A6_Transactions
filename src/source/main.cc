@@ -2,10 +2,6 @@
 #include <model/common/data.h>
 #include <model/hashtable/hash_table.h>
 #include <view/mainmenu.h>
-#include <view/storagemenu.h>
-
-#include <iostream>
-#include <string>
 
 int main() {
   s21::HashTable<std::string, s21::Student, s21::StudentComparator> hashtable;
