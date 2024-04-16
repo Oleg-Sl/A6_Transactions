@@ -29,6 +29,14 @@ test: build
 	cmake --build $(BUILD_DIR) --target $(TEST_EXE)
 	./$(BUILD_DIR)/tests/$(TEST_EXE)
 
+benchmark: build 
+	cmake --build $(BUILD_DIR) --target benchmark
+	./$(BUILD_DIR)/benchmark
+
+cli: build 
+	cmake --build $(BUILD_DIR) --target cli
+	./$(BUILD_DIR)/cli
+
 hash_table.a: build
 	cmake --build $(BUILD_DIR) --target hash_table
 
