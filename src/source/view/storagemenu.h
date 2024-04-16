@@ -29,8 +29,8 @@ class StorageMenu : BaseView {
       {"showall", {[this] { Showall(); }, ""}},
       {"upload", {[this] { Upload(); }, "<path>"}},
       {"export", {[this] { Export(); }, "<path>"}},
-      {"help", {[this] { DisplayMenu(kStorageCommands); }}},
-      {"exit", {[this] { PopMenu(); }}}};
+      {"help", {[this] { DisplayMenu(kStorageCommands); }, ""}},
+      {"exit", {[this] { PopMenu(); }, ""}}};
 
   explicit StorageMenu(const Controller<Key, Value>& controller)
       : controller_(controller) {}

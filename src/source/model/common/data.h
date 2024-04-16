@@ -7,27 +7,6 @@
 #include <string>
 
 namespace s21 {
-struct StudentComparator {
-  const std::string kStrIgnored = "-";
-  const int kIntIgnored = std::numeric_limits<int>::min();
-
-  bool operator()(Student student_1, Student student_2) const {
-    bool name_equal =
-        (student_1.name == student_2.name || student_2.name == kStrIgnored);
-    bool surname_equal = (student_1.surname == student_2.surname ||
-                          student_2.surname == kStrIgnored);
-    bool birhday_equal = (student_1.birthday == student_2.birthday ||
-                          student_2.birthday == kIntIgnored);
-    bool city_equal =
-        (student_1.city == student_2.city || student_2.city == kStrIgnored);
-    bool coins_equal =
-        (student_1.coins == student_2.coins || student_2.coins == kIntIgnored);
-
-    return name_equal && surname_equal && birhday_equal && city_equal &&
-           coins_equal;
-  }
-};
-
 struct Student {
   std::string name;
   std::string surname;
@@ -78,6 +57,27 @@ struct Student {
         coins == 0)
       return true;
     return false;
+  }
+};
+
+struct StudentComparator {
+  const std::string kStrIgnored = "-";
+  const int kIntIgnored = std::numeric_limits<int>::min();
+
+  bool operator()(Student student_1, Student student_2) const {
+    bool name_equal =
+        (student_1.name == student_2.name || student_2.name == kStrIgnored);
+    bool surname_equal = (student_1.surname == student_2.surname ||
+                          student_2.surname == kStrIgnored);
+    bool birhday_equal = (student_1.birthday == student_2.birthday ||
+                          student_2.birthday == kIntIgnored);
+    bool city_equal =
+        (student_1.city == student_2.city || student_2.city == kStrIgnored);
+    bool coins_equal =
+        (student_1.coins == student_2.coins || student_2.coins == kIntIgnored);
+
+    return name_equal && surname_equal && birhday_equal && city_equal &&
+           coins_equal;
   }
 };
 
