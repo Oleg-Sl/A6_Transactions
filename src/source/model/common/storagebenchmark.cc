@@ -1,6 +1,6 @@
 #include <chrono>
-#include <random>
 #include <functional>
+#include <random>
 
 #include "model/common/storagebenchmark.h"
 
@@ -69,8 +69,7 @@ double StorageBenchmark::MeasureGet(
 
   for (size_t i = 0; i < repeats; ++i) {
     std::string key = keys[i % (keys.size() - 1)];
-    time += MeasureTime(
-        [&storage](const std::string& k) { return storage.Get(k); }, key);
+    time += MeasureTime(&Controller<std::string, Student>::Get, &storage, key);
   }
 
   return time;
@@ -81,7 +80,7 @@ double StorageBenchmark::MeasureShowAll(
   double time = 0;
 
   for (size_t i = 0; i < repeats; ++i) {
-    time += MeasureTime([&storage] { return storage.Showall(); });
+    time += MeasureTime(&Controller<std::string, Student>::Showall, storage);
   }
 
   return time;
@@ -94,8 +93,8 @@ double StorageBenchmark::MeasureFind(
 
   for (size_t i = 0; i < repeats; ++i) {
     Student student = students[i % (students.size() - 1)];
-    time += MeasureTime(
-        [&storage](const Student& s) { return storage.Find(s); }, student);
+    time +=
+        MeasureTime(&Controller<std::string, Student>::Find, storage, student);
   }
 
   return time;
@@ -108,10 +107,8 @@ double StorageBenchmark::MeasureSet(
   for (size_t i = 0; i < repeats; ++i) {
     Student student = GenerateStudent();
     std::string key = GenerateKey(kKeyLength);
-    time +=
-        MeasureTime([&storage](const std::string& k,
-                               const Student& s) { return storage.Set(k, s); },
-                    key, student);
+    time += MeasureTime(&Controller<std::string, Student>::Set, storage, key,
+                        student, 0);
     storage.Del(key);
   }
 
@@ -125,9 +122,7 @@ double StorageBenchmark::MeasureDel(
 
   for (size_t i = 0; i < repeats; ++i) {
     std::string key = keys[i % (keys.size() - 1)];
-    time += MeasureTime(
-        [&storage](const std::string& k) { return storage.Del(k); }, key);
-    storage.Set(key, GenerateStudent());
+    time += MeasureTime(&Controller<std::string, Student>::Del, storage, key);
   }
 
   return time;
