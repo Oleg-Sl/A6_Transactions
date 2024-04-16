@@ -1,15 +1,52 @@
 #include "three.h"
 
+#include <algorithm>
+#include <iostream>
+#include <iterator>
+#include <random>
+#include <vector>
+
 
 int main() {
-    Three<int, std::string> three;
-    for (int i = 0; i <= 100; ++i) {
-        three.insert(i, std::to_string(i));
+    std::vector<int> v;
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> uniform_dist(1, 100000000);
+    for (int i = 0; i < 100000; ++i) {
+        v.push_back(uniform_dist(gen));
     }
-    for (int i = 0; i < 55; ++i) {
-        three.remove(i);
+
+    std::shuffle(v.begin(), v.end(), gen);
+    // for (auto el : v) {
+    //     std::cout << el << " ";
+    // }
+    std::cout << std::endl;
+
+    Three<int, std::string> three;
+    for (size_t i = 0; i < v.size(); ++i) {
+        three.insert(v[i], std::to_string(v[i]));
     }
     three.printTree();
+    for (size_t i = 0; i <  v.size(); ++i) {
+        three.remove(v[i]);
+    }
+    // three.printTree();
+    // three.remove(0);
+    // three.remove(1);
+    // three.remove(2);
+    // three.remove(3);
+    // three.remove(4);
+    // three.remove(5);
+    // three.remove(6);
+    // three.remove(7);
+    // three.remove(8);
+    // three.remove(9);
+    // three.remove(10);
+    // three.remove(11);
+    // three.remove(12);
+    // std::cout << "======================================================" << std::endl;
+    // three.printTree();
 
     // three.insert(3, "dasf");
     // three.insert(2, "324");
