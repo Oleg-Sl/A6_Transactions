@@ -33,8 +33,10 @@ public:
         }
         node_type* node = root_;
         while (!node->is_leaf) {
+            // std::cout << "keys size = " << node->keys.size() << std::endl;
             for (size_t i = 0; i <= node->keys.size(); ++i) {
                 if (i == node->keys.size() || key < node->keys[i]) {
+                    // std::cout << i << std::endl;
                     node = node->childs[i];
                     break;
                 }
@@ -75,6 +77,7 @@ public:
     void remove(Key key) {
         node_type* leaf = searchLeaf(key);
         if (leaf == nullptr) {
+            std::cout << "key not found" << std::endl;
             return;
         }
         removeKey(leaf, key);
@@ -85,12 +88,25 @@ public:
     node_type *begin_leaf{};
 private:
     void removeKey(node_type *node, Key& key) {
+        std::cout << "remove key = " << key << std::endl;
+        // printNode(node);
+        // printTree();
+        // удаление ключа из узла
         removeKeyFromNode(node, key);
+        // printTree();
+        // printNode(node);
+        // если узел является конем
         if (node == root_) {
+            // std::cout 
+            // TODO ("Remove root node if it is empty");
+            // std::cout << "Remove root node if it is empty: " << key << std::endl;
             updateRoot(node);
             return;
         }
+        // printTree();
+        // если узел заполнен не оптимально
         if (node->keys.size() < degree) {
+            // std::cout << "remove key and rebalance = " << key << std::endl;
             rebalance(node);
         } else {
             recursiveUpdateKeys(node->parent);
@@ -98,64 +114,61 @@ private:
     }
 
     void rebalance(node_type* node) {
+        // std::cout << "============== REBALANCE ==============" << std::endl;
         node_type* left_neighbor = node->left;
         node_type* right_neighbor = node->right;
-
+        // printTree();
         if (left_neighbor != nullptr && left_neighbor->keys.size() > degree) {
+            // Заимствование из левого узла
             std::cout << "Заимствование из левого узла" << std::endl;
             node->keys.insert(node->keys.begin(), left_neighbor->keys.back());
-            if (node->is_leaf) {
-                node->values.insert(node->values.begin(), left_neighbor->values.back());
-                left_neighbor->values.pop_back();
-                left_neighbor->keys.pop_back();
-                recursiveUpdateKeys(node->parent);
-            } else {
-                node->childs.insert(node->childs.begin(), left_neighbor->childs.back());
-                left_neighbor->childs.front()->parent = left_neighbor;
-                left_neighbor->childs.pop_back();
-                left_neighbor->keys.pop_back();
-                recursiveUpdateKeys(node->parent);
-            }
+            node->values.insert(node->values.begin(), left_neighbor->values.back());
+            left_neighbor->keys.pop_back();
+            left_neighbor->values.pop_back();
+            recursiveUpdateKeys(node->parent);
         } else if (right_neighbor != nullptr && right_neighbor->keys.size() > degree) {
-            std::cout << "Заимствование из правого узла = " << node << right_neighbor->keys.size() << std::endl;
+            // Заимствование из правого узла
+            std::cout << "Заимствование из правого узла" << std::endl;
             node->keys.push_back(right_neighbor->keys.front());
-            if (node->is_leaf) {
-                node->values.push_back(right_neighbor->values.front());
-                right_neighbor->values.erase(right_neighbor->values.begin());
-                right_neighbor->keys.erase(right_neighbor->keys.begin());
-                recursiveUpdateKeys(right_neighbor->parent);
-            } else {
-                node->childs.push_back(right_neighbor->childs.front());
-                right_neighbor->childs.front()->parent = node;
-                right_neighbor->childs.erase(right_neighbor->childs.begin());
-                right_neighbor->keys.erase(right_neighbor->keys.begin());
-                recursiveUpdateKeys(node->parent);
-            }
-            // std::cout << "End" << std::endl;
+            node->values.push_back(right_neighbor->values.front());
+            right_neighbor->keys.erase(right_neighbor->keys.begin());
+            right_neighbor->values.erase(right_neighbor->values.begin());
+            recursiveUpdateKeys(right_neighbor->parent);
         } else if (left_neighbor && left_neighbor->parent == node->parent) {
+            // std::cout << "============== REBALANCE ==============" << std::endl;
+            // printTree();
+            // Объединение с левым узлом
+            // node->keys[0] = 1000;
+            // printNode(node);
+            // printNode(left_neighbor);
+
             std::cout << "Объединение с левым узлом" << std::endl;
+            // TODO("Проверить узел или лист, если лист, то добавлять ключ");
             if (node->is_leaf) {
-                std::cout << "List" << std::endl;
                 std::move(node->keys.begin(), node->keys.end(), std::back_inserter(left_neighbor->keys));
                 std::move(node->values.begin(), node->values.end(), std::back_inserter(left_neighbor->values));
             } else {
-                std::cout << "Node" << std::endl;
-
                 std::transform(node->childs.begin(), node->childs.end(), std::back_inserter(left_neighbor->keys), [](auto item) { return item->keys.front(); });
                 std::move(node->childs.begin(), node->childs.end(), std::back_inserter(left_neighbor->childs));
                 for (auto& item : left_neighbor->childs) {
                     item->parent = left_neighbor;
                 }
             }
+            // node->keys.erase(node->keys.begin(), node->keys.end());
+            // node->childs.erase(node->childs.begin(), node->childs.end());
             if (node->right != nullptr) {
                 node->right->left = left_neighbor;
             }
             left_neighbor->right = node->right;
+            // left_neighbor.end()
+            // printTree();
             auto it = upper_bound(node->parent->keys.begin(), node->parent->keys.end(), *left_neighbor->keys.begin());
+            std::cout << "Remove from parent key = " << *it << std::endl;
             removeKey(node->parent, *it);
+            // std::cout << "Remove node = " << node << std::endl;
             delete node;
-            // std::cout << "End" << std::endl;
         } else if (right_neighbor && right_neighbor->parent == node->parent) {
+            // Объединение с правым узлом
             std::cout << "Объединение с правым узлом" << std::endl;
             if (node->is_leaf) {
                 std::move(right_neighbor->keys.begin(), right_neighbor->keys.end(), std::back_inserter(node->keys));
@@ -167,33 +180,18 @@ private:
                     item->parent = node;
                 }
             }
+            
             if (right_neighbor->right != nullptr) {
                 right_neighbor->right->left = node;
             }
             node->right = right_neighbor->right;
+            // printTree();
             auto it = upper_bound(right_neighbor->parent->keys.begin(), right_neighbor->parent->keys.end(), *node->keys.begin());
             removeKey(right_neighbor->parent, *it);
             delete right_neighbor;
-            // std::cout << "End" << std::endl;
         }
     }
 
-    void borrowFromRightNode(node_type* left, node_type* right) {
-        // std::cout << "Заимствование из левого узла" << std::endl;
-        right->keys.insert(right->keys.begin(), left->keys.back());
-        if (right->is_leaf) {
-            right->values.insert(right->values.begin(), left->values.back());
-            left->values.pop_back();
-            left->keys.pop_back();
-            recursiveUpdateKeys(right->parent);
-        } else {
-            right->childs.insert(right->childs.begin(), left->childs.back());
-            left->childs.front()->parent = left;
-            left->childs.pop_back();
-            left->keys.pop_back();
-            recursiveUpdateKeys(right->parent);
-        }
-    }
 
     void updateRoot(node_type *node) {
         if (node->keys.size() > 0) {
@@ -229,7 +227,13 @@ private:
         return node->keys[0];
     }
 
+    void mergeNode() {
+
+    }
+
     void split(node_type* node) {
+        std::cout << "split node = " << node << std::endl;
+
         // Создание нового узла и копирование в него половиы данных
         node_type* new_node = new node_type;
         new_node->left = node;
@@ -273,6 +277,7 @@ private:
         parent->childs.push_back(new_node);
         std::rotate(parent->keys.begin() + mid_index, parent->keys.end() - 1, parent->keys.end());
         std::rotate(parent->childs.begin() + mid_index + 1, parent->childs.end() - 1, parent->childs.end());
+        // printNode(parent);
 
         if (parent->keys.size() > 2 * degree) {
             split(parent);
@@ -280,6 +285,8 @@ private:
     }
 
     void moveDataToNewNode(node_type *src, node_type *dst, size_t border) {
+
+        // std::cout << "moveDataToNewNode src = " << src << ", dst = " << dst << ", border = " << border << std::endl;
         std::move(src->keys.begin() + border, src->keys.end(), std::back_inserter(dst->keys));
         src->keys.erase(src->keys.begin() + border, src->keys.end());
         if (src->is_leaf) {
@@ -302,9 +309,11 @@ private:
     void removeKeyFromNode(node_type* node, Key& key) {
         auto it = lower_bound(node->keys.begin(), node->keys.end(), key);
         size_t index = it - node->keys.begin();
+        std::cout << "index = " << index << std::endl;
         if (it == node->keys.end() || node->keys.size() == 0) {
             return;
         }
+        // printNode(node);
 
         node->keys.erase(it);
         if (node->is_leaf) {
@@ -353,9 +362,7 @@ private:
     void _printTree(node_type* node, int depth = 0) {
         for (int i = 0; i < depth; ++i) {
             std::cout << "|  ";
-        }
-        if (node == nullptr) {
-            return;
+            // std::cout << "  ";
         }
         std::cout << "|__";
 
