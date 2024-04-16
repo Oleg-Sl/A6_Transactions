@@ -28,11 +28,8 @@ class MainMenu : public BaseView {
     while (stack_menu_.size() > 0) {
       DisplayMenu(kMainMenuCommands);
       std::cout << "> ";
-      std::string input;
-      getline(std::cin, input);
-      std::stringstream stream(input);
       std::string command;
-      stream >> command;
+      std::cin >> command;
 
       ExecuteCommand(command);
     }

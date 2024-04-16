@@ -3,6 +3,7 @@
 
 #include <iomanip>
 #include <istream>
+#include <limits>
 #include <sstream>
 #include <string>
 
