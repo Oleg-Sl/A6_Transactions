@@ -29,21 +29,22 @@ struct StudentComparator {
 };
 
 struct Student {
- public:
   std::string name;
   std::string surname;
   int birthday{0};
   std::string city;
   int coins{0};
+
   Student() = default;
-  Student(std::string name, std::string surname, int birthday, std::string city,
-          int coins) {
-    this->name = name;
-    this->surname = surname;
-    this->birthday = birthday;
-    this->city = city;
-    this->coins = coins;
-  }
+
+  Student(const std::string& name, const std::string& surname, int birthday,
+          const std::string& city, int coins)
+      : name(name),
+        surname(surname),
+        birthday(birthday),
+        city(city),
+        coins(coins) {}
+
   std::string ToString() {
     std::stringstream ss;
     ss << std::left << std::setw(15) << name << std::left << std::setw(15)
