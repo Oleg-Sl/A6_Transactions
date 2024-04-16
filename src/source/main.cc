@@ -28,7 +28,7 @@ void StorageMenu<std::string, Student>::Update() {
       birthday == "-" ? old_student.birthday : std::stoi(birthday);
   new_student.city = city == "-" ? old_student.city : city;
   new_student.coins = coins == "-" ? old_student.coins : std::stoi(coins);
-  std::cout << controller_.Update(key, new_student) << std::endl;
+  std::cout << StatusToStr(controller_.Update(key, new_student)) << std::endl;
 }
 
 template <>
@@ -56,13 +56,10 @@ void StorageMenu<std::string, Student>::Find() {
 }  // namespace s21
 
 int main() {
-  using key = std::string;
-  using value = s21::Student;
+  s21::HashTable<std::string, s21::Student, s21::StudentComparator> hashtable;
 
-  s21::HashTable<key, value> hashtable;
-  s21::Controller<key, value> controller_1(std::move(hashtable));
-
-  s21::MainMenu<key, value> mainmenu(controller_1, controller_1, controller_1);
+  s21::Controller controller_1(std::move(hashtable));
+  s21::MainMenu mainmenu(controller_1, controller_1, controller_1);
 
   mainmenu.Start();
 
