@@ -1,9 +1,6 @@
 #ifndef TRANSACTIONS_SOURCE_CONTROLLER_CONTROLLER_H_
 #define TRANSACTIONS_SOURCE_CONTROLLER_CONTROLLER_H_
 
-// #include "model/bst/self_balancing_binary_search_tree.h"
-#include <memory>
-
 #include "model/common/base_class.h"
 #include "model/common/data.h"
 

@@ -1,12 +1,8 @@
 #ifndef TRANSACTIONS_SOURCE_MODEL_COMMON_STORAGEBENCHMARK_H_
 #define TRANSACTIONS_SOURCE_MODEL_COMMON_STORAGEBENCHMARK_H_
 
-#include <chrono>
-#include <random>
-
 #include "controller/controller.h"
 #include "model/common/data.h"
-#include "view/baseview.h"
 
 namespace s21 {
 

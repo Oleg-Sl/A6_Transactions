@@ -2,7 +2,9 @@
 #define TRANSACTIONS_SOURCE_VIEW_STORAGEBENCHMARKMENU_H_
 
 #include "controller/controller.h"
+#include "model/bst/self_balancing_binary_search_tree.h"
 #include "model/common/storagebenchmark.h"
+#include "model/hashtable/hash_table.h"
 #include "view/baseview.h"
 
 namespace s21 {
@@ -47,24 +49,24 @@ class StorageBenchmarkMenu : BaseView {
   }
 
   void HashTable() {
-    s21::HashTable<std::string, s21::Student> hashtable;
-    s21::Controller<std::string, s21::Student> controller(std::move(hashtable));
+    s21::HashTable<Key, Value> hashtable;
+    s21::Controller controller(std::move(hashtable));
 
     auto input = InputCountAndRepeats();
     MeasureTimeStorage(controller, input.first, input.second);
   }
 
   void SBBST() {
-    s21::HashTable<std::string, s21::Student> hashtable;
-    s21::Controller<std::string, s21::Student> controller(std::move(hashtable));
+    s21::SelfBalancingBinarySearchTree sbbst;
+    s21::Controller controller(std::move(sbbst));
 
     auto input = InputCountAndRepeats();
     MeasureTimeStorage(controller, input.first, input.second);
   }
 
   void BPlusTree() {
-    s21::HashTable<std::string, s21::Student> hashtable;
-    s21::Controller<std::string, s21::Student> controller(std::move(hashtable));
+    s21::HashTable<Key, Value> hashtable;
+    s21::Controller controller(std::move(hashtable));
 
     auto input = InputCountAndRepeats();
     MeasureTimeStorage(controller, input.first, input.second);

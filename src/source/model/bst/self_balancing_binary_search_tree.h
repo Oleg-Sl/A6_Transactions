@@ -24,7 +24,7 @@ class BSTNode {
   explicit BSTNode(const Data& value) : data(value) { color = Color::Red; };
 };
 
-class SelfBalancingBinarySearchTree : public BaseClass {
+class SelfBalancingBinarySearchTree : public BaseClass<std::string, Student> {
  public:
   class BSTIterator;
   using Node = BSTNode;
@@ -101,18 +101,18 @@ class SelfBalancingBinarySearchTree : public BaseClass {
     Pointer leaf_;
   };
 
-  bool Set(std::string key, Student student, int validity = 0);
-  Student Get(std::string key);
-  bool Exists(std::string key);
-  bool Del(std::string key);
-  bool Update(std::string key, Student student);
-  std::vector<std::string> Keys();
-  bool Rename(std::string key, std::string new_key);
-  std::string Ttl(std::string param);
-  std::vector<std::string> Find(Student student);
-  std::vector<Student> Showall();
-  std::pair<bool, int> Upload(std::string path);
-  std::pair<bool, int> Export(std::string path);
+  bool Set(const std::string& key, const Student& student, int validity = 0);
+  Student Get(const std::string& key) const ;
+  bool Exists(const std::string& key) const;
+  bool Del(const std::string& key);
+  bool Update(const std::string& key, const Student& student);
+  std::vector<std::string> Keys() const;
+  bool Rename(const std::string& key, const std::string& new_key);
+  int Ttl(const std::string& param) const;
+  std::vector<std::string> Find(const Student& student) const;
+  std::vector<Student> Showall() const;
+  std::pair<bool, int> Upload(const std::string& path);
+  std::pair<bool, int> Export(const std::string& path) const;
 
  private:
   Pointer root_;
@@ -126,7 +126,7 @@ class SelfBalancingBinarySearchTree : public BaseClass {
   int CountChildren(Pointer node) const;
   Pointer GetChild(Pointer node) const;
   Pointer GetParent(Pointer node) const;
-  Pointer Search(std::string key) const;
+  Pointer Search(const std::string& key) const;
   bool RemoveNode(Pointer node);
   void RemoveNodeWithoutChildren(Pointer node);
   void RemoveNodeWithOneChild(Pointer node);
