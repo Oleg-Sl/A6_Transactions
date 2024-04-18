@@ -24,6 +24,8 @@ class BSTNode {
   explicit BSTNode(const Data& value) : data(value) { color = Color::Red; };
 };
 
+
+
 class SelfBalancingBinarySearchTree : public BaseClass {
  public:
   class BSTIterator;
