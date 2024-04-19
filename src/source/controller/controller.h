@@ -9,7 +9,7 @@ namespace s21 {
 template <typename Key, typename Value>
 class Controller {
  public:
-  explicit Controller(BaseClass<Key, Value>&& model) : model_(model) {}
+  explicit Controller(BaseClass<Key, Value>& model) : model_(model) {}
 
   bool Set(Key key, Value value, int validity = 0) const {
     return model_.Set(key, value, validity);
@@ -41,8 +41,9 @@ class Controller {
     return model_.Export(path);
   }
 
- private:
   BaseClass<Key, Value>& model_;
+
+ private:
 };
 
 }  // namespace s21
