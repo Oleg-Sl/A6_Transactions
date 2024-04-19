@@ -111,9 +111,7 @@ class HashTable : public BaseClass<Key, Value> {
     std::vector<Key> result;
 
     for (auto it = data_.begin(); it != data_.end(); ++it) {
-      if (!TTLIsExpired(response_time, it)) {
-        result.push_back(it->key);
-      }
+      result.push_back(it->key);
     }
 
     return result;
@@ -161,9 +159,7 @@ class HashTable : public BaseClass<Key, Value> {
     ValueEqual equal;
 
     for (auto it = data_.begin(); it != data_.end(); ++it) {
-      if (!TTLIsExpired(response_time, it) && equal(it->value, value)) {
-        result.push_back(it->key);
-      }
+      result.push_back(it->key);
     }
 
     return result;
@@ -174,9 +170,7 @@ class HashTable : public BaseClass<Key, Value> {
     std::vector<Value> result;
 
     for (auto it = data_.begin(); it != data_.end(); ++it) {
-      if (!TTLIsExpired(response_time, it)) {
-        result.push_back(it->value);
-      }
+      result.push_back(it->value);
     }
 
     return result;
@@ -211,10 +205,8 @@ class HashTable : public BaseClass<Key, Value> {
 
     int counter = 0;
     for (auto it = data_.begin(); it != data_.end(); ++it) {
-      if (!TTLIsExpired(response_time, it)) {
-        file << it->key << " " << it->value << std::endl;
-        ++counter;
-      }
+      file << it->key << " " << it->value << std::endl;
+      ++counter;
     }
 
     return std::pair<bool, int>(true, counter);
@@ -235,17 +227,6 @@ class HashTable : public BaseClass<Key, Value> {
     return size == 1 ? 0 : hasher_(value) % (size - 1);
   }
 
-  bool TTLIsExpired(const time_type& response_time,
-                    typename std::list<Node>::const_iterator elem_pos) const {
-    bool is_valid_node = elem_pos != data_.end();
-    bool TTL_is_expired = std::chrono::duration_cast<std::chrono::milliseconds>(
-                              response_time - elem_pos->create_time)
-                                  .count() > 1000 * elem_pos->TTL &&
-                          elem_pos->TTL != 0;
-
-    return !is_valid_node || TTL_is_expired;
-  }
-
   typename std::list<Node>::const_iterator GetNodePosition(const Key& key,
                                                            int hash) const {
     auto response_time = std::chrono::steady_clock::now();
@@ -253,7 +234,7 @@ class HashTable : public BaseClass<Key, Value> {
     for (auto it = bucket_pointers_[hash];
          it != data_.end() && it->cached == hash; ++it) {
       Node node = *it;
-      if (node.key == key && !TTLIsExpired(response_time, it)) {
+      if (node.key == key) {
         return it;
       }
     }
@@ -267,7 +248,7 @@ class HashTable : public BaseClass<Key, Value> {
     for (auto it = bucket_pointers_[hash];
          it != data_.end() && it->cached == hash; ++it) {
       Node node = *it;
-      if (node.key == key && !TTLIsExpired(response_time, it)) {
+      if (node.key == key) {
         return it;
       }
     }

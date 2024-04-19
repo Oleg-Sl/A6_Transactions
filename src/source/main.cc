@@ -3,6 +3,11 @@
 #include <model/hashtable/hash_table.h>
 #include <view/mainmenu.h>
 
+#include <mutex>
+#include <thread>
+
+#include "model/common/managerttl.h"
+
 int main() {
   s21::HashTable<std::string, s21::Student, s21::StudentComparator> hashtable;
   s21::SelfBalancingBinarySearchTree<std::string, s21::Student,
@@ -15,7 +20,7 @@ int main() {
   s21::MainMenu<std::string, s21::Student> mainmenu(controller_1, controller_2,
                                                     controller_1);
 
-  mainmenu.Start();
+  storage.Start();
 
   return 0;
 }
