@@ -82,24 +82,6 @@ struct StudentComparator {
   }
 };
 
-class Data {
- public:
-  Data() = default;
-  Data(std::string key, Student value, int validity = 0)
-      : key_(key), value_(value), validity_(validity) {}
-
-  std::string GetKey() { return key_; }
-  Student GetValue() { return value_; }
-  int GetValidity() { return validity_; }
-  void SetKey(std::string key) { key_ = key; }
-  void SetValue(Student value) { value_ = value; }
-  void SetValidity(int validity) { validity_ = validity; }
-
- private:
-  std::string key_;
-  Student value_;
-  int validity_{0};
-};
 }  // namespace s21
 
 #endif  // TRANSACTIONS_SOURCE_MODEL_COMMON_DATA_H_
