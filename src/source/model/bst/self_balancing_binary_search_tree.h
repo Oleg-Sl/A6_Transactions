@@ -2,6 +2,7 @@
 #define TRANSACTIONS_SOURCE_MODEL_BST_SELF_BALANCING_BINARY_SEARCH_TREE_H_
 
 #include <fstream>
+#include <chrono>
 
 #include "model/common/base_class.h"
 #include "model/common/data.h"
@@ -20,7 +21,8 @@ namespace s21 {
 		BSTNode* link[2] = { nullptr, nullptr };
 		std::pair<Key, Value> data;
 		bool color = Color::Black;
-
+		int TTL{ 0 };
+		std::chrono::steady_clock::time_point create_time;
 		BSTNode() = default;
 		BSTNode(Key key, Value value) {
 			data = std::make_pair(key, value);
@@ -59,7 +61,7 @@ namespace s21 {
 					current_ = obj.current_;
 					leaf_ = obj.leaf_;
 					return *this;
-				}				
+				}
 
 				BSTIterator& operator++() noexcept {
 					if (current_->link[1] != leaf_) {
@@ -88,7 +90,7 @@ namespace s21 {
 				ValueType* operator->() const noexcept { return &(current_->data); }
 
 			private:
-				Pointer current_;				
+				Pointer current_;
 				Pointer leaf_;
 			};
 
@@ -99,7 +101,7 @@ namespace s21 {
 			bool Update(const Key& key, const Value& value);
 			std::vector<Key> Keys() const;
 			bool Rename(const Key& key, const Key& new_key);
-			int Ttl(const Key& param) const;
+			int Ttl(const Key& key) const;
 			std::vector<Key> Find(const Value& value) const;
 			std::vector<Value> Showall() const;
 			std::pair<bool, int> Upload(const std::string& path);
@@ -143,6 +145,8 @@ namespace s21 {
 	template<typename Key, typename Value, typename ValueEqual>
 	bool SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Set(const Key& key, const Value& value, int validity) {
 		Pointer tmp = new Node(key, value);
+		tmp->TTL = validity;
+		tmp->create_time = std::chrono::steady_clock::now();
 		if (!root_) {
 			root_ = tmp;
 			root_->color = Color::Black;
@@ -246,8 +250,15 @@ namespace s21 {
 	}
 
 	template<typename Key, typename Value, typename ValueEqual>
-	int SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Ttl(const Key& param) const {
-		return 0;
+	int SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Ttl(const Key& key) const {
+		Pointer node = Search(key);
+		if (!node) throw std::invalid_argument("Key is not exists");
+
+		auto response_time = std::chrono::steady_clock::now();
+		return node->TTL - std::chrono::duration_cast<std::chrono::seconds>(
+			response_time - node->create_time)
+			.count();
+
 	}
 
 	template<typename Key, typename Value, typename ValueEqual>
@@ -282,7 +293,7 @@ namespace s21 {
 	}
 
 	template<typename Key, typename Value, typename ValueEqual>
-	std::pair<bool, int> SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Upload(const std::string& path)	{
+	std::pair<bool, int> SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Upload(const std::string& path) {
 		std::ifstream file(path);
 		Key key;
 		Value value;
@@ -298,11 +309,11 @@ namespace s21 {
 			}
 		}
 
-		return std::pair<bool, int>(true, counter);		
+		return std::pair<bool, int>(true, counter);
 	}
 
 	template<typename Key, typename Value, typename ValueEqual>
-	std::pair<bool, int> SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Export(const std::string& path) const{
+	std::pair<bool, int> SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Export(const std::string& path) const {
 		int count = 0;
 		std::ofstream out;
 		out.open(path);
@@ -581,7 +592,7 @@ namespace s21 {
 	}
 
 	template<typename Key, typename Value, typename ValueEqual>
-	typename SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Iterator SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Begin() const{
+	typename SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Iterator SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Begin() const {
 		Pointer it = root_;
 		while (it && it->link[0] != leaf_) {
 			it = it->link[0];
@@ -592,7 +603,7 @@ namespace s21 {
 
 
 	template<typename Key, typename Value, typename ValueEqual>
-	typename SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Iterator SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::End() const{
+	typename SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Iterator SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::End() const {
 		Pointer it = root_;
 		while (it && it->link[1] != leaf_) {
 			it = it->link[1];
@@ -608,7 +619,7 @@ namespace s21 {
 		}
 	}
 
-	
+
 
 
 

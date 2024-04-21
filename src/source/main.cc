@@ -5,7 +5,7 @@
 
 int main() {
   s21::HashTable<std::string, s21::Student, s21::StudentComparator> hashtable;
-  s21::SelfBalancingBinarySearchTree sbbst;
+  s21::SelfBalancingBinarySearchTree<std::string, s21::Student, s21::StudentComparator> sbbst;
 
   s21::Controller controller_1(std::move(hashtable));
   s21::Controller controller_2(std::move(sbbst));
