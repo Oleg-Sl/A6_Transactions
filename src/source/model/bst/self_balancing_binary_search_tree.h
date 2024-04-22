@@ -3,6 +3,8 @@
 
 #include <chrono>
 #include <fstream>
+#include <thread>
+#include <mutex>
 
 #include "model/common/base_class.h"
 #include "model/common/data.h"
@@ -34,6 +36,7 @@ template <typename Key, typename Value,
           typename ValueEqual = std::equal_to<Value>>
 class SelfBalancingBinarySearchTree : public BaseClass<Key, Value> {
  public:
+  std::mutex mtx;
   class BSTIterator;
   using Node = BSTNode<Key, Value>;
   using Pointer = Node*;
@@ -144,7 +147,7 @@ SelfBalancingBinarySearchTree<Key, Value,
 
 template <typename Key, typename Value, typename ValueEqual>
 bool SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Set(
-    const Key& key, const Value& value, int validity) {
+    const Key& key, const Value& value, int validity) {    
   Pointer tmp = new Node(key, value);
   tmp->TTL = validity;
   tmp->create_time = std::chrono::steady_clock::now();
@@ -175,7 +178,13 @@ bool SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Set(
     }
   }
   if (validity) {
-    // Delete node !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      std::thread th([&, validity, key]() {
+          std::this_thread::sleep_for(std::chrono::seconds(validity));
+          mtx.lock();
+            Del(key);
+          mtx.unlock();
+          });      
+      th.detach();
   }
   return true;
 }
