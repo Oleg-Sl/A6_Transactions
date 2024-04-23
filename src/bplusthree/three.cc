@@ -8,30 +8,44 @@
 
 
 int main() {
-    std::vector<int> v;
 
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<int> uniform_dist(1, 100000000);
-    for (int i = 0; i < 100000; ++i) {
-        v.push_back(uniform_dist(gen));
+    std::uniform_int_distribution<int> uniform_dist(1, 10000000);
+
+    for (int j = 0; j < 20; ++j) {
+        std::vector<int> v;
+
+        for (int i = 0; i < 20000; ++i) {
+            auto el = uniform_dist(gen);
+            if (std::find(v.begin(), v.end(), el) == v.end()) {
+                v.push_back(el);
+            }
+        }
+
+        std::shuffle(v.begin(), v.end(), gen);
+        // for (auto el : v) {
+        //     std::cout << el << " ";
+        // }
+        std::cout << std::endl;
+
+        Three<int, std::string> three;
+        for (size_t i = 0; i < v.size(); ++i) {
+            three.insert(v[i], std::to_string(v[i]));
+        }
+        // three.printTree();
+        for (size_t i = 0; i <  v.size(); ++i) {
+            // three.printTree();
+            // std::cout << "Remove = " << v[i]  << std::endl;
+            three.remove(v[i]);
+        }
+
+        // std::cout << "======================================================" << std::endl;
+        three.printTree();
     }
 
-    std::shuffle(v.begin(), v.end(), gen);
-    // for (auto el : v) {
-    //     std::cout << el << " ";
-    // }
-    std::cout << std::endl;
 
-    Three<int, std::string> three;
-    for (size_t i = 0; i < v.size(); ++i) {
-        three.insert(v[i], std::to_string(v[i]));
-    }
-    three.printTree();
-    for (size_t i = 0; i <  v.size(); ++i) {
-        three.remove(v[i]);
-    }
-    // three.printTree();
+    // three.printNode(three.root_);
     // three.remove(0);
     // three.remove(1);
     // three.remove(2);
