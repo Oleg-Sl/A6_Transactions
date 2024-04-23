@@ -7,6 +7,7 @@
 #include <mutex>
 #include <queue>
 #include <thread>
+#include <functional>
 
 #include "model/common/base_class.h"
 

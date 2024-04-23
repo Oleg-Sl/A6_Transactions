@@ -31,7 +31,7 @@ class StorageBenchmarkMenu : BaseView {
   }
 
  private:
-  void MeasureTimeStorage(Controller<Key, Value> controller,
+  void MeasureTimeStorage(Controller<Key, Value> &controller,
                           size_t count_elements, size_t repeats) {
     StorageBenchmark benchmark_;
     benchmark_.FillStorage(controller, count_elements);

@@ -10,17 +10,17 @@ class StorageBenchmark {
  public:
   static constexpr int kKeyLength = 15;
 
-  static void FillStorage(const Controller<std::string, Student>& controller,
+  static void FillStorage(Controller<std::string, Student>& controller,
                           size_t count);
-  static double MeasureGet(const Controller<std::string, Student>& storage,
+  static double MeasureGet(Controller<std::string, Student>& storage,
                            size_t repeats);
-  static double MeasureShowAll(const Controller<std::string, Student>& storage,
+  static double MeasureShowAll(Controller<std::string, Student>& storage,
                                size_t repeats);
-  static double MeasureFind(const Controller<std::string, Student>& storage,
+  static double MeasureFind(Controller<std::string, Student>& storage,
                             size_t repeats);
-  static double MeasureSet(const Controller<std::string, Student>& storage,
+  static double MeasureSet(Controller<std::string, Student>& storage,
                            size_t repeats);
-  static double MeasureDel(const Controller<std::string, Student>& storage,
+  static double MeasureDel(Controller<std::string, Student>& storage,
                            size_t repeats);
 };
 }  // namespace s21
