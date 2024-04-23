@@ -1,21 +1,14 @@
 #ifndef TRANSACTIONS_SOURCE_VIEW_STORAGEMENU_H_
 #define TRANSACTIONS_SOURCE_VIEW_STORAGEMENU_H_
 
-#include <view/baseview.h>
-
-#include <atomic>
-#include <condition_variable>
 #include <functional>
 #include <map>
-#include <mutex>
-#include <sstream>
 #include <stack>
 #include <string>
-#include <thread>
 
 #include "controller/controller.h"
-#include "model/common/managerttl.h"
 #include "model/parser/parser.h"
+#include "view/baseview.h"
 
 namespace s21 {
 template <typename Key, typename Value>
@@ -37,45 +30,24 @@ class StorageMenu : BaseView {
       {"help", {[this] { DisplayMenu(kStorageCommands); }, ""}},
       {"exit", {[this] { PopMenu(); }, ""}}};
 
-  explicit StorageMenu(const Controller<Key, Value>& controller)
-      : controller_(controller), manager(controller_.model_) {}
+  explicit StorageMenu(Controller<Key, Value>& controller)
+      : controller_(controller) {}
 
   void Start() override {
     PushMenu(kStorageCommands);
     DisplayMenu(kStorageCommands);
-
-    std::thread t([this] {
-      manager.StartManager(std::chrono::seconds(100), mtx_, cv_, access_);
-    });
 
     while (stack_menu_.size() > 0) {
       std::string command;
       std::cout << "> ";
       std::cin >> command;
 
-      {
-        std::unique_lock<std::mutex> lock(mtx_);
-        cv_.wait(lock, [this] { return access_; });
-        cv_.notify_all();
-      }
-
-      std::unique_lock<std::mutex> lock(mtx_);
-      cv_.wait(lock, [this] { return access_; });
-      access_ = false;
       ExecuteCommand(command);
-      access_ = true;
     }
-
-    manager.StopManager();
-    t.join();
   }
 
  private:
-  Controller<Key, Value> controller_;
-  std::mutex mtx_;
-  std::condition_variable cv_;
-  bool access_ = true;
-  s21::ManagerTTL<Key, Value> manager;
+  Controller<Key, Value>& controller_;
 
   void Set() {
     std::stringstream user_input = ReadInputAsStringStream();
@@ -85,11 +57,9 @@ class StorageMenu : BaseView {
     bool status = false;
     auto optional_arg = parser_.ParseOptionalArgument<int>(user_input, "ex");
     if (optional_arg.first.empty()) {
-      status = controller_.Set(key, value);
+      status = controller_.Set(key, value, 0);
     } else {
       status = controller_.Set(key, value, optional_arg.second);
-      manager.AddRecord(typename ManagerTTL<Key, Value>::Record{
-          key, optional_arg.second, std::chrono::steady_clock::now()});
     }
 
     std::cout << StatusToStr(status) << std::endl;

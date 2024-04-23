@@ -1,13 +1,13 @@
 #ifndef TRANSACTIONS_SOURCE_VIEW_BASEVIEW_H_
 #define TRANSACTIONS_SOURCE_VIEW_BASEVIEW_H_
 
-#include <model/parser/parser.h>
-
 #include <functional>
 #include <iostream>
 #include <map>
 #include <stack>
 #include <string>
+
+#include "model/parser/parser.h"
 
 namespace s21 {
 class BaseView {
