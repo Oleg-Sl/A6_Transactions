@@ -1,13 +1,13 @@
 #ifndef TRANSACTIONS_SOURCE_MODEL_HASHTABLE_HASH_TABLE_H_
 #define TRANSACTIONS_SOURCE_MODEL_HASHTABLE_HASH_TABLE_H_
 
-#include <model/common/base_class.h>
-#include <model/common/data.h>
-
 #include <chrono>
 #include <fstream>
 #include <list>
 #include <stdexcept>
+
+#include "model/common/base_class.h"
+#include "model/common/data.h"
 
 namespace s21 {
 
@@ -107,7 +107,6 @@ class HashTable : public BaseClass<Key, Value> {
   }
 
   std::vector<Key> Keys() const override {
-    auto response_time = std::chrono::steady_clock::now();
     std::vector<Key> result;
 
     for (auto it = data_.begin(); it != data_.end(); ++it) {
@@ -154,7 +153,6 @@ class HashTable : public BaseClass<Key, Value> {
   }
 
   std::vector<Key> Find(const Value& value) const override {
-    auto response_time = std::chrono::steady_clock::now();
     std::vector<Key> result;
     ValueEqual equal;
 
@@ -166,7 +164,6 @@ class HashTable : public BaseClass<Key, Value> {
   }
 
   std::vector<Value> Showall() const override {
-    auto response_time = std::chrono::steady_clock::now();
     std::vector<Value> result;
 
     for (auto it = data_.begin(); it != data_.end(); ++it) {
@@ -196,7 +193,6 @@ class HashTable : public BaseClass<Key, Value> {
   }
 
   std::pair<bool, int> Export(const std::string& path) const override {
-    auto response_time = std::chrono::steady_clock::now();
     std::ofstream file(path);
 
     if (!file.is_open()) {
@@ -229,8 +225,6 @@ class HashTable : public BaseClass<Key, Value> {
 
   typename std::list<Node>::const_iterator GetNodePosition(const Key& key,
                                                            int hash) const {
-    auto response_time = std::chrono::steady_clock::now();
-
     for (auto it = bucket_pointers_[hash];
          it != data_.end() && it->cached == hash; ++it) {
       Node node = *it;
@@ -243,8 +237,6 @@ class HashTable : public BaseClass<Key, Value> {
   }
 
   typename std::list<Node>::iterator GetNodePosition(const Key& key, int hash) {
-    auto response_time = std::chrono::steady_clock::now();
-
     for (auto it = bucket_pointers_[hash];
          it != data_.end() && it->cached == hash; ++it) {
       Node node = *it;

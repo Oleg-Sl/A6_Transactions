@@ -1,10 +1,9 @@
 #ifndef TRANSACTIONS_SOURCE_VIEW_MAINMENU_H_
 #define TRANSACTIONS_SOURCE_VIEW_MAINMENU_H_
 
-#include <view/baseview.h>
-
 #include "controller/controller.h"
 #include "model/parser/parser.h"
+#include "view/baseview.h"
 #include "view/storagemenu.h"
 
 namespace s21 {
@@ -17,9 +16,8 @@ class MainMenu : public BaseView {
       {"3", {[this] { UseBPlusTree(); }, "use BPlusTree"}},
       {"4", {[this] { PopMenu(); }, "exit"}}};
 
-  MainMenu(const Controller<Key, Value>& hashtable,
-           const Controller<Key, Value>& sbbst,
-           const Controller<Key, Value>& bplustree)
+  MainMenu(Controller<Key, Value>& hashtable, Controller<Key, Value>& sbbst,
+           Controller<Key, Value>& bplustree)
       : hashtable_(hashtable), sbbst_(sbbst), bplustree_(bplustree) {}
 
   void Start() override {
@@ -36,9 +34,9 @@ class MainMenu : public BaseView {
   }
 
  private:
-  Controller<Key, Value> hashtable_;
-  Controller<Key, Value> sbbst_;
-  Controller<Key, Value> bplustree_;
+  Controller<Key, Value>& hashtable_;
+  Controller<Key, Value>& sbbst_;
+  Controller<Key, Value>& bplustree_;
 
   void UseHashTable() const { StorageMenu<Key, Value>(hashtable_).Start(); }
 
