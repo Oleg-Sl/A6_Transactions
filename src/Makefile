@@ -57,5 +57,3 @@ btree:
 	g++ -Wall -Wextra -Werror -o bthree bplusthree/*.cc
 	./bthree
 
-format: build
-	cmake --build $(BUILD_DIR) --target format

@@ -2,6 +2,7 @@
 #include <string>
 #include <iostream>
 #include <algorithm>
+#include <stdexcept>
 
 
 template <typename Key, typename Value>
@@ -27,7 +28,43 @@ public:
         return root_;
     }
 
-    node_type* searchLeaf(Key key) {
+    bool Exists(const Key& key) const {
+        node_type* leaf = searchLeaf(key);
+        if (leaf == nullptr) {
+            return false;
+        }
+        auto it = lower_bound(leaf->keys.begin(), leaf->keys.end(), key);
+        return it != leaf->keys.end() && *it == key;
+    }
+
+    bool Update(const Key& key, const Value& value) {
+        node_type* leaf = searchLeaf(key);
+        if (leaf == nullptr) {
+            return false;
+        }
+        auto it = lower_bound(leaf->keys.begin(), leaf->keys.end(), key);
+        if (it == leaf->keys.end() || *it != key) {
+            return false;
+        }
+        size_t index = std::distance(leaf->keys.begin(), it);
+        leaf->values[index] = value;
+        return true;
+    }
+
+    const Value& search(const Key& key) const {
+        node_type* leaf = searchLeaf(key);
+        if (leaf == nullptr) {
+            throw std::invalid_argument("Key not found");
+        }
+        auto it = lower_bound(leaf->keys.begin(), leaf->keys.end(), key);
+        if (it == leaf->keys.end() || *it != key) {
+            throw std::invalid_argument("Key not found");
+        }
+        size_t index = std::distance(leaf->keys.begin(), it);
+        return leaf->values[index];
+    }
+
+    node_type* searchLeaf(const Key& key) const {
         if (root_ == nullptr) {
             return nullptr;
         }
@@ -42,89 +79,71 @@ public:
                 size_t index = it - node->keys.begin();
                 node = node->childs[index];
             }
-            // for (size_t i = 0; i <= node->keys.size(); ++i) {
-            //     if (i == node->keys.size() || key < node->keys[i]) {
-            //         node = node->childs[i];
-            //         break;
-            //     }
-            // }
         }
         return node;
     }
 
-    void insert(Key key, Value value) {
+    bool insert(Key key, Value value) {
         node_type* leaf = searchLeaf(key);
-        // std::cout << "leaf = " << leaf << std::endl;
         if (leaf == nullptr) {
             root_ = new node_type;
-            // printNode(root_);
             root_->is_leaf = true;
             root_->keys.push_back(key);
             root_->values.push_back(value);
-            return;
+            begin_ = root_;
+            return true;
         }
-        // std::cout << "2" << std::endl;
         auto middle_it = lower_bound(leaf->keys.begin(), leaf->keys.end(), key);
+        if (*middle_it == key) {
+            return false;
+        };
         size_t insert_index = middle_it - leaf->keys.begin();
-        // std::cout << "3" << std::endl;
-
         if (middle_it == leaf->keys.end()) {
-            // std::cout << "4, sz = " << leaf->values.size() << ", sz = " << leaf->keys.size()  << std::endl;
             leaf->values.push_back(value);
             leaf->keys.push_back(key);
         } else if (*middle_it == key) {
-            // std::cout << "5" << std::endl;
             leaf->values[insert_index] = value;
         } else {
-            // std::cout << "6, sz = " << leaf->values.size() << ", sz = " << leaf->keys.size() << std::endl;
             leaf->values.push_back(value);
             leaf->keys.push_back(key);            
             std::rotate(leaf->keys.begin() + insert_index, leaf->keys.end() - 1, leaf->keys.end());
             std::rotate(leaf->values.begin() + insert_index, leaf->values.end() - 1, leaf->values.end());
         }
-        // std::cout << "7" << std::endl;
         if (leaf->keys.size() > 2 * degree) {
-            // std::cout << "8" << std::endl;
             split(leaf);
-            // std::cout << "9" << std::endl;
         }
+        return true;
     }
 
-    void remove(Key key) {
+    bool remove(const Key& key) {
         node_type* leaf = searchLeaf(key);
-        // std::cout << "leaf = " << leaf << ", key = " << key << std::endl;
         if (leaf == nullptr) {
-            // std::cout << "leaf = " << leaf << ", key = " << key << std::endl;
-            return;
+            return false;
         }
-        removeKey(leaf, key);
+        return removeKey(leaf, key);
     }
 
-    size_t degree{200};
-    node_type *root_{};
-    node_type *begin_leaf{};
+    node*
+
+
 private:
-    void removeKey(node_type *node, Key& key) {
-        // std::cout << "remove key = " << key << " from node = " << node->keys[0] << std::endl;
-        // for (auto& el : node->keys) {
-        //     std::cout << el << ", ";
-        // }
-        // std::cout << std::endl;
-        removeKeyFromNode(node, key);
-        // for (auto& el : node->keys) {
-        //     std::cout << el << ", ";
-        // }
-        // std::cout << std::endl;
+    size_t degree{5};
+    node_type *root_{};
+    node_type *begin_{};
+
+    bool removeKey(node_type *node, const Key& key) {
+        bool is_removed = removeKeyFromNode(node, key);
         
         if (node == root_) {
             updateRoot(node);
-            return;
+            return is_removed;
         }
         if (node->keys.size() < degree) {
             rebalance(node);
         } else {
             recursiveUpdateKeys(node->parent);
         }
+        return is_removed;
     }
 
     void rebalance(node_type* node) {
@@ -132,31 +151,21 @@ private:
         node_type* right_neighbor = node->right;
 
         if (left_neighbor != nullptr && left_neighbor->keys.size() > degree) {
-            // std::cout << "Заимствование из левого узла" << std::endl;
             borrowFromLeftNeighbor(left_neighbor, node);
         } else if (right_neighbor != nullptr && right_neighbor->keys.size() > degree) {
-            // std::cout << "Заимствование из правого узла = " << node << right_neighbor->keys.size() << std::endl;
             borrowFromRightNeighbor(node, right_neighbor);
         } else if (left_neighbor && left_neighbor->parent == node->parent) {
-            // std::cout << "Объединение с левым узлом" << std::endl;
-            // std::cout << "left_neighbor = " << left_neighbor->keys[0] << ", node = " << node->keys[0] << std::endl;
-            // std::cout << "parent left = " << left_neighbor->parent << ", parent node = " << node->parent << std::endl;
             mergeNodes(left_neighbor, node);
         } else if (right_neighbor && right_neighbor->parent == node->parent) {
-            // std::cout << "Объединение с правым узлом" << std::endl;
-            // std::cout << "right_neighbor = " << right_neighbor->keys[0] << ", node = " << node->keys[0] << std::endl;
-            // std::cout << "parent right = " << right_neighbor->parent << ", parent node = " << node->parent << std::endl;
             mergeNodes(node, right_neighbor);
         }
     }
 
     void mergeNodes(node_type* left, node_type* right) {
-            // std::cout << "Merge: " << "left = " << left->keys[0] << ", right = " << right->keys[0] << std::endl;
             if (left->is_leaf) {
                 std::move(right->keys.begin(), right->keys.end(), std::back_inserter(left->keys));
                 std::move(right->values.begin(), right->values.end(), std::back_inserter(left->values));
             } else {
-                // std::transform(right->childs.begin(), right->childs.end(), std::back_inserter(left->keys), [](auto item) { return item->keys.front(); });
                 for (auto& item : right->childs) {
                     left->keys.push_back(item->keys.front());
                 }
@@ -165,26 +174,18 @@ private:
                     item->parent = left;
                 }
             }
-
             if (right->right != nullptr) {
                 right->right->left = left;
             }
-
             left->right = right->right;
-            // printNode(root_);
-
-            // auto it = upper_bound(right->parent->keys.begin(), right->parent->keys.end(), left->keys.front());
-            // auto ind = 0;
             for (size_t i = 0; i < right->parent->childs.size(); ++i) {
                 node_type* item = right->parent->childs[i];
                 if (item == right) {
-                    // ind = i;
                     removeKey(right->parent, right->parent->keys[i - 1]);
                     break;
                 }
             }
             updateKeys(left->parent);
-            // printTree();
             delete right;
     }
 
@@ -201,17 +202,7 @@ private:
             borrowed->parent = right;
             left->childs.pop_back();
         }
-
-        // recursiveUpdateKeys(left->parent);
-        // recursiveUpdateKeys(right->parent);
-        // if (right->is_leaf) {
-            recursiveUpdateKeys(right->parent);
-            // recursiveUpdateKeys(left->parent);
-        // } else {
-        //     recursiveUpdateKeys(right);
-        //     recursiveUpdateKeys(left);
-
-        // }
+        recursiveUpdateKeys(right->parent);
     }
 
     void borrowFromRightNeighbor(node_type* left, node_type* right) {
@@ -227,27 +218,13 @@ private:
             borrowed->parent = left;
             right->childs.erase(right->childs.begin());
         }
-        // recursiveUpdateKeys(left->parent);
-        // recursiveUpdateKeys(right->parent);
-        // recursiveUpdateKeys(right);
-        // if (right->is_leaf) {
-            recursiveUpdateKeys(right->parent);
-            // recursiveUpdateKeys(left->parent);
-        // } else {
-        //     recursiveUpdateKeys(right);
-        //     recursiveUpdateKeys(left);
-        // }
+        recursiveUpdateKeys(right->parent);
     }
 
     void updateRoot(node_type *node) {
-        
-        // std::cout << "update root1: " << node->keys[0] << ", sz = " << node->keys.size() << std::endl;
-        // printNode(node);
         if (node->keys.size() > 0) {
             return;
         }
-        // std::cout << "update root2: " << node->keys[0] << std::endl;
-
         if (!node->is_leaf) {
             root_ = node->childs[0];
             root_->parent = nullptr;
@@ -306,8 +283,6 @@ private:
             new_root->childs.push_back(node);
             new_root->childs.push_back(new_node);
             root_ = new_root;
-            // node->is_leaf = true;
-            // new_node->is_leaf = true;
             node->parent = new_root;
             new_node->parent = new_root;
             return;
@@ -329,35 +304,26 @@ private:
 
     void moveDataToNewNode(node_type *src, node_type *dst, size_t border) {
         if (src->is_leaf) {
-            // printNode(src);
-            // printNode(dst);
             std::move(src->keys.begin() + border, src->keys.end(), std::back_inserter(dst->keys));
             std::move(src->values.begin() + border, src->values.end(), std::back_inserter(dst->values));
             src->keys.erase(src->keys.begin() + border, src->keys.end());
             src->values.erase(src->values.begin() + border, src->values.end());
-            // printNode(src);
-            // printNode(dst);
         } else {
             std::move(src->keys.begin() + border + 1, src->keys.end(), std::back_inserter(dst->keys));
             src->keys.erase(src->keys.begin() + border, src->keys.end());
-            // std::transform(src->childs.begin() + border, src->childs.end(), src->childs.begin() + border, [dst](auto item) { return item->parent = dst; });
-            // auto tmp = dst->childs.end() - 1;
             std::move(src->childs.begin() + border + 1, src->childs.end(), std::back_inserter(dst->childs));
             for (auto& item : dst->childs) {
                 item->parent = dst;
             }
-            // std::transform(dst->childs.begin(), dst->childs.end(), dst->childs.begin(), [dst](auto item) { return item->parent = dst; });
-            // std::transform(tmp, dst->childs.end(), dst, [dst](auto item) { return item->parent = dst; });
-            // std::transform(src->childs.begin(), src->childs.end(), src->childs.begin(), [dst](auto item) { return item->parent = dst; });
             src->childs.erase(src->childs.begin() + border + 1, src->childs.end());
         }
     }
 
-    void removeKeyFromNode(node_type* node, Key& key) {
+    bool removeKeyFromNode(node_type* node, const Key& key) {
         auto it = lower_bound(node->keys.begin(), node->keys.end(), key);
         size_t index = it - node->keys.begin();
         if (it == node->keys.end() || node->keys.size() == 0) {
-            return;
+            return false;
         }
 
         node->keys.erase(it);
@@ -366,21 +332,8 @@ private:
         } else {
             node->childs.erase(node->childs.begin() + index + 1);
         }
+        return true;
     }
-
-    // void updateKeys(node_type *left, node_type *right) {
-    //     node_type *parent_left = left->parent;
-    //     node_type *parent_right = right->parent;
-
-    //     while (parent_left != parent_right) {
-    //         parent_left = parent_left->parent;
-    //         parent_right = parent_right->parent;
-    //     }
-        
-    //     if (parent_left == nullptr) {
-    //         return;
-    //     }
-    // }
 
  public:   
     void printNode(node_type *node) {
