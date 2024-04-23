@@ -55,15 +55,15 @@ std::string GenerateKey(size_t length) {
   return key;
 }
 
-void StorageBenchmark::FillStorage(
-    const Controller<std::string, Student>& controller, size_t count) {
+void StorageBenchmark::FillStorage(Controller<std::string, Student>& controller,
+                                   size_t count) {
   for (size_t i = 0; i < count; ++i) {
     controller.Set(GenerateKey(kKeyLength), GenerateStudent());
   }
 }
 
-double StorageBenchmark::MeasureGet(
-    const Controller<std::string, Student>& storage, size_t repeats) {
+double StorageBenchmark::MeasureGet(Controller<std::string, Student>& storage,
+                                    size_t repeats) {
   std::vector<std::string> keys = storage.Keys();
   double time = 0;
 
@@ -76,38 +76,38 @@ double StorageBenchmark::MeasureGet(
 }
 
 double StorageBenchmark::MeasureShowAll(
-    const Controller<std::string, Student>& storage, size_t repeats) {
+    Controller<std::string, Student>& storage, size_t repeats) {
   double time = 0;
 
   for (size_t i = 0; i < repeats; ++i) {
-    time += MeasureTime(&Controller<std::string, Student>::Showall, storage);
+    time += MeasureTime(&Controller<std::string, Student>::Showall, &storage);
   }
 
   return time;
 }
 
-double StorageBenchmark::MeasureFind(
-    const Controller<std::string, Student>& storage, size_t repeats) {
+double StorageBenchmark::MeasureFind(Controller<std::string, Student>& storage,
+                                     size_t repeats) {
   double time = 0;
   std::vector<Student> students = storage.Showall();
 
   for (size_t i = 0; i < repeats; ++i) {
     Student student = students[i % (students.size() - 1)];
     time +=
-        MeasureTime(&Controller<std::string, Student>::Find, storage, student);
+        MeasureTime(&Controller<std::string, Student>::Find, &storage, student);
   }
 
   return time;
 }
 
-double StorageBenchmark::MeasureSet(
-    const Controller<std::string, Student>& storage, size_t repeats) {
+double StorageBenchmark::MeasureSet(Controller<std::string, Student>& storage,
+                                    size_t repeats) {
   double time = 0;
 
   for (size_t i = 0; i < repeats; ++i) {
     Student student = GenerateStudent();
     std::string key = GenerateKey(kKeyLength);
-    time += MeasureTime(&Controller<std::string, Student>::Set, storage, key,
+    time += MeasureTime(&Controller<std::string, Student>::Set, &storage, key,
                         student, 0);
     storage.Del(key);
   }
@@ -115,14 +115,14 @@ double StorageBenchmark::MeasureSet(
   return time;
 }
 
-double StorageBenchmark::MeasureDel(
-    const Controller<std::string, Student>& storage, size_t repeats) {
+double StorageBenchmark::MeasureDel(Controller<std::string, Student>& storage,
+                                    size_t repeats) {
   double time = 0;
   std::vector<std::string> keys = storage.Keys();
 
   for (size_t i = 0; i < repeats; ++i) {
     std::string key = keys[i % (keys.size() - 1)];
-    time += MeasureTime(&Controller<std::string, Student>::Del, storage, key);
+    time += MeasureTime(&Controller<std::string, Student>::Del, &storage, key);
   }
 
   return time;
