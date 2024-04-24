@@ -4,6 +4,7 @@
 #include <functional>
 #include <iostream>
 #include <map>
+#include <sstream>
 #include <stack>
 #include <string>
 

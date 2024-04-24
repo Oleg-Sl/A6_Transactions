@@ -1,10 +1,10 @@
 #ifndef TRANSACTIONS_SOURCE_MODEL_PARSER_PARSER_H_
 #define TRANSACTIONS_SOURCE_MODEL_PARSER_PARSER_H_
 
+#include <istream>
 #include <limits>
-#include <sstream>
+#include <ostream>
 #include <string>
-#include <vector>
 
 namespace s21 {
 

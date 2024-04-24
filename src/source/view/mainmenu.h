@@ -2,7 +2,6 @@
 #define TRANSACTIONS_SOURCE_VIEW_MAINMENU_H_
 
 #include "controller/controller.h"
-#include "model/parser/parser.h"
 #include "view/baseview.h"
 #include "view/storagemenu.h"
 

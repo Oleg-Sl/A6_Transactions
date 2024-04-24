@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "data.h"
+#include "model/common/data.h"
 
 namespace s21 {
 template <typename Key, typename Value>

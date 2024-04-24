@@ -50,15 +50,15 @@ class StorageBenchmarkMenu : BaseView {
 
   void HashTable() {
     s21::HashTable<Key, Value> hashtable;
-    s21::Controller controller(hashtable);
+    Controller controller(hashtable);
 
     auto input = InputCountAndRepeats();
     MeasureTimeStorage(controller, input.first, input.second);
   }
 
   void SBBST() {
-    s21::SelfBalancingBinarySearchTree sbbst;
-    s21::Controller controller(sbbst);
+    SelfBalancingBinarySearchTree<Key, Value> sbbst;
+    Controller controller(sbbst);
 
     auto input = InputCountAndRepeats();
     MeasureTimeStorage(controller, input.first, input.second);
@@ -66,7 +66,7 @@ class StorageBenchmarkMenu : BaseView {
 
   void BPlusTree() {
     s21::HashTable<Key, Value> hashtable;
-    s21::Controller controller(hashtable);
+    Controller controller(hashtable);
 
     auto input = InputCountAndRepeats();
     MeasureTimeStorage(controller, input.first, input.second);

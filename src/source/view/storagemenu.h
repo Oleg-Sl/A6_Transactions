@@ -2,12 +2,11 @@
 #define TRANSACTIONS_SOURCE_VIEW_STORAGEMENU_H_
 
 #include <functional>
+#include <iomanip>
 #include <map>
-#include <stack>
 #include <string>
 
 #include "controller/controller.h"
-#include "model/parser/parser.h"
 #include "view/baseview.h"
 
 namespace s21 {
@@ -116,7 +115,11 @@ class StorageMenu : BaseView {
     std::stringstream user_input = ReadInputAsStringStream();
     Key key = parser_.ParseValue<Key>(user_input, "key");
     try {
-      std::cout << controller_.Ttl(key) << std::endl;
+      auto lifetime = controller_.Ttl(key);
+      if (lifetime < 0)
+        std::cout << "(null)" << std::endl;
+      else
+        std::cout << lifetime << std::endl;
     } catch (std::invalid_argument& ex) {
       std::cout << "(null)" << std::endl;
     }
