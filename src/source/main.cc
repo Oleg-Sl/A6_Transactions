@@ -12,7 +12,6 @@ int main() {
   s21::Controller controller_2(sbbst);
 
   s21::MainMenu mainmenu(controller_1, controller_2, controller_1);
-  s21::StorageMenu storage(controller_1);
 
   mainmenu.Start();
 
