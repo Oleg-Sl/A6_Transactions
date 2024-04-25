@@ -5,8 +5,8 @@
 #include <chrono>
 #include <condition_variable>
 #include <functional>
+#include <list>
 #include <mutex>
-#include <queue>
 #include <thread>
 
 #include "model/common/basestorage.h"
@@ -18,13 +18,12 @@ class ManagerTTL {
  public:
   struct Record {
     Key key;
-    int TTL;
-    std::chrono::steady_clock::time_point create_time;
+    std::chrono::steady_clock::time_point die_time;
 
-    bool operator<(const Record& other) const {
-      return create_time + std::chrono::seconds(TTL) >
-             other.create_time + std::chrono::seconds(other.TTL);
-    }
+    Record(Key key, int TTL)
+        : key(key),
+          die_time(std::chrono::seconds(TTL) +
+                   std::chrono::steady_clock::now()) {}
   };
 
   ManagerTTL(BaseStorage<Key, Value>& storage,
@@ -40,56 +39,49 @@ class ManagerTTL {
   }
 
   void AddRecord(const Record& record) {
-    if (record.TTL == 0) {
+    if (record.die_time <= std::chrono::steady_clock::now()) {
       return;
     }
 
-    std::unique_lock lock(pq_mtx_);
-    pq_.push(record);
+    std::unique_lock lock(records_mtx_);
+    auto it = records_.begin();
+    while (it != records_.end() && it->die_time < record.die_time) {
+      ++it;
+    }
+
+    records_.insert(it, record);
   }
 
   void DeleteExpiredRecords() {
     std::unique_lock lock(storage_mtx_);
-    std::unique_lock lock2(pq_mtx_);
-    std::chrono::steady_clock::time_point now =
-        std::chrono::steady_clock::now();
-    while (!pq_.empty() &&
-           pq_.top().create_time + std::chrono::seconds(pq_.top().TTL) <= now) {
-      storage_.Del(pq_.top().key);
-      pq_.pop();
+    std::unique_lock lock2(records_mtx_);
+    auto now = std::chrono::steady_clock::now();
+
+    while (!records_.empty() && records_.begin()->die_time <= now) {
+      storage_.Del(records_.begin()->key);
+      records_.erase(records_.begin());
     }
   }
 
   void RenameRecord(const Key& key, const Key& new_key) {
-    std::unique_lock lock_2(pq_mtx_);
-    std::priority_queue<Record> temp;
+    std::unique_lock lock_2(records_mtx_);
 
-    while (!pq_.empty()) {
-      if (pq_.top().key == key) {
-        Record new_record = pq_.top();
-        new_record.key = new_key;
-        temp.push(new_record);
-      } else {
-        temp.push(pq_.top());
+    for (auto it = records_.begin(); it != records_.end(); ++it) {
+      if (it->key == key) {
+        it->key = new_key;
       }
-      pq_.pop();
     }
-
-    std::swap(pq_, temp);
   }
 
   void DeleteRecord(const Key& key) {
-    std::unique_lock lock_2(pq_mtx_);
-    std::priority_queue<Record> temp;
+    std::unique_lock lock_2(records_mtx_);
 
-    while (!pq_.empty()) {
-      if (pq_.top().key != key) {
-        temp.push(pq_.top());
+    for (auto it = records_.begin(); it != records_.end(); ++it) {
+      if (it->key == key) {
+        records_.erase(it);
+        break;
       }
-      pq_.pop();
     }
-
-    std::swap(pq_, temp);
   }
 
   void StartManagerLoop(std::chrono::seconds sleep_time) {
@@ -115,12 +107,12 @@ class ManagerTTL {
 
  private:
   BaseStorage<Key, Value>& storage_;
-  std::priority_queue<Record> pq_;
+  std::list<Record> records_;
 
   std::atomic<bool> stop_manager_ = false;
   std::condition_variable loop_condition_;
   std::mutex storage_mtx_;
-  std::mutex pq_mtx_;
+  std::mutex records_mtx_;
   std::thread manager_thread_;
 };
 

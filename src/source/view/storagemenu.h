@@ -109,7 +109,8 @@ class StorageMenu : BaseView {
     std::stringstream user_input = ReadInputAsStringStream();
     Key key_1 = parser_.ParseValue<Key>(user_input, "key1");
     Key key_2 = parser_.ParseValue<Key>(user_input, "key2");
-    std::cout << controller_.Rename(key_1, key_2) << std::endl;
+    std::cout << std::boolalpha << controller_.Rename(key_1, key_2)
+              << std::endl;
   }
 
   void Ttl() {
