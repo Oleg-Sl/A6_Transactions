@@ -13,8 +13,7 @@ class Controller {
       : manager_(model, std::chrono::seconds(5)) {}
 
   bool Set(Key key, Value value, int ttl = 0) {
-    manager_.AddRecord(typename ManagerTTL<Key, Value>::Record{
-        key, ttl, std::chrono::steady_clock::now()});
+    manager_.AddRecord(typename ManagerTTL<Key, Value>::Record{key, ttl});
     return manager_.ExecuteStorageOperation(&BaseStorage<Key, Value>::Set, key,
                                             value, ttl);
   }
