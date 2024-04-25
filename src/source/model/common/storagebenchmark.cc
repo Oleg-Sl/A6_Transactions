@@ -38,7 +38,7 @@ Student GenerateStudent() {
   std::string city = cities[city_dist(gen)];
   int coins = coins_dist(gen);
 
-  return Student(name, surname, birthday_year, city, coins);
+  return Student{name, surname, birthday_year, city, coins};
 }
 
 std::string GenerateKey(size_t length) {

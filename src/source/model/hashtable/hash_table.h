@@ -6,15 +6,14 @@
 #include <list>
 #include <stdexcept>
 
-#include "model/common/base_class.h"
-#include "model/common/data.h"
+#include "model/common/basestorage.h"
 
 namespace s21 {
 
 template <typename Key, typename Value,
           typename ValueEqual = std::equal_to<Value>,
           typename Hasher = std::hash<Key>>
-class HashTable : public BaseClass<Key, Value> {
+class HashTable : public BaseStorage<Key, Value> {
  public:
   using time_type = std::chrono::steady_clock::time_point;
 
@@ -157,7 +156,9 @@ class HashTable : public BaseClass<Key, Value> {
     ValueEqual equal;
 
     for (auto it = data_.begin(); it != data_.end(); ++it) {
-      result.push_back(it->key);
+      if (equal(it->value, value)) {
+        result.push_back(it->key);
+      }
     }
 
     return result;

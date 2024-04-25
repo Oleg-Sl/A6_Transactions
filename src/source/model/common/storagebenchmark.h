@@ -2,7 +2,7 @@
 #define TRANSACTIONS_SOURCE_MODEL_COMMON_STORAGEBENCHMARK_H_
 
 #include "controller/controller.h"
-#include "model/common/data.h"
+#include "model/common/student.h"
 
 namespace s21 {
 

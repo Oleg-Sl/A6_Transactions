@@ -1,6 +1,6 @@
 
 #include "model/bst/self_balancing_binary_search_tree.h"
-#include "model/common/data.h"
+#include "model/common/student.h"
 #include "model/hashtable/hash_table.h"
 #include "view/mainmenu.h"
 
