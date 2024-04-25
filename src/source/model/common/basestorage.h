@@ -1,17 +1,15 @@
-#ifndef TRANSACTIONS_SOURCE_MODEL_COMMON_BASE_CLASS_H_
-#define TRANSACTIONS_SOURCE_MODEL_COMMON_BASE_CLASS_H_
+#ifndef TRANSACTIONS_SOURCE_MODEL_COMMON_BASESTORAGE_H_
+#define TRANSACTIONS_SOURCE_MODEL_COMMON_BASESTORAGE_H_
 
 #include <string>
 #include <vector>
 
-#include "model/common/data.h"
-
 namespace s21 {
 template <typename Key, typename Value>
-class BaseClass {
+class BaseStorage {
  public:
-  virtual ~BaseClass() = default;
-  virtual bool Set(const Key& key, const Value& value, int validity = 0) = 0;
+  virtual ~BaseStorage() = default;
+  virtual bool Set(const Key& key, const Value& value, int ttl = 0) = 0;
   virtual Value Get(const Key& key) const = 0;
   virtual bool Exists(const Key& key) const = 0;
   virtual bool Del(const Key& key) = 0;
@@ -26,4 +24,4 @@ class BaseClass {
 };
 }  // namespace s21
 
-#endif  // TRANSACTIONS_SOURCE_MODEL_COMMON_BASE_CLASS_H_
+#endif  // TRANSACTIONS_SOURCE_MODEL_COMMON_BASESTORAGE_H_

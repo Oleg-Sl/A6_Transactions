@@ -9,7 +9,7 @@
 #include <queue>
 #include <thread>
 
-#include "model/common/base_class.h"
+#include "model/common/basestorage.h"
 
 namespace s21 {
 
@@ -27,7 +27,7 @@ class ManagerTTL {
     }
   };
 
-  ManagerTTL(BaseClass<Key, Value>& storage,
+  ManagerTTL(BaseStorage<Key, Value>& storage,
              std::chrono::seconds clean_interaval)
       : storage_(storage), manager_thread_([this, &clean_interaval] {
           StartManagerLoop(clean_interaval);
@@ -40,6 +40,10 @@ class ManagerTTL {
   }
 
   void AddRecord(const Record& record) {
+    if (record.TTL == 0) {
+      return;
+    }
+
     std::unique_lock lock(pq_mtx_);
     pq_.push(record);
   }
@@ -54,6 +58,24 @@ class ManagerTTL {
       storage_.Del(pq_.top().key);
       pq_.pop();
     }
+  }
+
+  void RenameRecord(const Key& key, const Key& new_key) {
+    std::unique_lock lock_2(pq_mtx_);
+    std::priority_queue<Record> temp;
+
+    while (!pq_.empty()) {
+      if (pq_.top().key == key) {
+        Record new_record = pq_.top();
+        new_record.key = new_key;
+        temp.push(new_record);
+      } else {
+        temp.push(pq_.top());
+      }
+      pq_.pop();
+    }
+
+    std::swap(pq_, temp);
   }
 
   void DeleteRecord(const Key& key) {
@@ -92,7 +114,7 @@ class ManagerTTL {
   }
 
  private:
-  BaseClass<Key, Value>& storage_;
+  BaseStorage<Key, Value>& storage_;
   std::priority_queue<Record> pq_;
 
   std::atomic<bool> stop_manager_ = false;

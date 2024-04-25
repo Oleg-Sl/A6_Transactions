@@ -4,8 +4,7 @@
 #include <chrono>
 #include <fstream>
 
-#include "model/common/base_class.h"
-#include "model/common/data.h"
+#include "model/common/basestorage.h"
 
 namespace s21 {
 
@@ -32,7 +31,7 @@ class BSTNode {
 
 template <typename Key, typename Value,
           typename ValueEqual = std::equal_to<Value>>
-class SelfBalancingBinarySearchTree : public BaseClass<Key, Value> {
+class SelfBalancingBinarySearchTree : public BaseStorage<Key, Value> {
  public:
   class BSTIterator;
   using Node = BSTNode<Key, Value>;

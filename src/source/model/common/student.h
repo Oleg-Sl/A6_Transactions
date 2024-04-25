@@ -1,5 +1,5 @@
-#ifndef TRANSACTIONS_SOURCE_MODEL_COMMON_DATA_H_
-#define TRANSACTIONS_SOURCE_MODEL_COMMON_DATA_H_
+#ifndef TRANSACTIONS_SOURCE_MODEL_COMMON_STUDENT_H_
+#define TRANSACTIONS_SOURCE_MODEL_COMMON_STUDENT_H_
 
 #include <istream>
 #include <limits>
@@ -13,16 +13,6 @@ struct Student {
   int birthday{0};
   std::string city;
   int coins{0};
-
-  Student() = default;
-
-  Student(const std::string& name, const std::string& surname, int birthday,
-          const std::string& city, int coins)
-      : name(name),
-        surname(surname),
-        birthday(birthday),
-        city(city),
-        coins(coins) {}
 
   bool operator==(const Student& other) const {
     return name == other.name && surname == other.surname &&
@@ -65,4 +55,4 @@ struct StudentComparator {
 
 }  // namespace s21
 
-#endif  // TRANSACTIONS_SOURCE_MODEL_COMMON_DATA_H_
+#endif  // TRANSACTIONS_SOURCE_MODEL_COMMON_STUDENT_H_
