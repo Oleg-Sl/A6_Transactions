@@ -8,8 +8,6 @@ namespace s21 {
 
 class StorageBenchmark {
  public:
-  static constexpr int kKeyLength = 15;
-
   static void FillStorage(Controller<std::string, Student>& controller,
                           size_t count);
   static double MeasureGet(Controller<std::string, Student>& storage,
@@ -22,6 +20,11 @@ class StorageBenchmark {
                            size_t repeats);
   static double MeasureDel(Controller<std::string, Student>& storage,
                            size_t repeats);
+
+ private:
+  static std::string GenerateRandomString(size_t length);
+  static Student GenerateStudent();
+  static std::string GenerateKey(size_t length);
 };
 }  // namespace s21
 
