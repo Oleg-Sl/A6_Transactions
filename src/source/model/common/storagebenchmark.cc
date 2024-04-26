@@ -1,7 +1,7 @@
-#include "model/common/storagebenchmark.h"
-
 #include <chrono>
 #include <random>
+
+#include "model/common/storagebenchmark.h"
 
 namespace s21 {
 template <typename Func, typename... Args>
@@ -12,50 +12,43 @@ double MeasureTime(Func func, Args... args) {
   return std::chrono::duration<double, std::milli>(end - start).count();
 }
 
-Student GenerateStudent() {
-  std::vector<std::string> names = {"Alice", "Bob",   "Charlie", "David",
-                                    "Emma",  "Frank", "Grace",   "Henry",
-                                    "Ivy",   "Jack"};
-  std::vector<std::string> surnames = {"Smith", "Johnson", "Williams", "Jones",
-                                       "Brown", "Davis",   "Miller",   "Wilson",
-                                       "Moore", "Taylor"};
-  std::vector<std::string> cities = {
-      "New_York",     "Los_Angeles", "Chicago",   "Houston", "Phoenix",
-      "Philadelphia", "San_Antonio", "San_Diego", "Dallas",  "San_Jose"};
-
+Student StorageBenchmark::GenerateStudent() {
+  const size_t kStringLength = 15;
   std::random_device rd;
   std::mt19937 gen(rd());
-  std::uniform_int_distribution<int> name_dist(0, names.size() - 1);
-  std::uniform_int_distribution<int> surname_dist(0, surnames.size() - 1);
-  std::uniform_int_distribution<int> city_dist(0, cities.size() - 1);
   std::uniform_int_distribution<int> year_dist(1990, 2024);
   std::uniform_int_distribution<int> coins_dist(0, 999);
 
-  std::string name = names[name_dist(gen)];
-  std::string surname = surnames[surname_dist(gen)];
+  std::string name = GenerateRandomString(kStringLength);
+  std::string surname = GenerateRandomString(kStringLength);
   int birthday_year = year_dist(gen);
-  std::string city = cities[city_dist(gen)];
+  std::string city = GenerateRandomString(kStringLength);
   int coins = coins_dist(gen);
 
   return Student{name, surname, birthday_year, city, coins};
 }
 
-std::string GenerateKey(size_t length) {
+std::string StorageBenchmark::GenerateRandomString(size_t length) {
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_int_distribution<char> distribution('a', 'z');
-
-  std::string key;
+  std::string result;
 
   for (size_t i = 0; i < length; ++i) {
-    key.push_back(distribution(gen));
+    result.push_back(distribution(gen));
   }
 
-  return key;
+  return result;
+}
+
+std::string StorageBenchmark::GenerateKey(size_t length) {
+  return GenerateRandomString(length);
 }
 
 void StorageBenchmark::FillStorage(Controller<std::string, Student>& controller,
                                    size_t count) {
+  const size_t kKeyLength = 15;
+
   for (size_t i = 0; i < count; ++i) {
     controller.Set(GenerateKey(kKeyLength), GenerateStudent());
   }
@@ -101,6 +94,7 @@ double StorageBenchmark::MeasureFind(Controller<std::string, Student>& storage,
 
 double StorageBenchmark::MeasureSet(Controller<std::string, Student>& storage,
                                     size_t repeats) {
+  const size_t kKeyLength = 15;
   double time = 0;
 
   for (size_t i = 0; i < repeats; ++i) {
