@@ -9,8 +9,7 @@ namespace s21 {
 template <typename Key, typename Value>
 class Controller {
  public:
-  explicit Controller(BaseStorage<Key, Value>& model)
-      : manager_(model, std::chrono::seconds(5)) {}
+  explicit Controller(BaseStorage<Key, Value>& model) : manager_(model) {}
 
   bool Set(Key key, Value value, int ttl = 0) {
     manager_.AddRecord(typename ManagerTTL<Key, Value>::Record{key, ttl});
@@ -70,6 +69,12 @@ class Controller {
     return manager_.ExecuteStorageOperation(&BaseStorage<Key, Value>::Export,
                                             path);
   }
+
+  void StartManagerLoop(std::chrono::seconds sleep_time) {
+    manager_.StartManagerLoop(sleep_time);
+  }
+
+  void StopManagerLoop() { manager_.StopManagerLoop(); }
 
  private:
   ManagerTTL<Key, Value> manager_;
