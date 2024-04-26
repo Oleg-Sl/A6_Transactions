@@ -7,7 +7,6 @@
 #include <functional>
 #include <list>
 #include <mutex>
-#include <thread>
 
 #include "model/common/basestorage.h"
 
@@ -26,17 +25,7 @@ class ManagerTTL {
                    std::chrono::steady_clock::now()) {}
   };
 
-  ManagerTTL(BaseStorage<Key, Value>& storage,
-             std::chrono::seconds clean_interaval)
-      : storage_(storage), manager_thread_([this, &clean_interaval] {
-          StartManagerLoop(clean_interaval);
-        }) {}
-
-  ~ManagerTTL() {
-    StopManager();
-    loop_condition_.notify_all();
-    manager_thread_.join();
-  }
+  ManagerTTL(BaseStorage<Key, Value>& storage) : storage_(storage) {}
 
   void AddRecord(const Record& record) {
     if (record.die_time <= std::chrono::steady_clock::now()) {
@@ -85,7 +74,8 @@ class ManagerTTL {
   }
 
   void StartManagerLoop(std::chrono::seconds sleep_time) {
-    while (!stop_manager_.load()) {
+    running_collector_.store(true);
+    while (running_collector_.load()) {
       DeleteExpiredRecords();
 
       std::mutex temp;
@@ -94,7 +84,10 @@ class ManagerTTL {
     }
   }
 
-  void StopManager() { stop_manager_.store(true); }
+  void StopManagerLoop() {
+    running_collector_.store(false);
+    loop_condition_.notify_all();
+  }
 
   template <typename Func, typename... Args>
   auto ExecuteStorageOperation(Func func, Args... args) {
@@ -109,11 +102,10 @@ class ManagerTTL {
   BaseStorage<Key, Value>& storage_;
   std::list<Record> records_;
 
-  std::atomic<bool> stop_manager_ = false;
+  std::atomic<bool> running_collector_ = false;
   std::condition_variable loop_condition_;
   std::mutex storage_mtx_;
   std::mutex records_mtx_;
-  std::thread manager_thread_;
 };
 
 }  // namespace s21

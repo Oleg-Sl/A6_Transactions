@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <map>
 #include <string>
+#include <thread>
 
 #include "controller/controller.h"
 #include "view/baseview.h"
@@ -14,15 +15,15 @@ template <typename Key, typename Value>
 class StorageMenu : BaseView {
  public:
   const std::map<std::string, MenuAction> kStorageCommands = {
-      {"set", {[this] { Set(); }, "<key> <struct> [ex <time>]"}},
+      {"set", {[this] { Set(); }, "<key> <value> [ex <time>]"}},
       {"get", {[this] { Get(); }, "<key>"}},
       {"exists", {[this] { Exists(); }, "<key>"}},
       {"del", {[this] { Del(); }, "<key>"}},
-      {"update", {[this] { Update(); }, "<key> <struct>"}},
+      {"update", {[this] { Update(); }, "<key> <value>"}},
       {"keys", {[this] { Keys(); }, ""}},
       {"rename", {[this] { Rename(); }, "<key1> <key2>"}},
       {"ttl", {[this] { Ttl(); }, "<key>"}},
-      {"find", {[this] { Find(); }, "<struct>"}},
+      {"find", {[this] { Find(); }, "<value>"}},
       {"showall", {[this] { Showall(); }, ""}},
       {"upload", {[this] { Upload(); }, "<path>"}},
       {"export", {[this] { Export(); }, "<path>"}},
@@ -33,6 +34,8 @@ class StorageMenu : BaseView {
       : controller_(controller) {}
 
   void Start() override {
+    std::thread collector(
+        [this] { controller_.StartManagerLoop(std::chrono::seconds(5)); });
     PushMenu(kStorageCommands);
     DisplayMenu(kStorageCommands);
 
@@ -43,6 +46,9 @@ class StorageMenu : BaseView {
 
       ExecuteCommand(command);
     }
+
+    controller_.StopManagerLoop();
+    collector.join();
   }
 
  private:
@@ -179,8 +185,8 @@ void StorageMenu<std::string, Student>::Update() {
   Student old_student = controller_.Get(key);
   new_student.name = name == "-" ? old_student.name : name;
   new_student.surname = surname == "-" ? old_student.surname : surname;
-  new_student.birthday =
-      birthday == "-" ? old_student.birthday : std::stoi(birthday);
+  new_student.birth_year =
+      birthday == "-" ? old_student.birth_year : std::stoi(birthday);
   new_student.city = city == "-" ? old_student.city : city;
   new_student.coins = coins == "-" ? old_student.coins : std::stoi(coins);
   std::cout << StatusToStr(controller_.Update(key, new_student)) << std::endl;
@@ -197,8 +203,8 @@ void StorageMenu<std::string, Student>::Find() {
   student.city = parser_.ParseValue<std::string>(user_input, "city");
   std::string coins = parser_.ParseValue<std::string>(user_input, "coins");
 
-  birthday == "-" ? student.birthday = std::numeric_limits<int>::min()
-                  : student.birthday = std::stoi(birthday);
+  birthday == "-" ? student.birth_year = std::numeric_limits<int>::min()
+                  : student.birth_year = std::stoi(birthday);
   coins == "-" ? student.coins = std::numeric_limits<int>::min()
                : student.coins = std::stoi(coins);
 
@@ -225,7 +231,7 @@ void StorageMenu<std::string, Student>::Showall() {
     std::cout << std::left << std::setw(column_width[0]) << counter++
               << std::left << std::setw(column_width[1]) << student.surname
               << std::left << std::setw(column_width[2]) << student.name
-              << std::left << std::setw(column_width[3]) << student.birthday
+              << std::left << std::setw(column_width[3]) << student.birth_year
               << std::left << std::setw(column_width[4]) << student.city
               << std::left << std::setw(column_width[5]) << student.coins
               << std::endl;
