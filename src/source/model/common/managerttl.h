@@ -6,6 +6,7 @@
 #include <condition_variable>
 #include <functional>
 #include <list>
+#include <map>
 #include <mutex>
 
 #include "model/common/basestorage.h"
@@ -15,30 +16,33 @@ namespace s21 {
 template <typename Key, typename Value>
 class ManagerTTL {
  public:
+  using time_type = std::chrono::steady_clock::time_point;
+
   struct Record {
     Key key;
-    std::chrono::steady_clock::time_point die_time;
+    time_type death_time;
 
     Record(Key key, int TTL)
         : key(key),
-          die_time(std::chrono::seconds(TTL) +
-                   std::chrono::steady_clock::now()) {}
+          death_time(std::chrono::seconds(TTL) +
+                     std::chrono::steady_clock::now()) {}
   };
 
-  ManagerTTL(BaseStorage<Key, Value>& storage) : storage_(storage) {}
+  explicit ManagerTTL(BaseStorage<Key, Value>& storage) : storage_(storage) {}
 
   void AddRecord(const Record& record) {
-    if (record.die_time <= std::chrono::steady_clock::now()) {
+    if (record.death_time <= std::chrono::steady_clock::now()) {
       return;
     }
 
     std::unique_lock lock(records_mtx_);
     auto it = records_.begin();
-    while (it != records_.end() && it->die_time < record.die_time) {
+    while (it != records_.end() && it->death_time < record.death_time) {
       ++it;
     }
 
     records_.insert(it, record);
+    ttl_info_[record.key] = record.death_time;
   }
 
   void DeleteExpiredRecords() {
@@ -46,8 +50,9 @@ class ManagerTTL {
     std::unique_lock lock2(records_mtx_);
     auto now = std::chrono::steady_clock::now();
 
-    while (!records_.empty() && records_.begin()->die_time <= now) {
+    while (!records_.empty() && records_.begin()->death_time <= now) {
       storage_.Del(records_.begin()->key);
+      ttl_info_[records_.begin()->key] = records_.begin()->death_time;
       records_.erase(records_.begin());
     }
   }
@@ -57,6 +62,8 @@ class ManagerTTL {
 
     for (auto it = records_.begin(); it != records_.end(); ++it) {
       if (it->key == key) {
+        ttl_info_[new_key] = (it->death_time);
+        ttl_info_.erase(it->key);
         it->key = new_key;
       }
     }
@@ -67,6 +74,7 @@ class ManagerTTL {
 
     for (auto it = records_.begin(); it != records_.end(); ++it) {
       if (it->key == key) {
+        ttl_info_.erase(it->key);
         records_.erase(it);
         break;
       }
@@ -89,6 +97,17 @@ class ManagerTTL {
     loop_condition_.notify_all();
   }
 
+  int GetTTL(const Key& key) {
+    auto elem = ttl_info_.find(key);
+    if (elem != ttl_info_.end()) {
+      return std::chrono::duration_cast<std::chrono::seconds>(
+                 elem->second - std::chrono::steady_clock::now())
+          .count();
+    }
+
+    return 0;
+  }
+
   template <typename Func, typename... Args>
   auto ExecuteStorageOperation(Func func, Args... args) {
     DeleteExpiredRecords();
@@ -101,6 +120,7 @@ class ManagerTTL {
  private:
   BaseStorage<Key, Value>& storage_;
   std::list<Record> records_;
+  std::map<Key, time_type> ttl_info_;
 
   std::atomic<bool> running_collector_ = false;
   std::condition_variable loop_condition_;

@@ -1,8 +1,8 @@
+#include "model/common/storagebenchmark.h"
+
 #include <chrono>
 #include <functional>
 #include <random>
-
-#include "model/common/storagebenchmark.h"
 
 namespace s21 {
 template <typename Func, typename... Args>

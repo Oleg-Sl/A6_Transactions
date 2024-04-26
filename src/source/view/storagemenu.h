@@ -23,7 +23,7 @@ class StorageMenu : BaseView {
       {"update", {[this] { Update(); }, "<key> <value>"}},
       {"keys", {[this] { Keys(); }, ""}},
       {"rename", {[this] { Rename(); }, "<key1> <key2>"}},
-      {"ttl", {[this] { Ttl(); }, "<key>"}},
+      {"ttl", {[this] { TTL(); }, "<key>"}},
       {"find", {[this] { Find(); }, "<value>"}},
       {"showall", {[this] { Showall(); }, ""}},
       {"upload", {[this] { Upload(); }, "<path>"}},
@@ -119,17 +119,14 @@ class StorageMenu : BaseView {
               << std::endl;
   }
 
-  void Ttl() {
+  void TTL() {
     std::stringstream user_input = ReadInputAsStringStream();
     Key key = parser_.ParseValue<Key>(user_input, "key");
-    try {
-      auto lifetime = controller_.Ttl(key);
-      if (lifetime < 0)
-        std::cout << "(null)" << std::endl;
-      else
-        std::cout << lifetime << std::endl;
-    } catch (std::invalid_argument& ex) {
+    int ttl = controller_.TTL(key);
+    if (ttl <= 0) {
       std::cout << "(null)" << std::endl;
+    } else {
+      std::cout << ttl << std::endl;
     }
   }
 

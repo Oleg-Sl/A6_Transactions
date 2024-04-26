@@ -1,7 +1,6 @@
 #ifndef TRANSACTIONS_SOURCE_MODEL_BST_SELF_BALANCING_BINARY_SEARCH_TREE_H_
 #define TRANSACTIONS_SOURCE_MODEL_BST_SELF_BALANCING_BINARY_SEARCH_TREE_H_
 
-#include <chrono>
 #include <fstream>
 #include <mutex>
 #include <thread>
@@ -22,8 +21,7 @@ class BSTNode {
   BSTNode* link[2] = {nullptr, nullptr};
   std::pair<Key, Value> data;
   bool color = Color::Black;
-  int TTL{0};
-  std::chrono::steady_clock::time_point create_time;
+
   BSTNode() = default;
   BSTNode(Key key, Value value) {
     data = std::make_pair(key, value);
@@ -94,14 +92,13 @@ class SelfBalancingBinarySearchTree : public BaseStorage<Key, Value> {
     Pointer leaf_;
   };
 
-  bool Set(const Key& key, const Value& value, int validity = 0);
+  bool Set(const Key& key, const Value& value);
   Value Get(const Key& key) const;
   bool Exists(const Key& key) const;
   bool Del(const Key& key);
   bool Update(const Key& key, const Value& value);
   std::vector<Key> Keys() const;
   bool Rename(const Key& key, const Key& new_key);
-  int Ttl(const Key& key) const;
   std::vector<Key> Find(const Value& value) const;
   std::vector<Value> Showall() const;
   std::pair<bool, int> Upload(const std::string& path);
@@ -146,10 +143,8 @@ SelfBalancingBinarySearchTree<Key, Value,
 
 template <typename Key, typename Value, typename ValueEqual>
 bool SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Set(
-    const Key& key, const Value& value, int validity) {
+    const Key& key, const Value& value) {
   Pointer tmp = new Node(key, value);
-  tmp->TTL = validity;
-  tmp->create_time = std::chrono::steady_clock::now();
   if (!root_) {
     root_ = tmp;
     root_->color = Color::Black;
@@ -252,18 +247,6 @@ bool SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Rename(
   Set(new_key, node->data.second);
   RemoveNode(node);
   return true;
-}
-
-template <typename Key, typename Value, typename ValueEqual>
-int SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Ttl(
-    const Key& key) const {
-  Pointer node = Search(key);
-  if (!node) throw std::invalid_argument("Key is not exists");
-
-  auto response_time = std::chrono::steady_clock::now();
-  return node->TTL - std::chrono::duration_cast<std::chrono::seconds>(
-                         response_time - node->create_time)
-                         .count();
 }
 
 template <typename Key, typename Value, typename ValueEqual>

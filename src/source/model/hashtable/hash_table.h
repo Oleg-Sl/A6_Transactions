@@ -1,7 +1,6 @@
 #ifndef TRANSACTIONS_SOURCE_MODEL_HASHTABLE_HASH_TABLE_H_
 #define TRANSACTIONS_SOURCE_MODEL_HASHTABLE_HASH_TABLE_H_
 
-#include <chrono>
 #include <fstream>
 #include <list>
 #include <stdexcept>
@@ -15,8 +14,6 @@ template <typename Key, typename Value,
           typename Hasher = std::hash<Key>>
 class HashTable : public BaseStorage<Key, Value> {
  public:
-  using time_type = std::chrono::steady_clock::time_point;
-
   static constexpr size_t kDefaultSize = 1;
   static constexpr float kResizeCoeff = 0.75;
   static constexpr size_t kScaleCoeff = 2;
@@ -24,8 +21,6 @@ class HashTable : public BaseStorage<Key, Value> {
   struct Node {
     Key key;
     Value value;
-    int TTL;
-    time_type create_time;
     int cached;
   };
 
@@ -42,9 +37,7 @@ class HashTable : public BaseStorage<Key, Value> {
     allocator_.deallocate(bucket_pointers_, table_size_);
   }
 
-  bool Set(const Key& key, const Value& value, int TTL = 0) override {
-    auto response_time = std::chrono::steady_clock::now();
-
+  bool Set(const Key& key, const Value& value) override {
     if (data_.size() / table_size_ >= kResizeCoeff) {
       Resize();
     }
@@ -56,10 +49,10 @@ class HashTable : public BaseStorage<Key, Value> {
     }
 
     if (bucket_pointers_[hash] != data_.end()) {
-      bucket_pointers_[hash] = data_.insert(
-          bucket_pointers_[hash], Node{key, value, TTL, response_time, hash});
+      bucket_pointers_[hash] =
+          data_.insert(bucket_pointers_[hash], Node{key, value, hash});
     } else {
-      data_.push_back(Node{key, value, TTL, response_time, hash});
+      data_.push_back(Node{key, value, hash});
       bucket_pointers_[hash] = std::prev(data_.end());
     }
 
@@ -136,19 +129,6 @@ class HashTable : public BaseStorage<Key, Value> {
     }
 
     return false;
-  }
-
-  int Ttl(const Key& key) const override {
-    auto response_time = std::chrono::steady_clock::now();
-    auto pos = GetNodePosition(key, GetHash(key, table_size_));
-
-    if (pos != data_.end()) {
-      return pos->TTL - std::chrono::duration_cast<std::chrono::seconds>(
-                            response_time - pos->create_time)
-                            .count();
-    }
-
-    throw std::invalid_argument("Key is not exists");
   }
 
   std::vector<Key> Find(const Value& value) const override {

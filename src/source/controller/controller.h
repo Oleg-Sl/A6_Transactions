@@ -14,7 +14,7 @@ class Controller {
   bool Set(Key key, Value value, int ttl = 0) {
     manager_.AddRecord(typename ManagerTTL<Key, Value>::Record{key, ttl});
     return manager_.ExecuteStorageOperation(&BaseStorage<Key, Value>::Set, key,
-                                            value, ttl);
+                                            value);
   }
 
   Value Get(Key key) {
@@ -46,10 +46,7 @@ class Controller {
                                             key, new_key);
   }
 
-  int Ttl(Key param) {
-    return manager_.ExecuteStorageOperation(&BaseStorage<Key, Value>::Ttl,
-                                            param);
-  }
+  int TTL(Key key) { return manager_.GetTTL(key); }
 
   std::vector<Key> Find(Value value) {
     return manager_.ExecuteStorageOperation(&BaseStorage<Key, Value>::Find,
