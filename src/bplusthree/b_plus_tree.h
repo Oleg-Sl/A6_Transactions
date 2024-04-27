@@ -39,23 +39,51 @@ public:
         }
     };
 
-    // std::vector<Key> Keys() const {
+    std::vector<Key> Keys()  {
+        std::vector<Key> keys;
+        for (auto it = tree.Begin(); it != tree.End(); ++it) {
+            keys.push_back((*it).first);
+        }
+        return keys;
+    };
+
+    bool Rename(const Key& key, const Key& new_key) {
+        if (tree.Exists(new_key)) {
+            return false;
+        }
+        const new_value value = tree.search(key);
+        bool res = tree.remove(key);
+        if (!res) {
+            return false;        
+        }
+        return tree.insert(new_key, value);
+    };
+
+    int Ttl(const Key& key) const {
+        const new_value& value = tree.search(key);
+        return value.ttl;
+    };
+
+    // std::vector<Key> Find(const Value& value) const {
 
     // };
 
-    bool Rename(const Key& key, const Key& new_key) {
-        const new_value& value = tree.search(key);
-        bool res = tree.remove(key);
-        if (res) {
-            return tree.insert(key, new_value{0, value});
+    std::vector<Value> Showall() const {
+        std::vector<Value> values;
+        for (auto it = tree.Begin(); it != tree.End(); ++it) {
+            values.push_back((*it).second.value);
         }
+        return values;
     };
 
-    // virtual int Ttl(const Key& param) const = 0;
-    // virtual std::vector<Key> Find(const Value& value) const = 0;
-    // virtual std::vector<Value> Showall() const = 0;
-    // virtual std::pair<bool, int> Upload(const std::string& path) = 0;
-    // virtual std::pair<bool, int> Export(const std::string& path) const = 0;
+    // std::pair<bool, int> Upload(const std::string& path) {
+
+    // };
+
+    // std::pair<bool, int> Export(const std::string& path) const {
+
+    // };
+
     void Print() {
         tree.printTree();
     }

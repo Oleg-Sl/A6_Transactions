@@ -12,7 +12,7 @@
 int main() {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<int> uniform_dist(1, 10000000);
+    std::uniform_int_distribution<int> uniform_dist(1, 100);
     std::vector<int> v;
     for (int i = 0; i < 20000; ++i) {
         auto el = uniform_dist(gen);
@@ -33,10 +33,18 @@ int main() {
     }
     auto val = tree.Update(-7, "-");
     std::cout << std::boolalpha << val << std::endl;
-
-    for (size_t i = 0; i < v.size(); ++i) {
-        auto val = tree.Get(v[i]);
-        std::cout << val << std::endl;
+    // for (size_t i = 0; i < v.size(); ++i) {
+    //     // auto k = std::to_string(v[i]);
+    //     // auto val = tree.Rename(v[i], -v[i]);
+    //     std::cout << std::boolalpha << val << std::endl;
+    // }
+    auto keys = tree.Keys();
+    for (auto el : keys) {
+        std::cout << ">>> " << el << std::endl;
+    }
+    auto values = tree.Keys();
+    for (auto el : values) {
+        std::cout << ">>> " << el << std::endl;
     }
     return 0;
 }
