@@ -21,6 +21,44 @@ template <typename Key, typename Value>
 class Three {
 public:
     using node_type = Node<Key, Value>;
+
+    class Iterator {
+    public:
+        Iterator(node_type* node, size_t ind = 0) : node_(node), ind_(ind) {};
+
+        Iterator& operator++() noexcept {
+            if (node_ == nullptr) {
+                return *this;
+            }
+            ind_ += 1;
+            if (ind_ >= node_->keys.size()) {
+                node_ = node_->right;
+                ind_ = 0;
+            }
+            return *this;
+        }
+
+        bool operator!=(const Iterator& other) {
+            return node_ != other.node_ || ind_ != other.ind_;
+        }
+
+        bool operator==(const Iterator& other) {
+            return node_ == other.node_ && ind_ == other.ind_;
+        }
+
+        std::pair<Key, Value> operator*() {
+            if (node_ == nullptr) {
+                return std::pair<Key, Value>{};
+            }
+            // return std::pair<Key, Value>{node_->keys[ind_], node_->values[ind_]};
+            return {node_->keys[ind_], node_->values[ind_]};
+        }
+
+    private:
+        node_type* node_;
+        size_t ind_;
+    };
+
     Three() {}
     ~Three() {}
 
@@ -123,7 +161,13 @@ public:
         return removeKey(leaf, key);
     }
 
-    node*
+    Iterator Begin() {
+        return Iterator(begin_);
+    }
+
+    Iterator End() {
+        return Iterator(nullptr);
+    }
 
 
 private:
