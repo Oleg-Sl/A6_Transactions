@@ -23,7 +23,7 @@ class MainMenu : public BaseView {
   void Start() override {
     PushMenu(kMainMenuCommands);
 
-    while (stack_menu_.size() > 0) {
+    while (stack_menu_.size() > 0 && !std::cin.eof()) {
       DisplayMenu(kMainMenuCommands);
       std::cout << "> ";
       std::string command;
