@@ -1,7 +1,6 @@
 #ifndef TRANSACTIONS_SOURCE_MODEL_HASHTABLE_HASH_TABLE_H_
 #define TRANSACTIONS_SOURCE_MODEL_HASHTABLE_HASH_TABLE_H_
 
-#include <fstream>
 #include <list>
 #include <stdexcept>
 
@@ -14,15 +13,18 @@ template <typename Key, typename Value,
           typename Hasher = std::hash<Key>>
 class HashTable : public BaseStorage<Key, Value> {
  public:
-  static constexpr size_t kDefaultSize = 1;
-  static constexpr float kResizeCoeff = 0.75;
-  static constexpr size_t kScaleCoeff = 2;
-
   struct Node {
     Key key;
     Value value;
     int cached;
   };
+
+  using iterator = typename std::list<Node>::iterator;
+  using const_iterator = typename std::list<Node>::const_iterator;
+
+  static constexpr size_t kDefaultSize = 8;
+  static constexpr float kResizeCoeff = 0.75;
+  static constexpr size_t kScaleCoeff = 2;
 
   HashTable() {
     bucket_pointers_ = allocator_.allocate(kDefaultSize);
@@ -154,41 +156,6 @@ class HashTable : public BaseStorage<Key, Value> {
     return result;
   }
 
-  std::pair<bool, int> Upload(const std::string& path) override {
-    std::ifstream file(path);
-    Key key;
-    Value value;
-
-    if (!file.is_open()) {
-      return std::pair<bool, int>(false, 0);
-    }
-
-    int counter = 0;
-    while (file >> key && file >> value) {
-      if (Set(key, value)) {
-        ++counter;
-      }
-    }
-
-    return std::pair<bool, int>(true, counter);
-  }
-
-  std::pair<bool, int> Export(const std::string& path) const override {
-    std::ofstream file(path);
-
-    if (!file.is_open()) {
-      return std::pair<bool, int>(false, 0);
-    }
-
-    int counter = 0;
-    for (auto it = data_.begin(); it != data_.end(); ++it) {
-      file << it->key << " " << it->value << std::endl;
-      ++counter;
-    }
-
-    return std::pair<bool, int>(true, counter);
-  }
-
   std::size_t GetSize() const { return table_size_; }
 
   std::size_t GetLoadFactor() const { return data_.size(); }
@@ -196,20 +163,18 @@ class HashTable : public BaseStorage<Key, Value> {
  private:
   size_t table_size_ = kDefaultSize;
   std::list<Node> data_;
-  std::allocator<typename std::list<Node>::iterator> allocator_;
-  typename std::list<Node>::iterator* bucket_pointers_;
+  std::allocator<iterator> allocator_;
+  iterator* bucket_pointers_;
   const Hasher hasher_{};
 
   size_t GetHash(const Key& value, size_t size) const {
     return size == 1 ? 0 : hasher_(value) % (size - 1);
   }
 
-  typename std::list<Node>::const_iterator GetNodePosition(const Key& key,
-                                                           int hash) const {
+  const_iterator GetNodePosition(const Key& key, int hash) const {
     for (auto it = bucket_pointers_[hash];
          it != data_.end() && it->cached == hash; ++it) {
-      Node node = *it;
-      if (node.key == key) {
+      if (it->key == key) {
         return it;
       }
     }
@@ -217,7 +182,7 @@ class HashTable : public BaseStorage<Key, Value> {
     return data_.end();
   }
 
-  typename std::list<Node>::iterator GetNodePosition(const Key& key, int hash) {
+  iterator GetNodePosition(const Key& key, int hash) {
     for (auto it = bucket_pointers_[hash];
          it != data_.end() && it->cached == hash; ++it) {
       Node node = *it;
@@ -231,13 +196,12 @@ class HashTable : public BaseStorage<Key, Value> {
 
   void Resize() {
     size_t new_table_size = table_size_ * kScaleCoeff;
-    typename std::list<Node>::iterator* new_bucket_pointers =
-        allocator_.allocate(new_table_size);
+    iterator* new_bucket_pointers = allocator_.allocate(new_table_size);
     std::list<Node> temp;
     std::swap(temp, data_);
 
     for (std::size_t i = 0; i < new_table_size; ++i) {
-      std::allocator_traits<decltype(allocator_)>::construct(
+      std::allocator_traits<std::allocator<iterator>>::construct(
           allocator_, &new_bucket_pointers[i], data_.end());
     }
 
