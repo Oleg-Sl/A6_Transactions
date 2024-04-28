@@ -21,7 +21,7 @@ class StorageBenchmarkMenu : BaseView {
   void Start() override {
     stack_menu_.push(kBenchmarkMenuCommands);
 
-    while (stack_menu_.size() > 0) {
+    while (stack_menu_.size() > 0 && !std::cin.eof()) {
       DisplayMenu(stack_menu_.top());
       std::cout << "> ";
       std::string command;

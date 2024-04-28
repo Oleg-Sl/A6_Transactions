@@ -39,7 +39,7 @@ class StorageMenu : BaseView {
     PushMenu(kStorageCommands);
     DisplayMenu(kStorageCommands);
 
-    while (stack_menu_.size() > 0) {
+    while (stack_menu_.size() > 0 && !std::cin.eof()) {
       std::string command;
       std::cout << "> ";
       std::cin >> command;
