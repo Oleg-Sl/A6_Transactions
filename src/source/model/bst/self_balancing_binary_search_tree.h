@@ -101,8 +101,6 @@ class SelfBalancingBinarySearchTree : public BaseStorage<Key, Value> {
   bool Rename(const Key& key, const Key& new_key);
   std::vector<Key> Find(const Value& value) const;
   std::vector<Value> Showall() const;
-  std::pair<bool, int> Upload(const std::string& path);
-  std::pair<bool, int> Export(const std::string& path) const;
 
  private:
   Pointer root_;
@@ -278,53 +276,6 @@ SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Showall() const {
     nodes.push_back(i->second);
   }
   return nodes;
-}
-
-template <typename Key, typename Value, typename ValueEqual>
-std::pair<bool, int>
-SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Upload(
-    const std::string& path) {
-  std::ifstream file(path);
-  Key key;
-  Value value;
-
-  if (!file.is_open()) {
-    return std::pair<bool, int>(false, 0);
-  }
-
-  int counter = 0;
-  while (file >> key && file >> value) {
-    if (Set(key, value)) {
-      ++counter;
-    }
-  }
-
-  return std::pair<bool, int>(true, counter);
-}
-
-template <typename Key, typename Value, typename ValueEqual>
-std::pair<bool, int>
-SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Export(
-    const std::string& path) const {
-  int count = 0;
-  std::ofstream out;
-  out.open(path);
-  if (out.is_open()) {
-    Iterator it = Begin();
-    if (it.IsValid()) {
-      while (it != End()) {
-        out << it->first << " " << it->second << std::endl;
-        ++count;
-        ++it;
-      }
-      out << it->first << " " << it->second << std::endl;
-      ++count;
-    }
-  } else {
-    return std::make_pair(false, 0);
-  }
-  out.close();
-  return std::make_pair(true, count);
 }
 
 template <typename Key, typename Value, typename ValueEqual>

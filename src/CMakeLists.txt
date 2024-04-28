@@ -5,7 +5,7 @@ project(Transactions)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# add_compile_options(-Wall -Wextra -Werror -pedantic)
+add_compile_options(-Wall -Wextra -Werror -pedantic)
 
 if(CMAKE_BUILD_TYPE MATCHES "^Debug")
   add_compile_options(-g -O0)

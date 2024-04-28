@@ -2,6 +2,7 @@
 #define TRANSACTIONS_SOURCE_CONTROLLER_CONTROLLER_H_
 
 #include "model/common/basestorage.h"
+#include "model/common/filemanager.h"
 #include "model/common/managerttl.h"
 
 namespace s21 {
@@ -9,7 +10,8 @@ namespace s21 {
 template <typename Key, typename Value>
 class Controller {
  public:
-  explicit Controller(BaseStorage<Key, Value>& model) : manager_(model) {}
+  explicit Controller(BaseStorage<Key, Value>& model)
+      : manager_(model), model_(model) {}
 
   bool Set(Key key, Value value, int ttl = 0) {
     manager_.AddRecord(typename ManagerTTL<Key, Value>::Record{key, ttl});
@@ -57,14 +59,12 @@ class Controller {
     return manager_.ExecuteStorageOperation(&BaseStorage<Key, Value>::Showall);
   }
 
-  std::pair<bool, int> Upload(std::string path) {
-    return manager_.ExecuteStorageOperation(&BaseStorage<Key, Value>::Upload,
-                                            path);
+  std::pair<bool, int> Upload(const std::string& path) {
+    return s21::FileManager::ImportFromDat(model_, path);
   }
 
-  std::pair<bool, int> Export(std::string path) {
-    return manager_.ExecuteStorageOperation(&BaseStorage<Key, Value>::Export,
-                                            path);
+  std::pair<bool, int> Export(const std::string& path) const {
+    return s21::FileManager::ExportToDat(model_, path);
   }
 
   void StartManagerLoop(std::chrono::seconds sleep_time) {
@@ -75,6 +75,7 @@ class Controller {
 
  private:
   ManagerTTL<Key, Value> manager_;
+  BaseStorage<Key, Value>& model_;
 };
 
 }  // namespace s21
