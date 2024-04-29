@@ -1,8 +1,6 @@
 #ifndef TRANSACTIONS_SOURCE_MODEL_BST_SELF_BALANCING_BINARY_SEARCH_TREE_H_
 #define TRANSACTIONS_SOURCE_MODEL_BST_SELF_BALANCING_BINARY_SEARCH_TREE_H_
 
-#include <fstream>
-
 #include "model/common/basestorage.h"
 
 namespace s21 {
@@ -41,7 +39,6 @@ class SelfBalancingBinarySearchTree : public BaseStorage<Key, Value> {
   SelfBalancingBinarySearchTree();
   ~SelfBalancingBinarySearchTree();
 
-  // internal class BSTIterator
   class BSTIterator {
     friend class SelfBalancingBinarySearchTree;
 

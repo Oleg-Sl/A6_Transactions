@@ -14,7 +14,7 @@ class Controller {
       : manager_(model), model_(model) {}
 
   bool Set(Key key, Value value, int ttl = 0) {
-    manager_.AddRecord(typename ManagerTTL<Key, Value>::Record{key, ttl});
+    manager_.AddRecord({key, ttl});
     return manager_.ExecuteStorageOperation(&BaseStorage<Key, Value>::Set, key,
                                             value);
   }

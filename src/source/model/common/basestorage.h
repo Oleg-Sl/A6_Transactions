@@ -1,7 +1,6 @@
 #ifndef TRANSACTIONS_SOURCE_MODEL_COMMON_BASESTORAGE_H_
 #define TRANSACTIONS_SOURCE_MODEL_COMMON_BASESTORAGE_H_
 
-#include <string>
 #include <vector>
 
 namespace s21 {
