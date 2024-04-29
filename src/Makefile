@@ -16,7 +16,7 @@ OPEN_FILE	= xdg-open
 endif
 
 
-all: hash_table.a
+all:
 
 build:
 	CC=gcc CXX=g++ cmake -B $(BUILD_DIR) 
@@ -37,18 +37,18 @@ cli: build
 	cmake --build $(BUILD_DIR) --target cli
 	./$(BUILD_DIR)/cli
 
-hash_table.a: build
-	cmake --build $(BUILD_DIR) --target hash_table
+# hash_table.a: build
+# 	cmake --build $(BUILD_DIR) --target hash_table
 
 leaks: test
-	$(MEMORY_TEST) $(BUILD_DIR)/tests/$(TEST_EXE) --gtest_filter=-*.*Throw* --gtest_filter=-*.*NoCheckLeaks*
+	$(MEMORY_TEST) $(BUILD_DIR)/tests/$(TEST_EXE) --gtest_filter=-*.*Throw*
 
 report: build
 	cmake --build $(BUILD_DIR) --target report
 	./$(BUILD_DIR)/tests/report
-	lcov --capture --directory $(BUILD_DIR)/tests/CMakeFiles/report.dir --output-file $(BUILD_DIR)/s21_coverage.info --exclude "/usr/*" --exclude "*build/*" $(REPORT_FLAG)
-	genhtml $(BUILD_DIR)/s21_coverage.info --output-directory s21_lcov_report
-	$(OPEN_FILE) ./s21_lcov_report/index.html
+	lcov --capture --directory $(BUILD_DIR)/tests/CMakeFiles/report.dir --output-file $(BUILD_DIR)/coverage.info --exclude "/usr/*" --exclude "*build/*" $(REPORT_FLAG)
+	genhtml $(BUILD_DIR)/coverage.info --output-directory lcov_report
+	$(OPEN_FILE) ./lcov_report/index.html
 
 stylecheck: build
 	cmake --build $(BUILD_DIR) --target stylecheck
@@ -57,3 +57,9 @@ btree:
 	g++ -Wall -Wextra -Werror -o bthree bplusthree/*.cc
 	./bthree
 
+format: build
+	cmake --build $(BUILD_DIR) --target format
+
+# bptree: build 
+# 	cmake --build $(BUILD_DIR) --target bptree
+# 	./$(BUILD_DIR)/source/model/bptree

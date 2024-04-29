@@ -13,6 +13,8 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+file(GLOB_RECURSE TEST_SOURCES ${TESTS_DIR}/*.cc)
+
 enable_testing()
 add_executable(${PROJECT_NAME} ${TEST_SOURCES})
 target_link_libraries(${PROJECT_NAME} GTest::gtest_main ${TARGET_GRAPH_LIB})
@@ -23,11 +25,8 @@ include(GoogleTest)
 gtest_discover_tests(${PROJECT_NAME})
 
 # Report
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
-# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
-# set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
-# set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --coverage")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
 
-# add_executable(report ${TEST_SOURCES} ${ANT_COLONY_MODEL} ${GAUSS_MODEL})
-# target_link_libraries(report GTest::gtest_main)
-# target_include_directories(report PUBLIC ${RELATIVE_HEADER_DIR})
+add_executable(report ${TEST_SOURCES} ${LIB_HASH_TABLE_SOURCE} ${LIB_SBBST_SOURCE} ${LIB_BPLUSTREE_SOURCE} ${COMMON_MODEL_DIR}/student.cc)
+target_link_libraries(report GTest::gtest_main)
+target_include_directories(report PUBLIC ${RELATIVE_HEADER_DIR})
