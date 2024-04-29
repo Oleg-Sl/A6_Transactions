@@ -12,9 +12,9 @@ if(CMAKE_BUILD_TYPE MATCHES "^Debug")
 endif()
 
 # Libraries names
-set(TARGET_HASH_TABLE_LIB hash_table)
-set(TARGET_SBBST_LIB self_balancing_binary_search_tree)
-set(TARGET_BPLUSTREE_LIB b_plus_tree)
+# set(TARGET_HASH_TABLE_LIB hash_table)
+# set(TARGET_SBBST_LIB self_balancing_binary_search_tree)
+# set(TARGET_BPLUSTREE_LIB b_plus_tree)
 
 # Directories
 set(BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
@@ -23,35 +23,32 @@ set(CONTROLLER_DIR ${SOURCE_DIR}/controller)
 set(MODEL_DIR ${SOURCE_DIR}/model)
 set(VIEW_DIR ${SOURCE_DIR}/view)
 set(TESTS_DIR ${BASE_DIR}/tests)
+set(COMMON_MODEL_DIR ${MODEL_DIR}/common)
+set(SAMPLES_DIR ${BASE_DIR}/samples)
 set(HASH_TABLE_DIR ${MODEL_DIR}/hashtable)
 set(SBBST_DIR ${MODEL_DIR}/bst)
 set(BPLUSTREE_DIR ${MODEL_DIR}/bplustree)
-set(COMMON_MODEL_DIR ${MODEL_DIR}/common)
-set(SAMPLES_DIR ${BASE_DIR}/samples)
 
 set(RELATIVE_HEADER_DIR ${SOURCE_DIR})
 
 # Sources
 file(GLOB_RECURSE ALL_SOURCES ${SOURCE_DIR}/*.cc ${SOURCE_DIR}/*.h)
-file(GLOB_RECURSE LIB_HASH_TABLE_SOURCE ${HASH_TABLE_DIR}/*.cc ${HASH_TABLE_DIR}/*.h ${COMMON_MODEL_DIR}/*.h)
-file(GLOB_RECURSE LIB_SBBST_SOURCE ${SBBST_DIR}/*.cc ${SBBST_DIR}/*.h ${COMMON_MODEL_DIR}/*.h)
-file(GLOB_RECURSE LIB_BPLUSTREE_SOURCE ${BPLUSTREE_DIR}/*.cc ${BPLUSTREE_DIR}/*.h ${COMMON_MODEL_DIR}/*.h)
-file(GLOB_RECURSE CONTROLLER_SOURCES ${CONTROLLER_DIR}/*.cc ${CONTROLLER_DIR}/*.h ${COMMON_MODEL_DIR}/*.h)
-file(GLOB_RECURSE VIEW_SOURCES ${VIEW_DIR}/*.cc ${VIEW_DIR}/*.h)
-file(GLOB_RECURSE TEST_SOURCES ${TESTS_DIR}/*.cc)
+# file(GLOB_RECURSE LIB_HASH_TABLE_SOURCE ${HASH_TABLE_DIR}/*.cc ${HASH_TABLE_DIR}/*.h ${COMMON_MODEL_DIR}/*.h)
+# file(GLOB_RECURSE LIB_SBBST_SOURCE ${SBBST_DIR}/*.cc ${SBBST_DIR}/*.h ${COMMON_MODEL_DIR}/*.h)
+# file(GLOB_RECURSE LIB_BPLUSTREE_SOURCE ${BPLUSTREE_DIR}/*.cc ${BPLUSTREE_DIR}/*.h ${COMMON_MODEL_DIR}/*.h)
 
-add_executable(cli ${SOURCE_DIR}/main.cc ${CONTROLLER_SOURCES} ${VIEW_SOURCES})
-target_link_libraries(cli ${TARGET_GRAPH_LIB} ${TARGET_SBBST_LIB})
+add_executable(cli ${SOURCE_DIR}/main.cc ${COMMON_MODEL_DIR}/student.cc)
+# target_link_libraries(cli ${TARGET_GRAPH_LIB} ${TARGET_SBBST_LIB})
 target_include_directories(cli PUBLIC ${RELATIVE_HEADER_DIR})
 
 add_executable(benchmark ${SOURCE_DIR}/benchmark.cc ${MODEL_DIR}/common/storagebenchmark.cc)
-target_link_libraries(benchmark ${TARGET_GRAPH_LIB} ${TARGET_SBBST_LIB})
+# target_link_libraries(benchmark ${TARGET_GRAPH_LIB} ${TARGET_SBBST_LIB})
 target_include_directories(benchmark PUBLIC ${RELATIVE_HEADER_DIR})
 
 add_custom_target(format COMMAND clang-format --style=Google -i --verbose ${ALL_SOURCES})
 add_custom_target(stylecheck COMMAND clang-format --style=Google -n --verbose ${ALL_SOURCES})
-add_custom_target(cppcheck COMMAND cppcheck --language=c++ --enable=all --suppress=unusedFunction --suppress=missingInclude --inconclusive --suppress=functionStatic ${ALL_SOURCES})
+add_custom_target(cppcheck COMMAND cppcheck --language=c++ --enable=all --suppress=missingInclude ${ALL_SOURCES})
 
 enable_testing()
-add_subdirectory(${MODEL_DIR})
+# add_subdirectory(${MODEL_DIR})
 add_subdirectory(${TESTS_DIR})
