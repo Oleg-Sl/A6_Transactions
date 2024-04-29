@@ -22,9 +22,9 @@ class ManagerTTL {
     Key key;
     time_type death_time;
 
-    Record(Key key, int TTL)
+    Record(Key key, size_t ttl)
         : key(key),
-          death_time(std::chrono::seconds(TTL) +
+          death_time(std::chrono::seconds(ttl) +
                      std::chrono::steady_clock::now()) {}
   };
 
@@ -97,15 +97,19 @@ class ManagerTTL {
     loop_condition_.notify_all();
   }
 
-  int GetTTL(const Key& key) {
+  size_t GetTTL(const Key& key) {
+    using namespace std::chrono;
+
     auto elem = ttl_info_.find(key);
-    if (elem != ttl_info_.end()) {
-      return std::chrono::duration_cast<std::chrono::seconds>(
-                 elem->second - std::chrono::steady_clock::now())
-          .count();
+    if (elem == ttl_info_.end()) {
+      return 0;
     }
 
-    return 0;
+    int time_diff =
+        duration_cast<seconds>(elem->second - steady_clock::now()).count();
+    std::cout << time_diff << std::endl;
+
+    return time_diff < 0 ? 0 : static_cast<size_t>(time_diff);
   }
 
   template <typename Func, typename... Args>

@@ -44,6 +44,8 @@ class StorageMenu : BaseView {
       std::string command;
       std::cout << "> ";
       std::cin >> command;
+      std::transform(command.begin(), command.end(), command.begin(),
+                     ::tolower);
 
       ExecuteCommand(command);
     }
@@ -61,9 +63,9 @@ class StorageMenu : BaseView {
     Value value = parser_.ParseValue<Value>(user_input, "value");
 
     bool status = false;
-    auto optional_arg = parser_.ParseOptionalArgument<int>(user_input, "ex");
+    auto optional_arg = parser_.ParseOptionalArgument<size_t>(user_input, "ex");
     if (optional_arg.first.empty()) {
-      status = controller_.Set(key, value, 0);
+      status = controller_.Set(key, value);
     } else {
       status = controller_.Set(key, value, optional_arg.second);
     }
@@ -122,8 +124,8 @@ class StorageMenu : BaseView {
   void TTL() {
     std::stringstream user_input = ReadInputAsStringStream();
     Key key = parser_.ParseValue<Key>(user_input, "key");
-    int ttl = controller_.TTL(key);
-    if (ttl <= 0) {
+    size_t ttl = controller_.TTL(key);
+    if (ttl == 0) {
       std::cout << "(null)" << std::endl;
     } else {
       std::cout << ttl << std::endl;

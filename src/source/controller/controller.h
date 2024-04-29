@@ -13,7 +13,7 @@ class Controller {
   explicit Controller(BaseStorage<Key, Value>& model)
       : manager_(model), model_(model) {}
 
-  bool Set(Key key, Value value, int ttl = 0) {
+  bool Set(Key key, Value value, size_t ttl = 0) {
     manager_.AddRecord({key, ttl});
     return manager_.ExecuteStorageOperation(&BaseStorage<Key, Value>::Set, key,
                                             value);
@@ -48,7 +48,7 @@ class Controller {
                                             key, new_key);
   }
 
-  int TTL(Key key) { return manager_.GetTTL(key); }
+  size_t TTL(Key key) { return manager_.GetTTL(key); }
 
   std::vector<Key> Find(Value value) {
     return manager_.ExecuteStorageOperation(&BaseStorage<Key, Value>::Find,
@@ -59,11 +59,11 @@ class Controller {
     return manager_.ExecuteStorageOperation(&BaseStorage<Key, Value>::Showall);
   }
 
-  std::pair<bool, int> Upload(const std::string& path) {
+  std::pair<bool, size_t> Upload(const std::string& path) {
     return s21::FileManager::ImportFromDat(model_, path);
   }
 
-  std::pair<bool, int> Export(const std::string& path) const {
+  std::pair<bool, size_t> Export(const std::string& path) const {
     return s21::FileManager::ExportToDat(model_, path);
   }
 

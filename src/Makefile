@@ -7,14 +7,12 @@ MACOS = Darwin
 
 ifeq ($(OS), $(MACOS))
 MEMORY_TEST = leaks -atExit --
-
 REPORT_FLAG = --ignore-errors mismatch
 OPEN_FILE	= open
 else 
 MEMORY_TEST = valgrind --trace-children=yes --leak-check=yes --track-origins=yes
 OPEN_FILE	= xdg-open
 endif
-
 
 all:
 
@@ -25,7 +23,7 @@ clean:
 	rm -rf $(BUILD_DIR)
 	rm -rf s21_lcov_report
 
-test: build
+tests: build
 	cmake --build $(BUILD_DIR) --target $(TEST_EXE)
 	./$(BUILD_DIR)/tests/$(TEST_EXE)
 

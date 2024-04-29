@@ -32,6 +32,8 @@ class Parser {
     }
 
     std::string parsed_name = ParseValue<std::string>(stream, arg_name);
+    std::transform(parsed_name.begin(), parsed_name.end(), parsed_name.begin(),
+                   ::tolower);
     if (parsed_name != arg_name) {
       throw std::invalid_argument("Not accepted arg: " + parsed_name);
     }

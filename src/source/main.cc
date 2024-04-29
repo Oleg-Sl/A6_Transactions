@@ -9,12 +9,14 @@ int main() {
   s21::SelfBalancingBinarySearchTree<std::string, s21::Student,
                                      s21::StudentComparator>
       sbbst;
+  // s21::BPlusTree<std::string, s21::Student, s21::StudentComparator>
+  // bplustree;
 
-  s21::Controller<std::string, s21::Student> controller_1(std::move(hashtable));
-  s21::Controller<std::string, s21::Student> controller_2(std::move(sbbst));
+  s21::Controller controller_1(hashtable);
+  s21::Controller controller_2(sbbst);
+  // s21::Controller controller_3(bplustree);
 
-  s21::MainMenu<std::string, s21::Student> mainmenu(controller_1, controller_2,
-                                                    controller_1);
+  s21::MainMenu mainmenu(controller_1, controller_2, controller_1);
 
   mainmenu.Start();
 
