@@ -25,9 +25,9 @@ set(VIEW_DIR ${SOURCE_DIR}/view)
 set(TESTS_DIR ${BASE_DIR}/tests)
 set(COMMON_MODEL_DIR ${MODEL_DIR}/common)
 set(SAMPLES_DIR ${BASE_DIR}/samples)
-set(HASH_TABLE_DIR ${MODEL_DIR}/hashtable)
-set(SBBST_DIR ${MODEL_DIR}/bst)
-set(BPLUSTREE_DIR ${MODEL_DIR}/bplustree)
+# set(HASH_TABLE_DIR ${MODEL_DIR}/hashtable)
+# set(SBBST_DIR ${MODEL_DIR}/bst)
+# set(BPLUSTREE_DIR ${MODEL_DIR}/bplustree)
 
 set(RELATIVE_HEADER_DIR ${SOURCE_DIR})
 
@@ -41,7 +41,7 @@ add_executable(cli ${SOURCE_DIR}/main.cc ${COMMON_MODEL_DIR}/student.cc)
 # target_link_libraries(cli ${TARGET_GRAPH_LIB} ${TARGET_SBBST_LIB})
 target_include_directories(cli PUBLIC ${RELATIVE_HEADER_DIR})
 
-add_executable(benchmark ${SOURCE_DIR}/benchmark.cc ${MODEL_DIR}/common/storagebenchmark.cc)
+add_executable(benchmark ${SOURCE_DIR}/benchmark.cc ${MODEL_DIR}/common/storagebenchmark.cc ${COMMON_MODEL_DIR}/student.cc)
 # target_link_libraries(benchmark ${TARGET_GRAPH_LIB} ${TARGET_SBBST_LIB})
 target_include_directories(benchmark PUBLIC ${RELATIVE_HEADER_DIR})
 
