@@ -16,7 +16,7 @@ FetchContent_MakeAvailable(googletest)
 file(GLOB_RECURSE TEST_SOURCES ${TESTS_DIR}/*.cc)
 
 enable_testing()
-add_executable(${PROJECT_NAME} ${TEST_SOURCES})
+add_executable(${PROJECT_NAME} ${TEST_SOURCES} ${COMMON_MODEL_DIR}/student.cc)
 target_link_libraries(${PROJECT_NAME} GTest::gtest_main ${TARGET_GRAPH_LIB})
 target_include_directories(${PROJECT_NAME} PUBLIC ${RELATIVE_HEADER_DIR})
 add_definitions(-DSAMPLES_DIR="${SAMPLES_DIR}")
@@ -27,6 +27,6 @@ gtest_discover_tests(${PROJECT_NAME})
 # Report
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
 
-add_executable(report ${TEST_SOURCES} ${LIB_HASH_TABLE_SOURCE} ${LIB_SBBST_SOURCE} ${LIB_BPLUSTREE_SOURCE} ${COMMON_MODEL_DIR}/student.cc)
+add_executable(report ${TEST_SOURCES} ${COMMON_MODEL_DIR}/student.cc)
 target_link_libraries(report GTest::gtest_main)
 target_include_directories(report PUBLIC ${RELATIVE_HEADER_DIR})
