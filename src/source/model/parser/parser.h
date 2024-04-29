@@ -2,7 +2,6 @@
 #define TRANSACTIONS_SOURCE_MODEL_PARSER_PARSER_H_
 
 #include <limits>
-#include <sstream>
 #include <string>
 #include <vector>
 
