@@ -58,7 +58,6 @@ class BaseView {
     std::string input;
     std::cin >> std::ws;
     std::getline(std::cin, input);
-    std::transform(input.begin(), input.end(), input.begin(), ::tolower);
     return std::stringstream(input);
   }
 };
