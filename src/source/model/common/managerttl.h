@@ -107,7 +107,6 @@ class ManagerTTL {
 
     int time_diff =
         duration_cast<seconds>(elem->second - steady_clock::now()).count();
-    std::cout << time_diff << std::endl;
 
     return time_diff < 0 ? 0 : static_cast<size_t>(time_diff);
   }
