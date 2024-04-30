@@ -17,6 +17,6 @@ set_target_properties(${TARGET_BPLUSTREE_LIB} PROPERTIES ARCHIVE_OUTPUT_DIRECTOR
 set_target_properties(${TARGET_BPLUSTREE_LIB} PROPERTIES PREFIX "")
 target_include_directories(${TARGET_BPLUSTREE_LIB} PUBLIC ${RELATIVE_HEADER_DIR})
 
-add_executable(bptree ${LIB_BPLUSTREE_SOURCE} )
+# add_executable(bptree ${LIB_BPLUSTREE_SOURCE} )
 # target_link_libraries(bptree ${TARGET_GRAPH_LIB} ${TARGET_SBBST_LIB})
-target_include_directories(bptree PUBLIC ${RELATIVE_HEADER_DIR})
+# target_include_directories(bptree PUBLIC ${RELATIVE_HEADER_DIR})
