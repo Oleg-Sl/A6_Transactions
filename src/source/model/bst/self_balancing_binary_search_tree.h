@@ -29,7 +29,6 @@ template <typename Key, typename Value,
           typename ValueEqual = std::equal_to<Value>>
 class SelfBalancingBinarySearchTree : public BaseStorage<Key, Value> {
  public:
-  std::mutex mtx;
   class BSTIterator;
   using Node = BSTNode<Key, Value>;
   using Pointer = Node*;
@@ -164,32 +163,25 @@ bool SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Set(
       BalanceTree(current_node);
     }
   }
-  if (validity) {
-    std::thread th([&, validity, key]() {
-      std::this_thread::sleep_for(std::chrono::seconds(validity));
-      mtx.lock();
-      Del(key);
-      mtx.unlock();
-    });
-    th.detach();
-  }
+
   return true;
 }
 
 template <typename Key, typename Value, typename ValueEqual>
 Value SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Get(
     const Key& key) const {
-  if (!root_) throw std::invalid_argument("Key is not exists");
+    if (!root_) throw std::invalid_argument("Key is not exists");
 
-  Pointer current_node = root_;
-  while (current_node != leaf_) {
-    if (current_node->data.first == key) return current_node->data.second;
-    if (current_node->data.first > key)
-      current_node = current_node->link[0];
-    else
-      current_node = current_node->link[1];
-  }
-  throw std::invalid_argument("Key is not exists");
+    Pointer current_node = root_;
+    while (current_node != leaf_) {
+        if (current_node->data.first == key) return current_node->data.second;
+        if (current_node->data.first > key)
+            current_node = current_node->link[0];
+        else
+            current_node = current_node->link[1];
+    }
+    throw std::invalid_argument("Key is not exists");
+
 }
 
 template <typename Key, typename Value, typename ValueEqual>
