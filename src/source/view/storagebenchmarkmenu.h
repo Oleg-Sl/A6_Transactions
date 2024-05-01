@@ -57,7 +57,7 @@ class StorageBenchmarkMenu : BaseView {
   }
 
   void SBBST() {
-    s21::SelfBalancingBinarySearchTree sbbst;
+    s21::SelfBalancingBinarySearchTree<Key, Value> sbbst;
     s21::Controller controller(std::move(sbbst));
 
     auto input = InputCountAndRepeats();

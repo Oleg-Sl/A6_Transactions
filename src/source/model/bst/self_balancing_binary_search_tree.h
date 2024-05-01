@@ -3,8 +3,8 @@
 
 #include <chrono>
 #include <fstream>
-#include <thread>
 #include <mutex>
+#include <thread>
 
 #include "model/common/base_class.h"
 #include "model/common/data.h"
@@ -147,7 +147,7 @@ SelfBalancingBinarySearchTree<Key, Value,
 
 template <typename Key, typename Value, typename ValueEqual>
 bool SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Set(
-    const Key& key, const Value& value, int validity) {    
+    const Key& key, const Value& value, int validity) {
   Pointer tmp = new Node(key, value);
   tmp->TTL = validity;
   tmp->create_time = std::chrono::steady_clock::now();
@@ -178,13 +178,13 @@ bool SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Set(
     }
   }
   if (validity) {
-      std::thread th([&, validity, key]() {
-          std::this_thread::sleep_for(std::chrono::seconds(validity));
-          mtx.lock();
-            Del(key);
-          mtx.unlock();
-          });      
-      th.detach();
+    std::thread th([&, validity, key]() {
+      std::this_thread::sleep_for(std::chrono::seconds(validity));
+      mtx.lock();
+      Del(key);
+      mtx.unlock();
+    });
+    th.detach();
   }
   return true;
 }
@@ -192,8 +192,9 @@ bool SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Set(
 template <typename Key, typename Value, typename ValueEqual>
 Value SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Get(
     const Key& key) const {
-  Pointer current_node = root_;
+  if (!root_) throw std::invalid_argument("Key is not exists");
 
+  Pointer current_node = root_;
   while (current_node != leaf_) {
     if (current_node->data.first == key) return current_node->data.second;
     if (current_node->data.first > key)
@@ -201,7 +202,7 @@ Value SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Get(
     else
       current_node = current_node->link[1];
   }
-  return current_node->data.second;
+  throw std::invalid_argument("Key is not exists");
 }
 
 template <typename Key, typename Value, typename ValueEqual>
