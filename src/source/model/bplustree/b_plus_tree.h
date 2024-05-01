@@ -23,21 +23,21 @@ class BPlusTree : public BaseStorage<Key, Value> {
   ~BPlusTree() = default;
 
   bool Set(const Key& key, const Value& value) {
-    return tree.insert(key, new_value{0, value});
+    return tree.Insert(key, new_value{0, value});
   };
 
   Value Get(const Key& key) const {
-    const new_value& value = tree.search(key);
+    const new_value& value = tree.Search(key);
     return value.value;
   };
 
   bool Exists(const Key& key) const { return tree.Exists(key); };
 
-  bool Del(const Key& key) { return tree.remove(key); };
+  bool Del(const Key& key) { return tree.Remove(key); };
 
   bool Update(const Key& key, const Value& value) {
     try {
-      const new_value& old = tree.search(key);
+      const new_value& old = tree.Search(key);
       return tree.Update(key, new_value{old.ttl, value});
     } catch (const std::invalid_argument& err) {
       return false;
@@ -53,19 +53,19 @@ class BPlusTree : public BaseStorage<Key, Value> {
   };
 
   bool Rename(const Key& key, const Key& new_key) {
-    if (tree.Exists(new_key)) {
+    if (tree.Exists(new_key) || !tree.Exists(key)) {
       return false;
     }
-    const new_value value = tree.search(key);
-    bool res = tree.remove(key);
+    const new_value value = tree.Search(key);
+    bool res = tree.Remove(key);
     if (!res) {
       return false;
     }
-    return tree.insert(new_key, value);
+    return tree.Insert(new_key, value);
   };
 
   int Ttl(const Key& key) const {
-    const new_value& value = tree.search(key);
+    const new_value& value = tree.Search(key);
     return value.ttl;
   };
 
@@ -128,7 +128,7 @@ class BPlusTree : public BaseStorage<Key, Value> {
   void Print() { tree.printTree(); }
 
  private:
-  Three<Key, new_value> tree;
+  Tree<Key, new_value> tree;
 };
 }  // namespace s21
 
