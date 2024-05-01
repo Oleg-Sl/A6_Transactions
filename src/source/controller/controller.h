@@ -29,8 +29,10 @@ class Controller {
   }
 
   bool Del(Key key) {
+    bool status =
+        manager_.ExecuteStorageOperation(&BaseStorage<Key, Value>::Del, key);
     manager_.DeleteRecord(key);
-    return manager_.ExecuteStorageOperation(&BaseStorage<Key, Value>::Del, key);
+    return status;
   }
 
   bool Update(Key key, Value value) {
