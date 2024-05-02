@@ -1,7 +1,7 @@
 #ifndef TRANSACTIONS_SOURCE_MODEL_BST_SELF_BALANCING_BINARY_SEARCH_TREE_H_
 #define TRANSACTIONS_SOURCE_MODEL_BST_SELF_BALANCING_BINARY_SEARCH_TREE_H_
 
-#include "model/common/basestorage.h"
+#include "../common/basestorage.h"
 
 namespace s21 {
 
@@ -170,8 +170,9 @@ bool SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Set(
 template <typename Key, typename Value, typename ValueEqual>
 Value SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Get(
     const Key& key) const {
-  Pointer current_node = root_;
+  if (!root_) throw std::invalid_argument("Key is not exists");
 
+  Pointer current_node = root_;
   while (current_node != leaf_) {
     if (current_node->data.first == key) return current_node->data.second;
     if (current_node->data.first > key)
@@ -179,7 +180,7 @@ Value SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Get(
     else
       current_node = current_node->link[1];
   }
-  return current_node->data.second;
+  throw std::invalid_argument("Key is not exists");
 }
 
 template <typename Key, typename Value, typename ValueEqual>
@@ -324,9 +325,10 @@ void SelfBalancingBinarySearchTree<
   Pointer child = GetChild(node);
   bool child_color = child->color;
   Swap(node, child);
-
-  bool dir = (node->link[1] == child);
-  node->link[dir] = leaf_;
+  node->link[0] = child->link[0];
+  node->link[1] = child->link[1];
+  if (child->link[0] != leaf_) child->link[0]->parent = node;
+  if (child->link[1] != leaf_) child->link[1]->parent = node;
 
   delete child;
   child = nullptr;
@@ -383,7 +385,6 @@ void SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::Swap(Pointer a,
                                                                  Pointer b) {
   std::swap(a->data.first, b->data.first);
   std::swap(a->data.second, b->data.second);
-  std::swap(a->color, b->color);
 }
 
 template <typename Key, typename Value, typename ValueEqual>
@@ -395,7 +396,7 @@ void SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::RebalanceTree(
     bool dir = NodeIsLeftChild(node);
 
     brother = parent->link[dir];
-    if (brother->color == Color::Red) {
+    if (brother != leaf_ && brother->color == Color::Red) {
       brother->color = Color::Black;
       parent->color = Color::Red;
       if (dir)
@@ -404,12 +405,12 @@ void SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::RebalanceTree(
         RightRotation(parent);
       brother = parent->link[dir];
     }
-    if (brother->link[!dir]->color == Color::Black &&
+    if (brother != leaf_ && brother->link[!dir]->color == Color::Black &&
         brother->link[dir]->color == Color::Black) {
       brother->color = Color::Red;
       node = parent;
     } else {
-      if (brother->link[dir]->color == Color::Black) {
+      if (brother != leaf_ && brother->link[dir]->color == Color::Black) {
         brother->link[!dir]->color = Color::Black;
         brother->color = Color::Red;
         if (dir)
@@ -421,7 +422,7 @@ void SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::RebalanceTree(
       }
       brother->color = parent->color;
       parent->color = Color::Black;
-      brother->link[dir]->color = Color::Black;
+      if (brother != leaf_) brother->link[dir]->color = Color::Black;
       if (dir)
         LeftRotation(parent);
       else
@@ -442,8 +443,8 @@ template <typename Key, typename Value, typename ValueEqual>
 void SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::LeftRotation(
     Pointer node) {
   Pointer tmp = node->link[1];
-  node->link[1] = tmp->link[0];
-  if (tmp->link[0] != leaf_) {
+  node->link[1] = tmp == leaf_ ? leaf_ : tmp->link[0];
+  if (tmp != leaf_) {
     tmp->link[0]->parent = node;
   }
   tmp->parent = node->parent;
@@ -461,8 +462,8 @@ template <typename Key, typename Value, typename ValueEqual>
 void SelfBalancingBinarySearchTree<Key, Value, ValueEqual>::RightRotation(
     Pointer node) {
   Pointer tmp = node->link[0];
-  node->link[0] = tmp->link[1];
-  if (tmp->link[1] != leaf_) {
+  node->link[0] = tmp == leaf_ ? leaf_ : tmp->link[1];
+  if (tmp != leaf_) {
     tmp->link[1]->parent = node;
   }
   tmp->parent = node->parent;
