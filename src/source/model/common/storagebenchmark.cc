@@ -1,7 +1,6 @@
 #include "model/common/storagebenchmark.h"
 
 #include <chrono>
-#include <functional>
 #include <random>
 
 namespace s21 {

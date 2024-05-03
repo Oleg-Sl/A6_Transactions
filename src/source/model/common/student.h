@@ -1,10 +1,9 @@
 #ifndef TRANSACTIONS_SOURCE_MODEL_COMMON_STUDENT_H_
 #define TRANSACTIONS_SOURCE_MODEL_COMMON_STUDENT_H_
 
-#include <iomanip>
 #include <istream>
 #include <limits>
-#include <sstream>
+#include <ostream>
 #include <string>
 
 namespace s21 {

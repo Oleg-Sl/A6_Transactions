@@ -14,7 +14,7 @@ template <typename Key, typename Value,
 class HashTable : public BaseStorage<Key, Value> {
  public:
   struct Node {
-    Key key;
+    const Key key;
     Value value;
     int cached;
   };
@@ -24,7 +24,7 @@ class HashTable : public BaseStorage<Key, Value> {
 
   static constexpr size_t kDefaultSize = 8;
   static constexpr float kResizeCoeff = 0.75;
-  static constexpr size_t kScaleCoeff = 2;
+  static constexpr float kScaleCoeff = 2;
 
   HashTable() {
     bucket_pointers_ = allocator_.allocate(kDefaultSize);
@@ -40,23 +40,17 @@ class HashTable : public BaseStorage<Key, Value> {
   }
 
   bool Set(const Key& key, const Value& value) override {
+    if (Exists(key)) {
+      return false;
+    }
+
     if (data_.size() / table_size_ >= kResizeCoeff) {
       Resize();
     }
 
     int hash = GetHash(key, table_size_);
-    auto pos = GetNodePosition(key, hash);
-    if (pos != data_.end()) {
-      return false;
-    }
-
-    if (bucket_pointers_[hash] != data_.end()) {
-      bucket_pointers_[hash] =
-          data_.insert(bucket_pointers_[hash], Node{key, value, hash});
-    } else {
-      data_.push_back(Node{key, value, hash});
-      bucket_pointers_[hash] = std::prev(data_.end());
-    }
+    bucket_pointers_[hash] =
+        data_.insert(bucket_pointers_[hash], Node{key, value, hash});
 
     return true;
   }
@@ -78,11 +72,10 @@ class HashTable : public BaseStorage<Key, Value> {
     auto pos = GetNodePosition(key, GetHash(key, table_size_));
     if (pos != data_.end()) {
       if (bucket_pointers_[pos->cached]->key == key) {
-        bucket_pointers_[pos->cached] =
-            std::next(pos)->cached == std::next(pos)->cached ? (std::next(pos))
-                                                             : data_.end();
+        bucket_pointers_[pos->cached] = pos->cached == std::next(pos)->cached
+                                            ? (std::next(pos))
+                                            : data_.end();
       }
-
       data_.erase(pos);
       return true;
     }
@@ -112,19 +105,9 @@ class HashTable : public BaseStorage<Key, Value> {
 
   bool Rename(const Key& key, const Key& new_key) override {
     auto pos = GetNodePosition(key, GetHash(key, table_size_));
-    auto pos2 = GetNodePosition(new_key, GetHash(new_key, table_size_));
-    if (pos != data_.end() && pos2 == data_.end()) {
-      int new_key_hash = GetHash(new_key, table_size_);
-      Node new_node = *pos;
-      new_node.cached = new_key_hash;
-      new_node.key = new_key;
-      if (bucket_pointers_[new_key_hash] == data_.end()) {
-        data_.push_back(new_node);
-        bucket_pointers_[new_key_hash] = std::prev(data_.end());
-      } else {
-        bucket_pointers_[new_key_hash] =
-            data_.insert(bucket_pointers_[new_key_hash], new_node);
-      }
+
+    if (pos != data_.end() && !Exists(new_key)) {
+      Set(new_key, pos->value);
       Del(key);
 
       return true;
@@ -185,8 +168,7 @@ class HashTable : public BaseStorage<Key, Value> {
   iterator GetNodePosition(const Key& key, int hash) {
     for (auto it = bucket_pointers_[hash];
          it != data_.end() && it->cached == hash; ++it) {
-      Node node = *it;
-      if (node.key == key) {
+      if (it->key == key) {
         return it;
       }
     }
@@ -207,14 +189,8 @@ class HashTable : public BaseStorage<Key, Value> {
 
     for (auto it = temp.begin(); it != temp.end(); ++it) {
       int new_hash = GetHash(it->key, new_table_size);
-      it->cached = new_hash;
-      if (new_bucket_pointers[new_hash] != data_.end()) {
-        new_bucket_pointers[new_hash] =
-            data_.insert(new_bucket_pointers[new_hash], *it);
-      } else {
-        data_.push_back(*it);
-        new_bucket_pointers[new_hash] = std::prev(data_.end());
-      }
+      new_bucket_pointers[new_hash] = data_.insert(
+          new_bucket_pointers[new_hash], Node{it->key, it->value, new_hash});
     }
 
     allocator_.deallocate(bucket_pointers_, table_size_);
