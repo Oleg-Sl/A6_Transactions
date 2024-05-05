@@ -4,13 +4,101 @@
 
 namespace s21 {
 
+TEST(HashTableCopyConstructor, Normal) {
+  HashTable<std::string, Student> table;
+  size_t count_elements = 100;
+
+  for (size_t i = 0; i < count_elements; ++i) {
+    table.Set("KEY" + std::to_string(i),
+              Student{"NAME", "SURNAME", 12, "CITY", 5555});
+  }
+
+  HashTable<std::string, Student> table_2 = table;
+
+  auto elems1 = table.Showall();
+  auto elems2 = table_2.Showall();
+  for (size_t i = 0; i < count_elements; ++i) {
+    ASSERT_EQ(elems1[i], elems2[i]);
+  }
+
+  ASSERT_EQ(table.GetSize(), table_2.GetSize());
+  ASSERT_EQ(table.GetLoadFactor(), table_2.GetLoadFactor());
+}
+
+TEST(HashTableCopyAssignmentConstructor, Normal) {
+  HashTable<std::string, Student> table;
+  HashTable<std::string, Student> table_2;
+  size_t count_elements = 100;
+
+  for (size_t i = 0; i < count_elements; ++i) {
+    table.Set("KEY" + std::to_string(i),
+              Student{"NAME", "SURNAME", 12, "CITY", 5555});
+  }
+
+  table_2 = table;
+
+  auto elems1 = table.Showall();
+  auto elems2 = table_2.Showall();
+  for (size_t i = 0; i < count_elements; ++i) {
+    ASSERT_EQ(elems1[i], elems2[i]);
+  }
+}
+
+TEST(HashTableMoveAssignmentConstructor, Normal) {
+  HashTable<std::string, Student> table;
+  HashTable<std::string, Student> table_2;
+  size_t count_elements = 100;
+
+  for (size_t i = 0; i < count_elements; ++i) {
+    table.Set("KEY" + std::to_string(i),
+              Student{"NAME", "SURNAME", 12, "CITY", 5555});
+  }
+
+  for (size_t i = 0; i < count_elements; ++i) {
+    table_2.Set("KEY" + std::to_string(i),
+                Student{"NAME", "SURNAME", 12, "CITY", 5555});
+  }
+
+  table_2 = std::move(table);
+
+  auto elems = table_2.Showall();
+  Student student{"NAME", "SURNAME", 12, "CITY", 5555};
+  for (size_t i = 0; i < count_elements; ++i) {
+    ASSERT_EQ(elems[i], student);
+  }
+
+  ASSERT_EQ(table.GetSize(), 0);
+  ASSERT_EQ(table.Showall().size(), 0);
+}
+
+TEST(HashTableMoveConstructor, Normal) {
+  HashTable<std::string, Student> table;
+  size_t count_elements = 100;
+
+  for (size_t i = 0; i < count_elements; ++i) {
+    table.Set("KEY" + std::to_string(i),
+              Student{"NAME", "SURNAME", 12, "CITY", 5555});
+  }
+
+  HashTable<std::string, Student> table_2 = std::move(table);
+
+  auto elems = table_2.Showall();
+  Student student{"NAME", "SURNAME", 12, "CITY", 5555};
+  for (size_t i = 0; i < count_elements; ++i) {
+    ASSERT_EQ(elems[i], student);
+  }
+
+  ASSERT_EQ(table.GetSize(), 0);
+  ASSERT_EQ(table.Showall().size(), 0);
+}
+
 TEST(HashTableSet, OneElement) {
   HashTable<std::string, Student> table;
 
   int status = table.Set("KEY", Student{"NAME", "SURNAME", 12, "CITY", 5555});
 
   ASSERT_EQ(status, true);
-  ASSERT_EQ(table.GetLoadFactor(), 1);
+  ASSERT_EQ(table.GetSize(), 1);
 }
 
 TEST(HashTableSet, ManyElement) {
@@ -23,7 +111,7 @@ TEST(HashTableSet, ManyElement) {
     ASSERT_EQ(status, true);
   }
 
-  ASSERT_EQ(table.GetLoadFactor(), count_elements);
+  ASSERT_EQ(table.GetSize(), count_elements);
 }
 
 TEST(HashTableSet, ElementsWithSameKey) {
@@ -36,7 +124,7 @@ TEST(HashTableSet, ElementsWithSameKey) {
 
   ASSERT_EQ(status_1, true);
   ASSERT_EQ(status_2, false);
-  ASSERT_EQ(table.GetLoadFactor(), 1);
+  ASSERT_EQ(table.GetSize(), 1);
 }
 
 TEST(HashTableGet, Normal) {
@@ -204,6 +292,6 @@ TEST(HashTableShowAll, SomeElements) {
   auto values = table.Showall();
 
   ASSERT_EQ(values.size(), 3);
-  ASSERT_EQ(table.GetLoadFactor(), 3);
+  ASSERT_EQ(table.GetSize(), 3);
 }
 }  // namespace s21

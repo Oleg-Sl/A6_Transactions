@@ -45,7 +45,7 @@ TEST_F(FileManagerImport, Normal) {
 
   ASSERT_EQ(result.first, true);
   ASSERT_EQ(result.second, 20);
-  ASSERT_EQ(storage_.GetLoadFactor(), 20);
+  ASSERT_EQ(storage_.GetSize(), 20);
 }
 
 TEST_F(FileManagerImport, FileNotExists) {
@@ -54,7 +54,7 @@ TEST_F(FileManagerImport, FileNotExists) {
 
   ASSERT_EQ(result.first, false);
   ASSERT_EQ(result.second, 0);
-  ASSERT_EQ(storage_.GetLoadFactor(), 0);
+  ASSERT_EQ(storage_.GetSize(), 0);
 }
 
 TEST_F(FileManagerImport, FileIncorrectStucture) {
@@ -63,6 +63,6 @@ TEST_F(FileManagerImport, FileIncorrectStucture) {
 
   ASSERT_EQ(result.first, true);
   ASSERT_EQ(result.second, 0);
-  ASSERT_EQ(storage_.GetLoadFactor(), 0);
+  ASSERT_EQ(storage_.GetSize(), 0);
 }
 }  // namespace s21
