@@ -14,7 +14,7 @@ template <typename Key, typename Value,
 class HashTable : public BaseStorage<Key, Value> {
  public:
   struct Node {
-    const Key key;
+    Key key;
     Value value;
     int cached;
   };
@@ -26,17 +26,41 @@ class HashTable : public BaseStorage<Key, Value> {
   static constexpr float kResizeCoeff = 0.75;
   static constexpr float kScaleCoeff = 2;
 
-  HashTable() {
-    bucket_pointers_ = allocator_.allocate(kDefaultSize);
-
-    for (std::size_t i = 0; i < table_size_; ++i) {
-      std::allocator_traits<decltype(allocator_)>::construct(
-          allocator_, &bucket_pointers_[i], data_.end());
-    }
-  }
+  HashTable() = default;
 
   ~HashTable() override {
     allocator_.deallocate(bucket_pointers_, table_size_);
+  }
+
+  HashTable(const HashTable& other) : data_(other.data_) {
+    bucket_pointers_ = allocator_.allocate(other.table_size_);
+
+    for (std::size_t i = 0; i < other.table_size_; ++i) {
+      std::allocator_traits<decltype(allocator_)>::construct(
+          allocator_, &bucket_pointers_[i], data_.end());
+    }
+
+    for (auto it = data_.begin(); it != data_.end(); ++it) {
+      bucket_pointers_[it->cached] = it;
+    }
+  }
+
+  HashTable(HashTable&& other) noexcept { swap(*this, other); }
+
+  HashTable& operator=(const HashTable& other) {
+    HashTable temp = HashTable(other);
+    swap(*this, temp);
+    return *this;
+  }
+
+  HashTable& operator=(HashTable&& other) noexcept {
+    allocator_.deallocate(bucket_pointers_, table_size_);
+    data_.clear();
+    table_size_ = 0;
+    bucket_pointers_ = nullptr;
+
+    swap(*this, other);
+    return *this;
   }
 
   bool Set(const Key& key, const Value& value) override {
@@ -44,7 +68,7 @@ class HashTable : public BaseStorage<Key, Value> {
       return false;
     }
 
-    if (data_.size() / table_size_ >= kResizeCoeff) {
+    if (GetLoadFactor() >= kResizeCoeff || !bucket_pointers_) {
       Resize();
     }
 
@@ -139,22 +163,22 @@ class HashTable : public BaseStorage<Key, Value> {
     return result;
   }
 
-  std::size_t GetSize() const { return table_size_; }
+  std::size_t GetSize() const { return data_.size(); }
 
-  std::size_t GetLoadFactor() const { return data_.size(); }
+  float GetLoadFactor() const {
+    return table_size_ == 0 ? 0 : data_.size() / table_size_;
+  }
 
  private:
-  size_t table_size_ = kDefaultSize;
-  std::list<Node> data_;
-  std::allocator<iterator> allocator_;
-  iterator* bucket_pointers_;
-  const Hasher hasher_{};
-
   size_t GetHash(const Key& value, size_t size) const {
     return size == 1 ? 0 : hasher_(value) % (size - 1);
   }
 
   const_iterator GetNodePosition(const Key& key, int hash) const {
+    if (bucket_pointers_ == nullptr) {
+      return data_.end();
+    }
+
     for (auto it = bucket_pointers_[hash];
          it != data_.end() && it->cached == hash; ++it) {
       if (it->key == key) {
@@ -166,6 +190,10 @@ class HashTable : public BaseStorage<Key, Value> {
   }
 
   iterator GetNodePosition(const Key& key, int hash) {
+    if (bucket_pointers_ == nullptr) {
+      return data_.end();
+    }
+
     for (auto it = bucket_pointers_[hash];
          it != data_.end() && it->cached == hash; ++it) {
       if (it->key == key) {
@@ -177,7 +205,8 @@ class HashTable : public BaseStorage<Key, Value> {
   }
 
   void Resize() {
-    size_t new_table_size = table_size_ * kScaleCoeff;
+    size_t new_table_size =
+        table_size_ == 0 ? kDefaultSize : table_size_ * kScaleCoeff;
     iterator* new_bucket_pointers = allocator_.allocate(new_table_size);
     std::list<Node> temp;
     std::swap(temp, data_);
@@ -197,7 +226,24 @@ class HashTable : public BaseStorage<Key, Value> {
     bucket_pointers_ = std::move(new_bucket_pointers);
     table_size_ = new_table_size;
   }
+
+  friend void swap(HashTable& first, HashTable& second) noexcept {
+    using std::swap;
+
+    swap(first.table_size_, second.table_size_);
+    swap(first.data_, second.data_);
+    swap(first.bucket_pointers_, second.bucket_pointers_);
+    swap(first.hasher_, second.hasher_);
+    swap(first.allocator_, second.allocator_);
+  }
+
+  size_t table_size_ = 0;
+  std::list<Node> data_{};
+  iterator* bucket_pointers_ = nullptr;
+  Hasher hasher_{};
+  std::allocator<iterator> allocator_{};
 };
+
 }  // namespace s21
 
 #endif  // TRANSACTIONS_SOURCE_MODEL_HASHTABLE_HASH_TABLE_H_
