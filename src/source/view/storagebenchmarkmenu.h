@@ -74,7 +74,7 @@ class StorageBenchmarkMenu : BaseView {
   }
 
   std::pair<size_t, size_t> InputCountAndRepeats() {
-    std::cout << "count: ";
+    std::cout << "count of elements: ";
     size_t count = parser_.ParseValue<int>(std::cin, "count");
     std::cout << "repeats: ";
     size_t repeats = parser_.ParseValue<int>(std::cin, "repeats");

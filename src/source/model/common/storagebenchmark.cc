@@ -5,7 +5,7 @@
 
 namespace s21 {
 template <typename Func, typename... Args>
-double MeasureTime(Func func, Args... args) {
+double MeasureTime(Func func, Args&&... args) {
   auto start = std::chrono::steady_clock::now();
   std::invoke(func, std::forward<Args>(args)...);
   auto end = std::chrono::steady_clock::now();

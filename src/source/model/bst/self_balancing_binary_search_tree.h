@@ -1,7 +1,7 @@
 #ifndef TRANSACTIONS_SOURCE_MODEL_BST_SELF_BALANCING_BINARY_SEARCH_TREE_H_
 #define TRANSACTIONS_SOURCE_MODEL_BST_SELF_BALANCING_BINARY_SEARCH_TREE_H_
 
-#include "../common/basestorage.h"
+#include "model/common/basestorage.h"
 
 namespace s21 {
 
