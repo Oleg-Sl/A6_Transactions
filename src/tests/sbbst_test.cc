@@ -235,4 +235,17 @@ TEST(BstShowAll, SomeElements) {
 
   ASSERT_EQ(values.size(), 3);
 }
+
+TEST(StudentComparatorTest, Equal) {
+  Student student1{"NAME", "SURNAME", 12, "CITY", 5555};
+  Student student2{"-", "SURNAME", 12, "CITY", std::numeric_limits<int>::min()};
+  Student student3{"NAME1", "SURNAME1", 11, "-",
+                   std::numeric_limits<int>::min()};
+  StudentComparator scomp;
+  auto result = scomp(student1, student2);
+  auto result2 = scomp(student1, student3);
+
+  ASSERT_EQ(result, true);
+  ASSERT_EQ(result2, false);
+}
 }  // namespace s21
