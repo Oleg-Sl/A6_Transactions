@@ -15,7 +15,9 @@ class BPlusTree : public BaseStorage<Key, Value> {
  public:
   ~BPlusTree() = default;
 
-  BPlusTree() {}
+  BPlusTree() = default;
+
+  explicit BPlusTree(size_t degree) : tree_(degree) {}
 
   BPlusTree(const BPlusTree& other) : tree_(other.tree_) {}
 

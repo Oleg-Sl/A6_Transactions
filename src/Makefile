@@ -39,6 +39,12 @@ cli: build
 # hash_table.a: build
 # 	cmake --build $(BUILD_DIR) --target hash_table
 
+# self_balancing_binary_search_tree.a: build
+# 	cmake --build $(BUILD_DIR) --target self_balancing_binary_search_tree
+
+# b_plus_tree.a: build
+# 	cmake --build $(BUILD_DIR) --target b_plus_tree
+
 leaks: tests
 	$(MEMORY_TEST) $(BUILD_DIR)/tests/$(TEST_EXE) --gtest_filter=-*.*Throw*
 
@@ -61,7 +67,3 @@ format: build
 
 cppcheck: build
 	cmake --build $(BUILD_DIR) --target cppcheck	
-
-# bptree: build 
-# 	cmake --build $(BUILD_DIR) --target bptree
-# 	./$(BUILD_DIR)/source/model/bptree

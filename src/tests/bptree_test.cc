@@ -68,12 +68,26 @@ TEST(BPlusTreeSet, OneElement) {
 }
 
 TEST(BPlusTreeSet, ManyElement) {
-  BPlusTree<std::string, Student> tree;
-  size_t count_elements = 100;
+  BPlusTree<std::string, Student> tree(15);
+  size_t count_elements = 1000;
 
   for (size_t i = 0; i < count_elements; ++i) {
     int status = tree.Set("KEY" + std::to_string(i),
                            Student{"NAME", "SURNAME", 12, "CITY", 5555});
+    ASSERT_EQ(status, true);
+  }
+}
+
+TEST(BPlusTreeSet, ManyElemenRandomOrder) {
+  BPlusTree<std::string, Student> tree(15);
+  size_t count_elements = 1000;
+  std::vector<int> elements;
+  for (size_t i = 0; i < count_elements; ++i) {
+    elements.push_back(i);
+  }
+  std::random_shuffle( elements.begin(), elements.end() );
+  for (auto elem : elements) {
+    int status = tree.Set("KEY" + std::to_string(elem), Student{"NAME", "SURNAME", 12, "CITY", 5555});
     ASSERT_EQ(status, true);
   }
 }
@@ -186,6 +200,26 @@ TEST(BPlusTreeDel, InvalidKey) {
   bool status = tree.Del("KEY");
 
   ASSERT_EQ(status, false);
+}
+
+TEST(BPlusTreeDel, ManyElemensRandomOrder) {
+  BPlusTree<std::string, Student> tree(15);
+  size_t count_elements = 1000;
+  std::vector<int> elements;
+  for (size_t i = 0; i < count_elements; ++i) {
+    elements.push_back(i);
+  }
+  std::random_shuffle(elements.begin(), elements.end());
+  for (auto elem : elements) {
+    tree.Set("KEY" + std::to_string(elem), Student{"NAME", "SURNAME", 12, "CITY", 5555});
+  }
+  std::random_shuffle(elements.begin(), elements.end());
+  for (auto elem : elements) {
+    bool status = tree.Del("KEY" + std::to_string(elem));
+    ASSERT_EQ(status, true);
+    ASSERT_EQ(tree.Exists("KEY" + std::to_string(elem)), false);
+  }
+
 }
 
 TEST(BPlusTreeFind, OneElements) {
