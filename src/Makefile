@@ -15,7 +15,7 @@ MEMORY_TEST = valgrind --trace-children=yes --leak-check=yes --track-origins=yes
 OPEN_FILE	= xdg-open
 endif
 
-all:
+all: cli
 
 build:
 	CC=gcc CXX=g++ cmake -B $(BUILD_DIR) 
