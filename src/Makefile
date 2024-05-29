@@ -8,7 +8,7 @@ MACOS = Darwin
 
 ifeq ($(OS), $(MACOS))
 MEMORY_TEST = leaks -atExit --
-REPORT_FLAG = --ignore-errors mismatch
+REPORT_FLAG = --ignore-errors mismatch --ignore-errors inconsistent
 OPEN_FILE	= open
 else 
 MEMORY_TEST = valgrind --trace-children=yes --leak-check=yes --track-origins=yes
@@ -36,15 +36,6 @@ cli: build
 	cmake --build $(BUILD_DIR) --target cli
 	./$(BUILD_DIR)/cli
 
-# hash_table.a: build
-# 	cmake --build $(BUILD_DIR) --target hash_table
-
-# self_balancing_binary_search_tree.a: build
-# 	cmake --build $(BUILD_DIR) --target self_balancing_binary_search_tree
-
-# b_plus_tree.a: build
-# 	cmake --build $(BUILD_DIR) --target b_plus_tree
-
 leaks: tests
 	$(MEMORY_TEST) $(BUILD_DIR)/tests/$(TEST_EXE) --gtest_filter=-*.*Throw*
 
@@ -57,10 +48,6 @@ report: build
 
 stylecheck: build
 	cmake --build $(BUILD_DIR) --target stylecheck
-
-btree:
-	g++ -Wall -Wextra -Werror -o bthree bplusthree/*.cc
-	./bthree
 
 format: build
 	cmake --build $(BUILD_DIR) --target format

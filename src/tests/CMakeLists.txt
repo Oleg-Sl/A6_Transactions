@@ -26,6 +26,9 @@ gtest_discover_tests(${PROJECT_NAME})
 
 # Report
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --coverage")
 
 add_executable(report ${TEST_SOURCES} ${COMMON_MODEL_DIR}/student.cc)
 target_link_libraries(report GTest::gtest_main)
