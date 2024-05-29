@@ -20,10 +20,10 @@ class BSTNode {
 
   BSTNode() = default;
   BSTNode(const Key& key, const Value& value)
-      : data(std::make_pair(key, value)), color(Color::Red) {};
+      : data(std::make_pair(key, value)), color(Color::Red){};
 
   explicit BSTNode(const BSTNode& other)
-      : data(other.data), color(other.color) {};
+      : data(other.data), color(other.color){};
 
   BSTNode& operator=(const BSTNode& other) {
     data = other.data;

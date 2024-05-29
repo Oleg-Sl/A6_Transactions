@@ -34,7 +34,7 @@ class Tree {
 
   class Iterator {
    public:
-    explicit Iterator(Node* node, size_t ind = 0) : node_(node), ind_(ind) {};
+    explicit Iterator(Node* node, size_t ind = 0) : node_(node), ind_(ind){};
 
     Iterator& operator++() noexcept {
       if (node_ == nullptr) {
